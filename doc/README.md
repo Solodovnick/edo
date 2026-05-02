@@ -1,36 +1,30 @@
-# Документация по навыкам (Agent Skills)
+# Документация проекта EDO
 
-В репозитории используются **роли** — папки с файлами `SKILL.md` в формате [Agent Skills](https://agentskills.io).
+В этом репозитории объединены:
 
-## Источник паттернов
+- **Приложение** — интерфейс EDO Bank (Vite, React, Tailwind, Radix, MUI и др.), исходно из каталога `edo-bank`.
+- **Роли и навыки** — папка `roles/` с файлами `SKILL.md` в формате [Agent Skills](https://agentskills.io).
+
+## Навыки (Agent Skills)
 
 Официальный каталог примеров и спецификация:
 
-- [anthropics/skills](https://github.com/anthropics/skills) — публичный репозиторий Anthropic: примеры навыков, `spec/`, `template/`
-- В README репозитория описаны установка через Claude Code (`/plugin marketplace add anthropics/skills`) и использование в Claude API
-
-## Папка `roles/`
-
-Локальные навыки лежат в `roles/<категория>/SKILL.md`. Их можно:
-
-1. **Скопировать** в проектный каталог Cursor: `.cursor/skills/<имя-навыка>/` (внутри — `SKILL.md`)
-2. **Симлинкнуть** категорию из `roles/` в `.cursor/skills/`, если нужна одна общая точка входа
+- [anthropics/skills](https://github.com/anthropics/skills)
+- Подключение в Cursor: скопируйте нужную подпапку из `roles/` в `.cursor/skills/<имя>/` (внутри — `SKILL.md`).
 
 Подробнее — в `roles/README.md`.
 
-## Шаблон навыка
-
-Минимальный `SKILL.md`:
+## Шаблон `SKILL.md`
 
 ```yaml
 ---
 name: skill-id
-description: Что делает навык и когда его применять (для подсказки агенту).
+description: Что делает навык и когда его применять.
 ---
 
 # Заголовок
 
-Текст инструкций для агента.
+Инструкции для агента.
 ```
 
-Полный шаблон: [template/SKILL.md](https://github.com/anthropics/skills/blob/main/template/SKILL.md) в репозитории Anthropic.
+Шаблон Anthropic: [template/SKILL.md](https://github.com/anthropics/skills/blob/main/template/SKILL.md).
