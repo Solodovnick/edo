@@ -1,6 +1,6 @@
 # Реестр версий документации — EDO Bank
 
-**Version:** 1.1.5 | **Date:** 2026-05-03
+**Version:** 1.1.6 | **Date:** 2026-05-03
 
 Правила версионирования:
 - **MAJOR** — структурные изменения документа (переработка разделов)
@@ -10,6 +10,8 @@
 При выпуске новой версии старая копия переносится в `docs/archive/` с суффиксом версии.
 
 Пример: `docs/archive/functional-requirements-v1.0.0.md`
+
+**1.1.6:** учёт внешних источников без правок содержимого артефактов — `docs/external-sources-catalog.md` (**S-015**); ссылки из `docs/external-registry/README.md`, `docs/incoming-artifacts/README.md`; каталог **1.0.8**.
 
 **1.1.5:** импорт полного словаря данных в `docs/incoming-artifacts/slovar-dannykh/`; обновлён `docs/glossary.md`.
 
@@ -37,15 +39,16 @@
 | `docs/use-case.md` | 1.1.0 | 2026-05-03 | Active |
 | `docs/state-diagram.md` | 1.1.0 | 2026-05-03 | Active |
 | `docs/er-diagram.md` | 1.1.0 | 2026-05-03 | Draft |
-| `docs/artifacts-catalog.md` | 1.0.7 | 2026-05-03 | Active |
-| `docs/VERSIONS.md` | 1.1.5 | 2026-05-03 | Active |
+| `docs/artifacts-catalog.md` | 1.0.8 | 2026-05-03 | Active |
+| `docs/VERSIONS.md` | 1.1.6 | 2026-05-03 | Active |
 | `docs/c4-architecture-overview.md` | 1.0.0 | 2026-05-03 | Draft |
+| `docs/external-sources-catalog.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/ui-artifacts/README.md` | 1.0.0 | 2026-05-03 | Active |
-| `docs/incoming-artifacts/README.md` | 1.0.2 | 2026-05-03 | Active |
+| `docs/incoming-artifacts/README.md` | 1.0.3 | 2026-05-03 | Active |
 | `docs/incoming-artifacts/use-cases-export-594e282f/README.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/incoming-artifacts/slovar-dannykh/README.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/incoming-artifacts/slovar-dannykh/Словарьданных.md` | 1.0.0 | 2026-05-03 | Archive-import |
-| `docs/external-registry/README.md` | 1.0.2 | 2026-05-03 | Active |
+| `docs/external-registry/README.md` | 1.0.3 | 2026-05-03 | Active |
 | `docs/external-registry/excel-to-markdown.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/external-registry/use-case-registry.csv` | 1.0.0 | 2026-05-03 | Active |
 | `scripts/README.md` | 1.0.0 | 2026-05-03 | Active |
