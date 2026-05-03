@@ -1,6 +1,6 @@
 # Реестр артефактов — EDO Bank
 
-**Version:** 1.0.2 | **Date:** 2026-05-03 | **Status:** Active
+**Version:** 1.0.3 | **Date:** 2026-05-03 | **Status:** Active
 
 Единый реестр всех проектных артефактов с номерами, статусами и ссылками.
 
@@ -10,15 +10,17 @@
 
 | ID | Артефакт | Файл | Версия | Статус | Существует |
 |---|---|---|---|---|---|
-| **A-001** | Функциональные требования | [docs/functional-requirements.md](functional-requirements.md) | 1.0.0 | Active | ✅ |
-| **A-002** | Бизнес-требования | [docs/business-requirements.md](business-requirements.md) | 1.0.0 | Draft | ✅ |
+| **A-001** | Функциональные требования | [docs/functional-requirements.md](functional-requirements.md) | 1.2.0 | Active | ✅ |
+| **A-002** | Бизнес-требования | [docs/business-requirements.md](business-requirements.md) | 1.1.0 | Draft | ✅ |
 | **A-003** | UI/UX Бриф | [docs/ui-ux-brief.md](ui-ux-brief.md) | 1.0.0 | Active | ✅ |
 | **A-004** | План дизайн-системы | [docs/design-system-plan.md](design-system-plan.md) | 1.0.0 | Active | ✅ |
 | **A-005** | Event Storming | [docs/event-storming.md](event-storming.md) | 1.0.0 | Planned | ⬜ |
 | **A-006** | User Story Map | [docs/user-story-map.md](user-story-map.md) | 1.0.0 | Planned | ⬜ |
-| **A-007** | State Diagram (жизненный цикл обращения) | [docs/state-diagram.md](state-diagram.md) | 1.0.0 | Planned | ⬜ |
-| **A-008** | Use Case Diagram | [docs/use-case.md](use-case.md) | 1.0.0 | Planned | ⬜ |
-| **A-009** | ER Diagram | [docs/er-diagram.md](er-diagram.md) | 1.0.0 | Planned | ⬜ |
+| **A-007** | State Diagram | [docs/state-diagram.md](state-diagram.md) | 1.1.0 | Active | ✅ |
+| **A-008** | Use Cases | [docs/use-case.md](use-case.md) | 1.1.0 | Active | ✅ |
+| **A-009** | ER Diagram | [docs/er-diagram.md](er-diagram.md) | 1.1.0 | Draft | ✅ |
+| **A-010** | Глоссарий | [docs/glossary.md](glossary.md) | 1.0.0 | Draft | ✅ |
+| **A-011** | Реестр UC (сводка) | [docs/use-case-registry.md](use-case-registry.md) | 1.0.0 | Active | ✅ |
 
 ---
 
@@ -34,6 +36,9 @@
 | **S-006** | Agent Skills | [.cursor/skills/](../.cursor/skills/) | 1.0.0 | Active |
 | **S-007** | Правила агентов | [.cursor/rules/](../.cursor/rules/) | 1.0.1 | Active |
 | **S-008** | Исторические UI-артефакты | [docs/ui-artifacts/](ui-artifacts/) | — | Archive-source |
+| **S-009** | Реестр UC (CSV импорт) | [docs/external-registry/use-case-registry.csv](external-registry/use-case-registry.csv) | 1.0.0 | Active |
+| **S-010** | Входящие материалы | [docs/incoming-artifacts/README.md](incoming-artifacts/README.md) | 1.0.0 | Active |
+| **S-011** | Внешние реестры (описание) | [docs/external-registry/README.md](external-registry/README.md) | 1.0.0 | Active |
 
 ---
 

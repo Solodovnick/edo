@@ -1,6 +1,6 @@
 # Реестр версий документации — EDO Bank
 
-**Version:** 1.0.2 | **Date:** 2026-05-03
+**Version:** 1.1.0 | **Date:** 2026-05-03
 
 Правила версионирования:
 - **MAJOR** — структурные изменения документа (переработка разделов)
@@ -18,24 +18,29 @@
 | Документ | Версия | Дата | Статус |
 |---|---|---|---|
 | `README.md` | 1.0.0 | 2026-05-03 | Active |
-| `docs/functional-requirements.md` | 1.0.1 | 2026-05-03 | Active |
-| `docs/business-requirements.md` | 1.0.0 | 2026-05-03 | Draft |
+| `docs/functional-requirements.md` | 1.2.0 | 2026-05-03 | Active |
+| `docs/business-requirements.md` | 1.1.0 | 2026-05-03 | Draft |
 | `docs/ui-ux-brief.md` | 1.0.1 | 2026-05-03 | Active |
 | `docs/design-system-plan.md` | 1.0.1 | 2026-05-03 | Active |
-| `docs/artifacts-catalog.md` | 1.0.2 | 2026-05-03 | Active |
-| `docs/VERSIONS.md` | 1.0.2 | 2026-05-03 | Active |
+| `docs/glossary.md` | 1.0.0 | 2026-05-03 | Draft |
+| `docs/use-case-registry.md` | 1.0.0 | 2026-05-03 | Active |
+| `docs/use-case.md` | 1.1.0 | 2026-05-03 | Active |
+| `docs/state-diagram.md` | 1.1.0 | 2026-05-03 | Active |
+| `docs/er-diagram.md` | 1.1.0 | 2026-05-03 | Draft |
+| `docs/artifacts-catalog.md` | 1.0.3 | 2026-05-03 | Active |
+| `docs/VERSIONS.md` | 1.1.0 | 2026-05-03 | Active |
 | `docs/ui-artifacts/README.md` | 1.0.0 | 2026-05-03 | Active |
+| `docs/incoming-artifacts/README.md` | 1.0.0 | 2026-05-03 | Active |
+| `docs/external-registry/README.md` | 1.0.0 | 2026-05-03 | Active |
+| `docs/external-registry/use-case-registry.csv` | 1.0.0 | 2026-05-03 | Active |
 | `AGENTS.md` | 1.0.2 | 2026-05-03 | Active |
-| `.cursor/rules/*` (все роли) | 1.0.2 | 2026-05-03 | Active |
+| `.cursor/rules/*` | 1.0.2 | 2026-05-03 | Active |
 | `.cursor/skills/edo-*` | 1.0.2 | 2026-05-03 | Active |
 | `docs/adr/ADR-001-frontend-spa.md` | 1.0.0 | 2026-05-03 | Accepted |
 | `docs/adr/ADR-002-ui-stack.md` | 1.0.0 | 2026-05-03 | Accepted |
 | `docs/adr/ADR-003-tailwind.md` | 1.0.1 | 2026-05-03 | Accepted |
 | `docs/event-storming.md` | — | — | Planned |
 | `docs/user-story-map.md` | — | — | Planned |
-| `docs/state-diagram.md` | — | — | Planned |
-| `docs/use-case.md` | — | — | Planned |
-| `docs/er-diagram.md` | — | — | Planned |
 
 ---
 

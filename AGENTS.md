@@ -35,9 +35,12 @@
 
 - **ТЗ:** `docs/functional-requirements.md`
 - **Бизнес-контекст:** `docs/business-requirements.md`
+- **Глоссарий и роли:** `docs/glossary.md`
+- **Реестр UC (таблица):** `docs/use-case-registry.md`, CSV: `docs/external-registry/use-case-registry.csv`
 - **UI / дизайн:** `docs/ui-ux-brief.md`, `docs/design-system-plan.md`
+- **Жизненный цикл:** `docs/state-diagram.md`
 - **Реестр артефактов и ADR:** `docs/artifacts-catalog.md`, `docs/adr/`
-- **Исторические UI-заметки (не ТЗ):** `docs/ui-artifacts/` — оглавление: `docs/ui-artifacts/README.md`
+- **Исторические UI-заметки:** `docs/ui-artifacts/`
 
 ## Рекомендуемый порядок работы
 
