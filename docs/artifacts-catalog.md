@@ -1,6 +1,6 @@
 # Реестр артефактов — EDO Bank
 
-**Version:** 1.0.17 | **Date:** 2026-05-03 | **Status:** Active
+**Version:** 1.0.18 | **Date:** 2026-05-03 | **Status:** Active
 
 Единый реестр всех проектных артефактов с номерами, статусами и ссылками.
 
@@ -22,14 +22,14 @@
 | **A-010** | Глоссарий | [docs/glossary.md](glossary.md) | 1.0.2 | Draft | ✅ |
 | **A-012** | Архитектура C4 (верхний уровень) | [docs/c4-architecture-overview.md](c4-architecture-overview.md) | 1.0.1 | Draft | ✅ |
 | **A-013** | План разработки учебного демо-бэкенда | [docs/backend-development-plan.md](backend-development-plan.md) | 1.0.0 | Active | ✅ |
-| **A-014** | Статус-отчёт проекта (canvas-сводка) | [docs/project-status-report.md](project-status-report.md) | 1.0.0 | Active | ✅ |
+| **A-014** | Статус-отчёт проекта (canvas-сводка) | [docs/project-status-report.md](project-status-report.md) | 1.0.1 | Active | ✅ |
 
 ## Вспомогательные артефакты (S-###)
 
 | ID | Артефакт | Файл | Версия | Статус |
 |---|---|---|---|---|
 | **S-001** | README проекта | [README.md](../README.md) | 1.0.0 | Active |
-| **S-002** | Реестр версий | [docs/VERSIONS.md](VERSIONS.md) | 1.2.5 | Active |
+| **S-002** | Реестр версий | [docs/VERSIONS.md](VERSIONS.md) | 1.2.6 | Active |
 | **S-003** | ADR-001: Frontend SPA | [docs/adr/ADR-001-frontend-spa.md](adr/ADR-001-frontend-spa.md) | 1.0.1 | Accepted |
 | **S-004** | ADR-002: UI Stack | [docs/adr/ADR-002-ui-stack.md](adr/ADR-002-ui-stack.md) | 1.0.0 | Accepted |
 | **S-005** | ADR-003: Tailwind CSS | [docs/adr/ADR-003-tailwind.md](adr/ADR-003-tailwind.md) | 1.0.1 | Accepted |

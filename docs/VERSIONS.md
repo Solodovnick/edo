@@ -1,6 +1,6 @@
 # Реестр версий документации — EDO Bank
 
-**Version:** 1.2.5 | **Date:** 2026-05-03
+**Version:** 1.2.6 | **Date:** 2026-05-03
 
 Правила версионирования:
 - **MAJOR** — структурные изменения документа (переработка разделов)
@@ -10,6 +10,8 @@
 При выпуске новой версии старая копия переносится в `docs/archive/` с суффиксом версии.
 
 Пример: `docs/archive/functional-requirements-v1.0.0.md`
+
+**1.2.6:** канвас-отчёт в браузере — `docs/reports/wakatime-canvas-report.html`, `docs/reports/README.md`; рекомендация расширения **WakaTime** в `.vscode/extensions.json`; **A-014** **1.0.1**; каталог **1.0.18**.
 
 **1.2.5:** сводка проекта в markdown-таблицах — `docs/project-status-report.md` (**A-014**); пояснение: не интеграция WakaTime; `README`, `AGENTS` — ссылки; каталог **1.0.17**.
 
@@ -57,9 +59,10 @@
 | `docs/use-case.md` | 1.1.0 | 2026-05-03 | Active |
 | `docs/state-diagram.md` | 1.1.0 | 2026-05-03 | Active |
 | `docs/er-diagram.md` | 1.1.0 | 2026-05-03 | Draft |
-| `docs/artifacts-catalog.md` | 1.0.17 | 2026-05-03 | Active |
-| `docs/VERSIONS.md` | 1.2.5 | 2026-05-03 | Active |
-| `docs/project-status-report.md` | 1.0.0 | 2026-05-03 | Active |
+| `docs/artifacts-catalog.md` | 1.0.18 | 2026-05-03 | Active |
+| `docs/VERSIONS.md` | 1.2.6 | 2026-05-03 | Active |
+| `docs/project-status-report.md` | 1.0.1 | 2026-05-03 | Active |
+| `docs/reports/README.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/c4-architecture-overview.md` | 1.0.1 | 2026-05-03 | Draft |
 | `docs/backend-development-plan.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/user-story-map.md` | 1.0.0 | 2026-05-03 | Draft |
@@ -79,7 +82,7 @@
 | `docs/external-registry/excel-to-markdown.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/external-registry/use-case-registry.csv` | 1.0.0 | 2026-05-03 | Active |
 | `scripts/README.md` | 1.0.0 | 2026-05-03 | Active |
-| `AGENTS.md` | 1.0.7 | 2026-05-03 | Active |
+| `AGENTS.md` | 1.0.8 | 2026-05-03 | Active |
 | `.cursor/rules/*` | 1.0.2 | 2026-05-03 | Active |
 | `.cursor/skills/edo-*` | 1.0.3 | 2026-05-03 | Active |
 | `docs/adr/ADR-001-frontend-spa.md` | 1.0.1 | 2026-05-03 | Accepted |

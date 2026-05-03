@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EDO Bank — отчёт (canvas) + WakaTime</title>
+  <style>
+    :root {
+      --bg: #0f0f1a;
+      --panel: #1a1a2e;
+      --accent: #00d4ff;
+      --text: #e0e0ff;
+      --muted: #6a6a8a;
+      --border: #2a2a4a;
+      --success: #00ff88;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 1.25rem;
+    }
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin: 0 0 0.5rem;
+      color: var(--accent);
+    }
+    .sub {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 1.25rem;
+      max-width: 54rem;
+      line-height: 1.5;
+    }
+    /* Canvas grid */
+    .canvas {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      max-width: 1200px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+    }
+    .card h2 {
+      margin: 0 0 0.75rem;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.45rem 0.35rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    th { color: var(--muted); font-weight: 500; width: 38%; }
+    tr:last-child th, tr:last-child td { border-bottom: none; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .waka-panel {
+      grid-column: 1 / -1;
+      border-color: rgba(0, 212, 255, 0.35);
+    }
+    .waka-panel .hint {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-bottom: 0.75rem;
+      line-height: 1.45;
+    }
+    .waka-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .waka-links a {
+      display: inline-block;
+      padding: 0.35rem 0.65rem;
+      background: rgba(0, 212, 255, 0.12);
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+    .embed-slot {
+      min-height: 120px;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      text-align: center;
+      background: rgba(0,0,0,0.2);
+    }
+    footer {
+      margin-top: 1.5rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+      max-width: 1200px;
+    }
+  </style>
+</head>
+<body>
+  <h1>EDO Bank — сводка проекта (canvas)</h1>
+  <p class="sub">
+    Таблицы ниже — артефакты репозитория. Блок <strong>WakaTime</strong> — для сочетания с расширением
+    <code>WakaTime.vscode-wakatime</code>: время кодирования отображается в статус-баре и на
+    <a href="https://wakatime.com" target="_blank" rel="noopener">wakatime.com</a> (личный кабинет).
+    Сюда можно вставить iframe «Share» из настроек WakaTime или скриншот дашборда.
+  </p>
+
+  <div class="canvas">
+    <section class="card">
+      <h2>Проект</h2>
+      <table>
+        <tr><th>Название</th><td>EDO Bank — SPA учёта обращений</td></tr>
+        <tr><th>Контекст</th><td>ДУКО, KPI 91%→99%, устные обращения</td></tr>
+        <tr><th>Стек UI</th><td>React 18, TS, Vite, Tailwind, shadcn/ui</td></tr>
+        <tr><th>Данные</th><td>mock + localStorage (ADR-001)</td></tr>
+        <tr><th>Учёба</th><td>ADR-004, FR-17, план демо-бэкенда</td></tr>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Документация</h2>
+      <table>
+        <tr><th>Контекст</th><td><a href="../core-source-context.md">core-source-context.md</a></td></tr>
+        <tr><th>ТЗ</th><td><a href="../functional-requirements.md">functional-requirements.md</a></td></tr>
+        <tr><th>BR</th><td><a href="../business-requirements.md">business-requirements.md</a></td></tr>
+        <tr><th>Реестр</th><td><a href="../artifacts-catalog.md">artifacts-catalog.md</a></td></tr>
+        <tr><th>Сводка MD</th><td><a href="../project-status-report.md">project-status-report.md</a></td></tr>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Цели → решения</h2>
+      <table>
+        <tr><th>UX без сервера</th><td>ADR-001</td></tr>
+        <tr><th>Стек UI</th><td>ADR-002, ADR-003</td></tr>
+        <tr><th>KPI</th><td>core-source, BR, FR-03</td></tr>
+        <tr><th>Защита СА</th><td>ADR-004, FR-17</td></tr>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>ADR</h2>
+      <table>
+        <tr><th>001</th><td>SPA + mock</td></tr>
+        <tr><th>002</th><td>UI stack</td></tr>
+        <tr><th>003</th><td>Tailwind</td></tr>
+        <tr><th>004</th><td>Учебный REST + PostgreSQL</td></tr>
+      </table>
+    </section>
+
+    <section class="card waka-panel">
+      <h2>WakaTime — время в IDE</h2>
+      <p class="hint">
+        Установите расширение из рекомендаций workspace (<code>.vscode/extensions.json</code>),
+        укажите API key в настройках. Статистика по языкам и проектам — на сайте WakaTime.
+        Публичный embed: Settings → Share → скопируйте код iframe и замените содержимое блока ниже.
+      </p>
+      <div class="waka-links">
+        <a href="https://marketplace.visualstudio.com/items?itemName=WakaTime.vscode-wakatime" target="_blank" rel="noopener">Marketplace: WakaTime</a>
+        <a href="https://wakatime.com/dashboard" target="_blank" rel="noopener">Dashboard</a>
+      </div>
+      <div class="embed-slot" id="wakatime-embed">
+        <!-- Вставьте сюда &lt;iframe&gt; из WakaTime Share или оставьте скриншот дашборда рядом с отчётом -->
+        Место под график WakaTime (iframe из настроек Share или печать страницы Dashboard).
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    Локальный файл: docs/reports/wakatime-canvas-report.html — откройте в браузере.
+    Ссылки на .md при открытии с диска могут скачиваться; для просмотра документации используйте GitHub или превью в IDE.
+  </footer>
+</body>
+</html>
