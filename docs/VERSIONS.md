@@ -1,6 +1,6 @@
 # Реестр версий документации — EDO Bank
 
-**Version:** 1.0.0 | **Date:** 2026-05-03
+**Version:** 1.0.1 | **Date:** 2026-05-03
 
 Правила версионирования:
 - **MAJOR** — структурные изменения документа (переработка разделов)
@@ -22,8 +22,11 @@
 | `docs/business-requirements.md` | 1.0.0 | 2026-05-03 | Draft |
 | `docs/ui-ux-brief.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/design-system-plan.md` | 1.0.0 | 2026-05-03 | Active |
-| `docs/artifacts-catalog.md` | 1.0.0 | 2026-05-03 | Active |
-| `docs/VERSIONS.md` | 1.0.0 | 2026-05-03 | Active |
+| `docs/artifacts-catalog.md` | 1.0.1 | 2026-05-03 | Active |
+| `docs/VERSIONS.md` | 1.0.1 | 2026-05-03 | Active |
+| `AGENTS.md` | 1.0.1 | 2026-05-03 | Active |
+| `.cursor/rules/*` (все роли) | 1.0.1 | 2026-05-03 | Active |
+| `.cursor/skills/edo-*` | 1.0.1 | 2026-05-03 | Active |
 | `docs/adr/ADR-001-frontend-spa.md` | 1.0.0 | 2026-05-03 | Accepted |
 | `docs/adr/ADR-002-ui-stack.md` | 1.0.0 | 2026-05-03 | Accepted |
 | `docs/adr/ADR-003-tailwind.md` | 1.0.0 | 2026-05-03 | Accepted |

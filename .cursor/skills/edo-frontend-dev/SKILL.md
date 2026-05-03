@@ -1,41 +1,42 @@
 ---
 name: edo-frontend-dev
 description: >-
-  Фронтенд-разработчик для EDO Bank (React + TypeScript + Tailwind + shadcn/ui).
+  Фронтенд-разработчик EDO Bank (React + TypeScript + Tailwind + shadcn/ui).
   Применять когда нужно реализовать или доработать компонент, исправить баг,
-  добавить новый экран или функцию в src/app/components/.
+  добавить экран или логику в src/app/components/, src/services/, src/data/.
 ---
 
 # EDO Bank — Фронтенд-разработчик
 
 ## Когда применять
 
-- Реализация нового компонента React в `src/app/components/`
-- Доработка существующих кабинетов (Ответственного, Аудитора)
-- Исправление багов в UI
-- Добавление mock-данных в `src/data/`
-- Настройка сервисного слоя в `src/services/`
+- Новый или изменённый компонент в `src/app/components/`.
+- Доработка кабинетов (ответственный, аудитор и др. по ТЗ).
+- Исправление дефектов UI и поведения по сценариям из ТЗ.
+- Mock-данные в `src/data/` и обращение к ним через `src/services/`.
 
 ## Инструкции
 
-1. **Всегда читай ТЗ** перед реализацией: `docs/functional-requirements.md` + `docs/ui-ux-brief.md`.
-2. **Стек:** React 18 + TypeScript (strict) + Tailwind CSS 4 + shadcn/ui + Radix + MUI. Не добавлять новые зависимости без согласования.
-3. **Компоненты:**
-   - Один файл — один компонент
-   - Интерфейсы пропсов обязательны
-   - Нет `any`
-4. **Стили:** Tailwind утилиты + CSS-переменные из `default_shadcn_theme.css`. Не inline styles для токенов.
-5. **Данные:** только через `src/services/`. Не обращаться напрямую к localStorage из компонентов.
-6. **Layout карточки:** трёхколоночный (левый сайдбар / центр / правый сайдбар) — базовый шаблон.
-7. После реализации — краткий отчёт: какие FR покрыты.
+1. Перед изменениями свериться с `docs/functional-requirements.md`, `docs/ui-ux-brief.md`, `docs/design-system-plan.md`.
+2. **Стек:** React 18 + TypeScript (strict) + Tailwind CSS 4 + shadcn/ui + Radix + MUI. Новые зависимости — только с согласованием и записями в `docs/artifacts-catalog.md` и ADR.
+3. **Компоненты:** один файл — один компонент; пропсы типизировать; избегать `any`.
+4. **Стили:** утилиты Tailwind и переменные из `default_shadcn_theme.css`; не размазывать токены по inline-стилям.
+5. **Данные:** инкапсуляция в `src/services/`; компоненты не ходят в `localStorage` напрямую, если для этого уже есть сервисный слой.
+6. Карточка обращения по ТЗ — ориентир на трёхколоночный layout (боковые панели + центр).
+7. В конце работы — короткий отчёт: какие пункты FR затронуты.
 
-## Ключевые компоненты
+## Ограничения
 
-| Компонент | Файл | FR |
+- Не менять контракт ТЗ молча: сначала правка `docs/functional-requirements.md` по согласованию.
+- Не подключать библиотеки вне списка и процедуры из `ui-core.mdc`.
+
+## Ориентиры по файлам (не исчерпывающий список)
+
+| Область | Примеры файлов | FR (из docs) |
 |---|---|---|
-| Таблица обращений | `Applications.tsx` | FR-04.1—04.4 |
-| Карточка обращения | `ApplicationDetail.tsx` | FR-04.5—04.8 |
-| Кабинет аудитора | `Audit.tsx` | FR-05 |
-| CRM-поиск | inline в карточках | FR-06 |
-| Dashboard / KPI | `Dashboard.tsx`, `KPICards.tsx` | FR-07 |
-| SLA-мониторинг | `SLAMonitoring.tsx` | FR-03 |
+| Таблица обращений | `Applications.tsx` | FR-04 |
+| Карточка | `ApplicationDetail.tsx` | FR-04 |
+| Аудит | `Audit.tsx` | FR-05 |
+| CRM / клиент | поля в карточках | FR-06 |
+| Дашборд | `Dashboard.tsx`, `KPICards.tsx` | FR-07 |
+| SLA | `SLAMonitoring.tsx` | FR-03 |

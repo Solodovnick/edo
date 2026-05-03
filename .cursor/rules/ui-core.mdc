@@ -6,7 +6,7 @@ alwaysApply: true
 # Ядро процесса UI — EDO Bank
 
 - **Источник правды:** `docs/functional-requirements.md` (и при необходимости `docs/ui-ux-brief.md`, `docs/design-system-plan.md`). Не добавлять экраны, поля, тексты, библиотеки и поведение, которых нет в утверждённых документах.
-- **Стек:** React 18 + TypeScript + Vite + Tailwind CSS 4 + shadcn/ui + Radix UI + MUI. Не подключать новые библиотеки без записи в `docs/artifacts-catalog.md` и ADR.
+- **Стек:** React 18 + TypeScript + Vite + Tailwind CSS 4 + shadcn/ui + Radix UI + MUI. Не подключать новые библиотеки без записи в `docs/artifacts-catalog.md` и ADR в `docs/adr/`.
 - **Данные:** mock через `localStorage` и `src/services/`. Не обращаться к внешним API без отдельного ADR.
 - **Согласование:** любое отклонение от ТЗ — сначала явное согласование, затем обновление `docs/functional-requirements.md`, затем код.
 - **Запрет «вариантов на выбор»:** при неоднозначности — уточняющие вопросы или один минимальный вариант.

@@ -1,0 +1,15 @@
+---
+description: Роль интеграции — конфигурация Vite/PostCSS/TS без изменения UI
+globs:
+  - "**/vite.config.*"
+  - "**/postcss.config.*"
+  - "**/tsconfig.json"
+alwaysApply: false
+---
+
+# Сборка (Vite, PostCSS, TypeScript) — EDO Bank
+
+- Менять **только** файлы конфигурации из glob; не править компоненты и стили в той же сессии без отдельной задачи.
+- Стек сборки проекта: **Vite 6 + @vitejs/plugin-react + @tailwindcss/vite** (как в репозитории).
+- Новые плагины Vite / изменения `tsconfig` — по согласованию; при добавлении зависимостей соблюдать `role-integration.mdc` и `docs/artifacts-catalog.md`.
+- Цель правок: сборка, алиасы путей, PostCSS — без изменения внешнего вида интерфейса.

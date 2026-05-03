@@ -1,6 +1,8 @@
 ---
 description: Роль дизайна/спеки UI — макет, компоненты, токены EDO Bank (без кода)
-globs: docs/ui-ux-brief.md,docs/design-system-plan.md
+globs:
+  - "docs/ui-ux-brief.md"
+  - "docs/design-system-plan.md"
 alwaysApply: false
 ---
 
@@ -10,5 +12,5 @@ alwaysApply: false
 - Стиль: **ретро-футуристический (Winamp-inspired)** — тёмная тема, неоновые акценты. Токены в `default_shadcn_theme.css`.
 - Фиксировать визуальные решения: сетка, отступы, компоненты, состояния — так, чтобы их можно было сопоставить с FR.
 - Трёхколоночный layout карточки обращения (левый сайдбар / центр / правый сайдбар) — базовый шаблон.
-- Не генерировать production TSX/CSS здесь; вёрстка — отдельная роль.
+- Не генерировать production TSX/CSS здесь; вёрстка — роль «Фронтенд».
 - Компонентная база: shadcn/ui + Radix (формы, диалоги), MUI (таблицы), Lucide (иконки).
