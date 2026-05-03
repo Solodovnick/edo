@@ -1,6 +1,6 @@
 # Реестр артефактов — EDO Bank
 
-**Version:** 1.0.1 | **Date:** 2026-05-03 | **Status:** Active
+**Version:** 1.0.2 | **Date:** 2026-05-03 | **Status:** Active
 
 Единый реестр всех проектных артефактов с номерами, статусами и ссылками.
 
@@ -33,7 +33,7 @@
 | **S-005** | ADR-003: Tailwind CSS | [docs/adr/ADR-003-tailwind.md](adr/ADR-003-tailwind.md) | 1.0.0 | Accepted |
 | **S-006** | Agent Skills | [.cursor/skills/](../.cursor/skills/) | 1.0.0 | Active |
 | **S-007** | Правила агентов | [.cursor/rules/](../.cursor/rules/) | 1.0.1 | Active |
-| **S-008** | Исторические UI-артефакты (MD в корне репо) | `AUDIT_*.md`, `RESPONSIBLE_*.md`, `CRM_*.md`, др. | — | Archive-source |
+| **S-008** | Исторические UI-артефакты | [docs/ui-artifacts/](ui-artifacts/) | — | Archive-source |
 
 ---
 

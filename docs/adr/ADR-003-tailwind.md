@@ -1,6 +1,6 @@
 # ADR-003: Tailwind CSS 4 как основа стилей
 
-**Status:** Accepted | **Date:** 2026-05-03
+**Version:** 1.0.1 | **Status:** Accepted | **Date:** 2026-05-03
 
 ---
 
@@ -10,7 +10,7 @@
 
 ## Решение
 
-Использовать **Tailwind CSS 4** в связке с **CSS-переменными** для дизайн-токенов. Пользовательские токены определены в `default_shadcn_theme.css`.
+Использовать **Tailwind CSS 4** в связке с **CSS-переменными** для дизайн-токенов. Рабочие токены приложения — в `src/styles/theme.css`; эталонный набор для справки также хранится в `docs/ui-artifacts/reference/default_shadcn_theme.css`.
 
 ## Обоснование
 

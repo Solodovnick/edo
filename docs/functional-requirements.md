@@ -1,8 +1,8 @@
 # Функциональные требования — EDO Bank
 
-**Version:** 1.0.0 | **Date:** 2026-05-03 | **Status:** Active  
+**Version:** 1.0.1 | **Date:** 2026-05-03 | **Status:** Active  
 **Author:** System Analyst  
-**Источник:** UI-артефакты из `.edo` (RESPONSIBLE_CABINET_REDESIGN.md, AUDIT_CABINET_COMPLETE.md, CRM_CLIENT_DATABASE_FEATURE.md и др.)
+**Источник:** UI-артефакты в `docs/ui-artifacts/` (например RESPONSIBLE_CABINET_REDESIGN.md, AUDIT_CABINET_COMPLETE.md, CRM_CLIENT_DATABASE_FEATURE.md и др.)
 
 ---
 

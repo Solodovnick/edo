@@ -20,7 +20,7 @@ description: >-
 1. Перед изменениями свериться с `docs/functional-requirements.md`, `docs/ui-ux-brief.md`, `docs/design-system-plan.md`.
 2. **Стек:** React 18 + TypeScript (strict) + Tailwind CSS 4 + shadcn/ui + Radix + MUI. Новые зависимости — только с согласованием и записями в `docs/artifacts-catalog.md` и ADR.
 3. **Компоненты:** один файл — один компонент; пропсы типизировать; избегать `any`.
-4. **Стили:** утилиты Tailwind и переменные из `default_shadcn_theme.css`; не размазывать токены по inline-стилям.
+4. **Стили:** утилиты Tailwind и переменные из `src/styles/theme.css`; не размазывать токены по inline-стилям.
 5. **Данные:** инкапсуляция в `src/services/`; компоненты не ходят в `localStorage` напрямую, если для этого уже есть сервисный слой.
 6. Карточка обращения по ТЗ — ориентир на трёхколоночный layout (боковые панели + центр).
 7. В конце работы — короткий отчёт: какие пункты FR затронуты.

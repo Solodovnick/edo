@@ -2,8 +2,8 @@
 name: edo-ui-analyst
 description: >-
   Аналитик требований для EDO Bank. Применять когда нужно: описать новую
-  функцию в docs/functional-requirements.md, разобрать исторический UI-артефакт
-  (markdown в корне репозитория), обновить docs/business-requirements.md,
+  функцию в docs/functional-requirements.md, разобрать исторические заметки в
+  docs/ui-artifacts/, обновить docs/business-requirements.md,
   составить acceptance criteria. Не пишет код.
 ---
 
@@ -12,7 +12,7 @@ description: >-
 ## Когда применять
 
 - Новая функциональность в системе обращений (регистрация, кабинеты, SLA, CRM, аудит).
-- Разбор описаний экранов из **корня репозитория** (`*.md` про кабинеты, регистрацию, CRM и т.д.) — только как входные заметки; итог фиксируется в `docs/`.
+- Разбор описаний экранов из **`docs/ui-artifacts/`** — только как входные заметки; итог фиксируется в `docs/`.
 - Обновление `docs/functional-requirements.md` или `docs/business-requirements.md`.
 - Составление acceptance criteria для user stories.
 

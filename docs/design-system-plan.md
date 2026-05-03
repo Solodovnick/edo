@@ -1,7 +1,7 @@
 # План дизайн-системы — EDO Bank
 
-**Version:** 1.0.0 | **Date:** 2026-05-03 | **Status:** Active  
-**Источник:** UNIFIED_DESIGN_SYSTEM.md, default_shadcn_theme.css из .edo
+**Version:** 1.0.1 | **Date:** 2026-05-03 | **Status:** Active  
+**Источник:** [docs/ui-artifacts/UNIFIED_DESIGN_SYSTEM.md](../ui-artifacts/UNIFIED_DESIGN_SYSTEM.md), рабочие токены в `src/styles/theme.css`, архив токенов в [docs/ui-artifacts/reference/default_shadcn_theme.css](../ui-artifacts/reference/default_shadcn_theme.css)
 
 ---
 
@@ -68,8 +68,9 @@ Tailwind CSS 4 (утилиты)
     + MUI theme override
 ```
 
-Файл токенов: `.edo/default_shadcn_theme.css`  
-Глобальные стили: `.edo/src/styles/`
+Файл токенов (приложение): `src/styles/theme.css` (импорт через `src/styles/index.css`).  
+Архив эталона shadcn: `docs/ui-artifacts/reference/default_shadcn_theme.css`.  
+Глобальные стили: `src/styles/`.
 
 ---
 

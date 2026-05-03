@@ -37,7 +37,7 @@
 - **Бизнес-контекст:** `docs/business-requirements.md`
 - **UI / дизайн:** `docs/ui-ux-brief.md`, `docs/design-system-plan.md`
 - **Реестр артефактов и ADR:** `docs/artifacts-catalog.md`, `docs/adr/`
-- **Исторические заметки по UI:** markdown-файлы в **корне репозитория** (описания кабинетов, регистрации и т.д.) — использовать только для уточнения и переноса формулировок в `docs/`
+- **Исторические UI-заметки (не ТЗ):** `docs/ui-artifacts/` — оглавление: `docs/ui-artifacts/README.md`
 
 ## Рекомендуемый порядок работы
 

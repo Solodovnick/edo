@@ -1,11 +1,12 @@
-﻿# EDO
+# EDO
 
 Интерфейс **EDO Bank** (исходный макет: [Figma — EDO-Bank](https://www.figma.com/design/ohKA7YUB4W1nvmFqxpFa7G/EDO-Bank)).
 
 В проект также входят:
 
-- `doc/` — описание и ссылки на Agent Skills
-- `roles/` — навыки для агентов (`SKILL.md`)
+- `docs/` — требования, ADR, **исторические UI-заметки:** `docs/ui-artifacts/`
+- `roles/` — примеры навыков Anthropic (`SKILL.md`), см. `roles/README.md`
+- `.cursor/rules/` и `.cursor/skills/edo-*` — роли Cursor для этого репозитория (`AGENTS.md`)
 
 ## Запуск
 

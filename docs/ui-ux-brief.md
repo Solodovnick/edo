@@ -1,7 +1,7 @@
 # UI/UX Бриф — EDO Bank
 
-**Version:** 1.0.0 | **Date:** 2026-05-03 | **Status:** Active  
-**Источник:** Артефакты .edo (UNIFIED_DESIGN_SYSTEM.md, DESIGN_HANDOFF.md, RESPONSIBLE_CABINET_REDESIGN.md)
+**Version:** 1.0.1 | **Date:** 2026-05-03 | **Status:** Active  
+**Источник:** `docs/ui-artifacts/` — UNIFIED_DESIGN_SYSTEM.md, DESIGN_HANDOFF.md, RESPONSIBLE_CABINET_REDESIGN.md (исторические заметки)
 
 ---
 
