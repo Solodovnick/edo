@@ -1,12 +1,14 @@
 # Архитектура C4 — верхний уровень (МОО / EDO Bank)
 
-**Version:** 1.0.0 | **Date:** 2026-05-03 | **Status:** Draft  
+**Version:** 1.0.1 | **Date:** 2026-05-03 | **Status:** Draft  
 
 **Охват документа:** уровни **C4 — System Context** и **Container**; уровни Component / Code **не** описываются (детализация — в отдельных артефактах и модели IcePanel).
 
 **Источники и согласование:** `docs/business-requirements.md`, `docs/functional-requirements.md`, `docs/use-case.md`, реестр UC; целевая системная декомпозиция уточняется по ландшафту IcePanel (`docs/incoming-artifacts/use-cases-export-594e282f/` — смежный пакет сценариев и модель).  
 
 **Текущая реализация в репозитории:** по [ADR-001](adr/ADR-001-frontend-spa.md) — только **SPA** с mock-данными; остальные контейнеры ниже — **целевая** серверная архитектура для последующих этапов и ADR по интеграциям ([FR-16](functional-requirements.md)).
+
+**Учебная демонстрация** (итоговый проект по системному анализу): упрощённый контур «SPA ↔ один REST API ↔ PostgreSQL» — [ADR-004](adr/ADR-004-education-demo-backend.md), [план бэкенда](backend-development-plan.md); не эквивалентен полному ландшафту контейнеров ниже.
 
 ---
 
