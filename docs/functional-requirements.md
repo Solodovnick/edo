@@ -1,8 +1,8 @@
 # Функциональные требования — EDO Bank
 
-**Version:** 1.2.0 | **Date:** 2026-05-03 | **Status:** Active  
+**Version:** 1.2.1 | **Date:** 2026-05-03 | **Status:** Active  
 **Author:** System Analyst  
-**Источник:** `docs/ui-artifacts/`, реестр UC в `docs/external-registry/use-case-registry.csv`, фрагменты UC заказчика (Au.*, словарь данных).
+**Источник:** `docs/ui-artifacts/`, реестр UC в `docs/external-registry/use-case-registry.csv`, фрагменты UC заказчика (Au.*, словарь данных). **КPI своевременности заказчика** — `docs/core-source-context.md`.
 
 ---
 
@@ -37,6 +37,8 @@
 ## FR-03 SLA-мониторинг
 
 *Приоритет: P0*
+
+Операционные KPI заказчика по доле своевременных ответов (**91% → 99%**) и горизонту стабилизации заданы в **`docs/core-source-context.md`**; интерфейс реализует мониторинг по строкам ниже.
 
 | ID | Требование | Приоритет |
 |---|---|---|

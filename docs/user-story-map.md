@@ -1,8 +1,8 @@
 # User Story Map — EDO Bank
 
-**Version:** 1.0.0 | **Date:** 2026-05-03 | **Status:** Planned
+**Version:** 1.0.0 | **Date:** 2026-05-03 | **Status:** Draft  
 
-> Артефакт запланирован.
+> Черновик USM; детализация acceptance criteria — по согласованию с ТЗ.
 
 ---
 
