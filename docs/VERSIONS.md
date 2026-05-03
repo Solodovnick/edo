@@ -1,6 +1,6 @@
 # Реестр версий документации — EDO Bank
 
-**Version:** 1.1.6 | **Date:** 2026-05-03
+**Version:** 1.1.7 | **Date:** 2026-05-03
 
 Правила версионирования:
 - **MAJOR** — структурные изменения документа (переработка разделов)
@@ -10,6 +10,8 @@
 При выпуске новой версии старая копия переносится в `docs/archive/` с суффиксом версии.
 
 Пример: `docs/archive/functional-requirements-v1.0.0.md`
+
+**1.1.7:** Event Storming — диаграмма процесса и три зоны потока в `docs/event-storming.md`; изображение `docs/assets/event-storming-process-overview.png`. Реестр: устранён дубликат строки `event-storming`, `user-story-map` в основной таблице.
 
 **1.1.6:** учёт внешних источников без правок содержимого артефактов — `docs/external-sources-catalog.md` (**S-015**); ссылки из `docs/external-registry/README.md`, `docs/incoming-artifacts/README.md`; каталог **1.0.8**.
 
@@ -39,8 +41,10 @@
 | `docs/use-case.md` | 1.1.0 | 2026-05-03 | Active |
 | `docs/state-diagram.md` | 1.1.0 | 2026-05-03 | Active |
 | `docs/er-diagram.md` | 1.1.0 | 2026-05-03 | Draft |
-| `docs/artifacts-catalog.md` | 1.0.8 | 2026-05-03 | Active |
-| `docs/VERSIONS.md` | 1.1.6 | 2026-05-03 | Active |
+| `docs/artifacts-catalog.md` | 1.0.9 | 2026-05-03 | Active |
+| `docs/VERSIONS.md` | 1.1.7 | 2026-05-03 | Active |
+| `docs/event-storming.md` | 1.1.0 | 2026-05-03 | Draft |
+| `docs/user-story-map.md` | — | — | Planned |
 | `docs/c4-architecture-overview.md` | 1.0.0 | 2026-05-03 | Draft |
 | `docs/external-sources-catalog.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/ui-artifacts/README.md` | 1.0.0 | 2026-05-03 | Active |
@@ -58,8 +62,6 @@
 | `docs/adr/ADR-001-frontend-spa.md` | 1.0.0 | 2026-05-03 | Accepted |
 | `docs/adr/ADR-002-ui-stack.md` | 1.0.0 | 2026-05-03 | Accepted |
 | `docs/adr/ADR-003-tailwind.md` | 1.0.1 | 2026-05-03 | Accepted |
-| `docs/event-storming.md` | — | — | Planned |
-| `docs/user-story-map.md` | — | — | Planned |
 
 ---
 

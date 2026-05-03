@@ -1,6 +1,6 @@
 # Реестр артефактов — EDO Bank
 
-**Version:** 1.0.8 | **Date:** 2026-05-03 | **Status:** Active
+**Version:** 1.0.9 | **Date:** 2026-05-03 | **Status:** Active
 
 Единый реестр всех проектных артефактов с номерами, статусами и ссылками.
 
@@ -14,7 +14,7 @@
 | **A-002** | Бизнес-требования | [docs/business-requirements.md](business-requirements.md) | 1.1.0 | Draft | ✅ |
 | **A-003** | UI/UX Бриф | [docs/ui-ux-brief.md](ui-ux-brief.md) | 1.0.0 | Active | ✅ |
 | **A-004** | План дизайн-системы | [docs/design-system-plan.md](design-system-plan.md) | 1.0.0 | Active | ✅ |
-| **A-005** | Event Storming | [docs/event-storming.md](event-storming.md) | 1.0.0 | Planned | ⬜ |
+| **A-005** | Event Storming | [docs/event-storming.md](event-storming.md) | 1.1.0 | Draft | ✅ |
 | **A-006** | User Story Map | [docs/user-story-map.md](user-story-map.md) | 1.0.0 | Planned | ⬜ |
 | **A-007** | State Diagram | [docs/state-diagram.md](state-diagram.md) | 1.1.0 | Active | ✅ |
 | **A-008** | Use Cases | [docs/use-case.md](use-case.md) | 1.1.0 | Active | ✅ |
