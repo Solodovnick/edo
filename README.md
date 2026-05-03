@@ -1,4 +1,4 @@
-# EDO
+﻿# EDO
 
 Интерфейс **EDO Bank** (исходный макет: [Figma — EDO-Bank](https://www.figma.com/design/ohKA7YUB4W1nvmFqxpFa7G/EDO-Bank)).
 
@@ -20,3 +20,8 @@ npm run dev
 npm run build
 npm run preview
 ```
+
+
+---
+
+Привет!
