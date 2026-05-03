@@ -1,6 +1,6 @@
 # Каталог внешних источников и ссылок
 
-**Version:** 1.0.0 | **Date:** 2026-05-03 | **Status:** Active  
+**Version:** 1.0.1 | **Date:** 2026-05-03 | **Status:** Active  
 
 **Назначение:** **учёт** материалов (файлы на диске, публичные ссылки, черновики API), которые участвуют в обсуждении EDO Bank / МОО, но **не** подменяют `docs/functional-requirements.md` и остальные утверждённые документы.
 
@@ -19,6 +19,7 @@
 | **EXT-03** | Экспорт IcePanel «Yaroslavdudchenko's landscape» | Файл `Yaroslavdudchenko's landscape (Current).md` (загрузки) | MD, встроенные диаграммы | См. [`c4-architecture-overview.md`](c4-architecture-overview.md) | Ожидает проверки |
 | **EXT-04** | Словарь данных (исходник на диске) | `Словарь+данных\Словарьданных.md` (загрузки) | Словарь сущностей | Импорт в репо: [`incoming-artifacts/slovar-dannykh/Словарьданных.md`](incoming-artifacts/slovar-dannykh/Словарьданных.md); выжимка: [`glossary.md`](glossary.md) | Ожидает проверки |
 | **EXT-05** | Архив «Сценарии использования» (ZIP) | Имя вида `Сценарии+использования+594e282f-....zip` (загрузки) | ZIP поставки | Распаковка: [`incoming-artifacts/use-cases-export-594e282f/`](incoming-artifacts/use-cases-export-594e282f/README.md); CSV совпадает с [`external-registry/use-case-registry.csv`](external-registry/use-case-registry.csv) | Импорт зафиксирован; содержимое — по задаче ролей |
+| **EXT-06** | SAB Group WIN'26 ЭДО — контекстная диаграмма (CSV/PDF в загрузках) | `SAB Group WIN'26 ЭДО.csv`, `SAB Group WIN'26 ЭДО.pdf` (пример пути: загрузки пользователя) | Экспорт Miro «Context Diagram V2», PDF | Импорт в репо: [`incoming-artifacts/sab-group-win26-edo-context/`](incoming-artifacts/sab-group-win26-edo-context/README.md); ссылка на доску в README импорта | Импорт зафиксирован; сверка с ТЗ — по задаче |
 
 ---
 

@@ -1,6 +1,6 @@
 # Реестр версий документации — EDO Bank
 
-**Version:** 1.1.7 | **Date:** 2026-05-03
+**Version:** 1.1.8 | **Date:** 2026-05-03
 
 Правила версионирования:
 - **MAJOR** — структурные изменения документа (переработка разделов)
@@ -10,6 +10,8 @@
 При выпуске новой версии старая копия переносится в `docs/archive/` с суффиксом версии.
 
 Пример: `docs/archive/functional-requirements-v1.0.0.md`
+
+**1.1.8:** импорт «SAB Group WIN'26 ЭДО» — контекстная диаграмма (Miro export): `docs/incoming-artifacts/sab-group-win26-edo-context/`; учёт **EXT-06** в `docs/external-sources-catalog.md`; каталог артефактов **1.0.10**.
 
 **1.1.7:** Event Storming — диаграмма процесса и три зоны потока в `docs/event-storming.md`; изображение `docs/assets/event-storming-process-overview.png`. Реестр: устранён дубликат строки `event-storming`, `user-story-map` в основной таблице.
 
@@ -41,14 +43,15 @@
 | `docs/use-case.md` | 1.1.0 | 2026-05-03 | Active |
 | `docs/state-diagram.md` | 1.1.0 | 2026-05-03 | Active |
 | `docs/er-diagram.md` | 1.1.0 | 2026-05-03 | Draft |
-| `docs/artifacts-catalog.md` | 1.0.9 | 2026-05-03 | Active |
-| `docs/VERSIONS.md` | 1.1.7 | 2026-05-03 | Active |
+| `docs/artifacts-catalog.md` | 1.0.10 | 2026-05-03 | Active |
+| `docs/VERSIONS.md` | 1.1.8 | 2026-05-03 | Active |
 | `docs/event-storming.md` | 1.1.0 | 2026-05-03 | Draft |
 | `docs/user-story-map.md` | — | — | Planned |
 | `docs/c4-architecture-overview.md` | 1.0.0 | 2026-05-03 | Draft |
-| `docs/external-sources-catalog.md` | 1.0.0 | 2026-05-03 | Active |
+| `docs/external-sources-catalog.md` | 1.0.1 | 2026-05-03 | Active |
 | `docs/ui-artifacts/README.md` | 1.0.0 | 2026-05-03 | Active |
-| `docs/incoming-artifacts/README.md` | 1.0.3 | 2026-05-03 | Active |
+| `docs/incoming-artifacts/README.md` | 1.0.4 | 2026-05-03 | Active |
+| `docs/incoming-artifacts/sab-group-win26-edo-context/README.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/incoming-artifacts/use-cases-export-594e282f/README.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/incoming-artifacts/slovar-dannykh/README.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/incoming-artifacts/slovar-dannykh/Словарьданных.md` | 1.0.0 | 2026-05-03 | Archive-import |

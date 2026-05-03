@@ -1,6 +1,6 @@
 # Реестр артефактов — EDO Bank
 
-**Version:** 1.0.9 | **Date:** 2026-05-03 | **Status:** Active
+**Version:** 1.0.10 | **Date:** 2026-05-03 | **Status:** Active
 
 Единый реестр всех проектных артефактов с номерами, статусами и ссылками.
 
@@ -27,7 +27,7 @@
 | ID | Артефакт | Файл | Версия | Статус |
 |---|---|---|---|---|
 | **S-001** | README проекта | [README.md](../README.md) | 1.0.0 | Active |
-| **S-002** | Реестр версий | [docs/VERSIONS.md](VERSIONS.md) | 1.0.0 | Active |
+| **S-002** | Реестр версий | [docs/VERSIONS.md](VERSIONS.md) | 1.1.8 | Active |
 | **S-003** | ADR-001: Frontend SPA | [docs/adr/ADR-001-frontend-spa.md](adr/ADR-001-frontend-spa.md) | 1.0.0 | Accepted |
 | **S-004** | ADR-002: UI Stack | [docs/adr/ADR-002-ui-stack.md](adr/ADR-002-ui-stack.md) | 1.0.0 | Accepted |
 | **S-005** | ADR-003: Tailwind CSS | [docs/adr/ADR-003-tailwind.md](adr/ADR-003-tailwind.md) | 1.0.0 | Accepted |
@@ -35,12 +35,13 @@
 | **S-007** | Правила агентов | [.cursor/rules/](../.cursor/rules/) | 1.0.1 | Active |
 | **S-008** | Исторические UI-артефакты | [docs/ui-artifacts/](ui-artifacts/) | — | Archive-source |
 | **S-009** | Реестр UC (CSV импорт) | [docs/external-registry/use-case-registry.csv](external-registry/use-case-registry.csv) | 1.0.0 | Active |
-| **S-010** | Входящие материалы | [docs/incoming-artifacts/README.md](incoming-artifacts/README.md) | 1.0.3 | Active |
+| **S-010** | Входящие материалы | [docs/incoming-artifacts/README.md](incoming-artifacts/README.md) | 1.0.4 | Active |
 | **S-014** | Полный словарь данных (импорт) | [docs/incoming-artifacts/slovar-dannykh/README.md](incoming-artifacts/slovar-dannykh/README.md) | 1.0.0 | Active |
+| **S-016** | Контекстная диаграмма SAB Group WIN'26 (импорт) | [docs/incoming-artifacts/sab-group-win26-edo-context/README.md](incoming-artifacts/sab-group-win26-edo-context/README.md) | 1.0.0 | Active |
 | **S-011** | Внешние реестры (описание) | [docs/external-registry/README.md](external-registry/README.md) | 1.0.3 | Active |
 | **S-012** | Excel → Markdown (процесс) | [docs/external-registry/excel-to-markdown.md](external-registry/excel-to-markdown.md) | 1.0.0 | Active |
 | **S-013** | Скрипты репозитория | [scripts/README.md](../scripts/README.md) | 1.0.0 | Active |
-| **S-015** | Каталог внешних источников (учёт, без правок артефактов) | [docs/external-sources-catalog.md](external-sources-catalog.md) | 1.0.0 | Active |
+| **S-015** | Каталог внешних источников (учёт, без правок артефактов) | [docs/external-sources-catalog.md](external-sources-catalog.md) | 1.0.1 | Active |
 
 ---
 
