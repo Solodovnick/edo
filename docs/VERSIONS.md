@@ -1,6 +1,6 @@
 # Реестр версий документации — EDO Bank
 
-**Version:** 1.1.8 | **Date:** 2026-05-03
+**Version:** 1.1.9 | **Date:** 2026-05-03
 
 Правила версионирования:
 - **MAJOR** — структурные изменения документа (переработка разделов)
@@ -10,6 +10,8 @@
 При выпуске новой версии старая копия переносится в `docs/archive/` с суффиксом версии.
 
 Пример: `docs/archive/functional-requirements-v1.0.0.md`
+
+**1.1.9:** импорт из ZIP `Словарь+данных.zip` (словарь + ERD) — `docs/incoming-artifacts/data-dictionary-import-afaff3ea/`; импорт `Ограничения+…b0b7abff…zip` — `docs/incoming-artifacts/constraints-import-b0b7abff/`; **EXT-07**, **EXT-08**; артефакты **S-017**, **S-018**; каталог **1.0.11**.
 
 **1.1.8:** импорт «SAB Group WIN'26 ЭДО» — контекстная диаграмма (Miro export): `docs/incoming-artifacts/sab-group-win26-edo-context/`; учёт **EXT-06** в `docs/external-sources-catalog.md`; каталог артефактов **1.0.10**.
 
@@ -43,14 +45,16 @@
 | `docs/use-case.md` | 1.1.0 | 2026-05-03 | Active |
 | `docs/state-diagram.md` | 1.1.0 | 2026-05-03 | Active |
 | `docs/er-diagram.md` | 1.1.0 | 2026-05-03 | Draft |
-| `docs/artifacts-catalog.md` | 1.0.10 | 2026-05-03 | Active |
-| `docs/VERSIONS.md` | 1.1.8 | 2026-05-03 | Active |
+| `docs/artifacts-catalog.md` | 1.0.11 | 2026-05-03 | Active |
+| `docs/VERSIONS.md` | 1.1.9 | 2026-05-03 | Active |
 | `docs/event-storming.md` | 1.1.0 | 2026-05-03 | Draft |
 | `docs/user-story-map.md` | — | — | Planned |
 | `docs/c4-architecture-overview.md` | 1.0.0 | 2026-05-03 | Draft |
-| `docs/external-sources-catalog.md` | 1.0.1 | 2026-05-03 | Active |
+| `docs/external-sources-catalog.md` | 1.0.2 | 2026-05-03 | Active |
 | `docs/ui-artifacts/README.md` | 1.0.0 | 2026-05-03 | Active |
-| `docs/incoming-artifacts/README.md` | 1.0.4 | 2026-05-03 | Active |
+| `docs/incoming-artifacts/README.md` | 1.0.5 | 2026-05-03 | Active |
+| `docs/incoming-artifacts/data-dictionary-import-afaff3ea/README.md` | 1.0.0 | 2026-05-03 | Active |
+| `docs/incoming-artifacts/constraints-import-b0b7abff/README.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/incoming-artifacts/sab-group-win26-edo-context/README.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/incoming-artifacts/use-cases-export-594e282f/README.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/incoming-artifacts/slovar-dannykh/README.md` | 1.0.0 | 2026-05-03 | Active |

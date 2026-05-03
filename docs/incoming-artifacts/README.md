@@ -1,6 +1,6 @@
 # Импорт исходной документации
 
-**Version:** 1.0.4 | **Date:** 2026-05-03
+**Version:** 1.0.5 | **Date:** 2026-05-03
 
 Сюда можно складывать **полные копии** выгрузок из Telegram Desktop, ZIP архивов ТП и т.д.
 
@@ -8,6 +8,8 @@
 
 На текущий момент:
 
+- **Словарь данных (ZIP afaff3ea, с PNG ERD):** [`data-dictionary-import-afaff3ea/`](data-dictionary-import-afaff3ea/README.md).
+- **Ограничения к системе (ZIP b0b7abff):** [`constraints-import-b0b7abff/`](constraints-import-b0b7abff/README.md).
 - **SAB Group WIN'26 ЭДО (контекстная диаграмма / Miro):** [`sab-group-win26-edo-context/`](sab-group-win26-edo-context/README.md) — CSV + PDF + выжимка статусов; исходные имена файлов в README папки.
 - Реестр UC версионирован в репозитории: **`docs/external-registry/use-case-registry.csv`** (копия из комплекта поставки).
 - **Пакет «Сценарии использования» (594e282f):** распакован в [`use-cases-export-594e282f/`](use-cases-export-594e282f/README.md) — индексный MD (шаблон UC, CRUDL), CSV реестра (дубликат канонического файла по хэшу), отдельные MD по каждому сценарию. Исходный ZIP: `Сценарии+использования+594e282f-b6c1-48aa-80b1-62713d373932.zip`.

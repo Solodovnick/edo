@@ -1,6 +1,6 @@
 # Каталог внешних источников и ссылок
 
-**Version:** 1.0.1 | **Date:** 2026-05-03 | **Status:** Active  
+**Version:** 1.0.2 | **Date:** 2026-05-03 | **Status:** Active  
 
 **Назначение:** **учёт** материалов (файлы на диске, публичные ссылки, черновики API), которые участвуют в обсуждении EDO Bank / МОО, но **не** подменяют `docs/functional-requirements.md` и остальные утверждённые документы.
 
@@ -20,6 +20,8 @@
 | **EXT-04** | Словарь данных (исходник на диске) | `Словарь+данных\Словарьданных.md` (загрузки) | Словарь сущностей | Импорт в репо: [`incoming-artifacts/slovar-dannykh/Словарьданных.md`](incoming-artifacts/slovar-dannykh/Словарьданных.md); выжимка: [`glossary.md`](glossary.md) | Ожидает проверки |
 | **EXT-05** | Архив «Сценарии использования» (ZIP) | Имя вида `Сценарии+использования+594e282f-....zip` (загрузки) | ZIP поставки | Распаковка: [`incoming-artifacts/use-cases-export-594e282f/`](incoming-artifacts/use-cases-export-594e282f/README.md); CSV совпадает с [`external-registry/use-case-registry.csv`](external-registry/use-case-registry.csv) | Импорт зафиксирован; содержимое — по задаче ролей |
 | **EXT-06** | SAB Group WIN'26 ЭДО — контекстная диаграмма (CSV/PDF в загрузках) | `SAB Group WIN'26 ЭДО.csv`, `SAB Group WIN'26 ЭДО.pdf` (пример пути: загрузки пользователя) | Экспорт Miro «Context Diagram V2», PDF | Импорт в репо: [`incoming-artifacts/sab-group-win26-edo-context/`](incoming-artifacts/sab-group-win26-edo-context/README.md); ссылка на доску в README импорта | Импорт зафиксирован; сверка с ТЗ — по задаче |
+| **EXT-07** | Словарь данных (ZIP на диске) | `Словарь+данных.zip` (загрузки) | ZIP, словарь + ERD PNG внутри | Импорт в репо: [`incoming-artifacts/data-dictionary-import-afaff3ea/`](incoming-artifacts/data-dictionary-import-afaff3ea/README.md); см. также [`slovar-dannykh/`](incoming-artifacts/slovar-dannykh/README.md) | Импорт зафиксирован; сверка с FR/glossary — по задаче |
+| **EXT-08** | Ограничения к системе (ZIP на диске) | `Ограничения+b0b7abff-811b-45e6-8706-960a51c14f7a.zip` (загрузки) | ZIP, один MD | Импорт в репо: [`incoming-artifacts/constraints-import-b0b7abff/`](incoming-artifacts/constraints-import-b0b7abff/README.md) | Импорт зафиксирован; согласование с ADR/ТЗ — по задаче |
 
 ---
 
