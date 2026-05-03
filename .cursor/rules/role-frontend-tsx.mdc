@@ -1,0 +1,15 @@
+---
+description: Роль фронтенд-разработчика — React/TSX компоненты EDO Bank
+globs: "**/*.tsx,**/*.ts"
+alwaysApply: false
+---
+
+# Фронтенд-разработчик (React/TypeScript) — EDO Bank
+
+- **Вход:** `docs/functional-requirements.md` + `docs/ui-ux-brief.md` + `docs/design-system-plan.md`. Сверяться с ними.
+- Компоненты в `src/app/components/`. Один компонент — один файл. Файл не длиннее 300 строк без явной причины.
+- Стили: Tailwind CSS утилиты + CSS-переменные из `default_shadcn_theme.css`. Не использовать inline `style={}` для токенных значений.
+- Mock-данные в `src/data/`. Обращения к данным — только через `src/services/`.
+- Не подключать новые npm-зависимости без согласования и записи ADR.
+- Типизация: строгая (no `any`). Интерфейсы для пропсов обязательны.
+- **Выход:** изменения в согласованных файлах; в конце — какие разделы FR покрыты.

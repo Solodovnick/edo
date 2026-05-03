@@ -1,0 +1,14 @@
+---
+description: Роль интеграции — сборка, зависимости, конфигурация Vite для EDO Bank
+globs: "**/package.json,**/vite.config.*,**/postcss.config.*"
+alwaysApply: false
+---
+
+# Интеграция и сборка — EDO Bank
+
+- Стек сборки: **Vite 6 + @vitejs/plugin-react + @tailwindcss/vite**.
+- Не менять компоненты и разметку в рамках задач конфигурации.
+- Новые npm-зависимости — только если отражены в требованиях или согласованы + записаны в ADR.
+- `npm run dev` → `http://localhost:5173` (или следующий свободный порт).
+- `npm run build` → статические файлы в `dist/` для деплоя.
+- Не использовать `require()` — только ESM (`import`).
