@@ -1,6 +1,6 @@
 # Реестр артефактов — EDO Bank
 
-**Version:** 1.0.5 | **Date:** 2026-05-03 | **Status:** Active
+**Version:** 1.0.6 | **Date:** 2026-05-03 | **Status:** Active
 
 Единый реестр всех проектных артефактов с номерами, статусами и ссылками.
 
@@ -20,9 +20,7 @@
 | **A-008** | Use Cases | [docs/use-case.md](use-case.md) | 1.1.0 | Active | ✅ |
 | **A-009** | ER Diagram | [docs/er-diagram.md](er-diagram.md) | 1.1.0 | Draft | ✅ |
 | **A-010** | Глоссарий | [docs/glossary.md](glossary.md) | 1.0.0 | Draft | ✅ |
-| **A-011** | Реестр UC (сводка) | [docs/use-case-registry.md](use-case-registry.md) | 1.0.0 | Active | ✅ |
-
----
+| **A-012** | Архитектура C4 (верхний уровень) | [docs/c4-architecture-overview.md](c4-architecture-overview.md) | 1.0.0 | Draft | ✅ |
 
 ## Вспомогательные артефакты (S-###)
 
