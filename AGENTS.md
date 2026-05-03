@@ -1,6 +1,6 @@
 # Роли агентов (Cursor) — EDO Bank
 
-**Version:** 1.0.4 | **Date:** 2026-05-03
+**Version:** 1.0.5 | **Date:** 2026-05-03
 
 Правила лежат в `.cursor/rules/*.mdc`. Роли подмешиваются в контекст по `alwaysApply` / `globs` или выбираются вручную.
 
@@ -12,30 +12,32 @@
 
 ## Роли по файлам
 
-| Роль | Файл | Когда подключается |
+| Должность (минимум Senior) | Файл правила | Когда подключается |
 |---|---|---|
-| Аналитик (FR / BR) | `role-analyst-requirements.mdc` | `docs/functional-requirements*.md`, `docs/business-requirements.md` |
-| Дизайн / UI-спека | `role-design-spec.mdc` | `docs/ui-ux-brief.md`, `docs/design-system-plan.md` |
-| Фронтенд (React/TS) | `role-frontend-tsx.mdc` | `**/*.tsx`, `**/*.ts` |
-| QA / ревью | `role-qa-review.mdc` | `**/*.tsx`, `**/*.ts` (по запросу на сверку с ТЗ) |
-| Интеграция (npm) | `role-integration.mdc` | `package.json`, `package-lock.json` |
-| Сборка (Vite/TS) | `role-integration-config.mdc` | `vite.config.*`, `postcss.config.*`, `tsconfig.json` |
+| Системный аналитик | `role-analyst-requirements.mdc` | `docs/functional-requirements*.md`, `docs/business-requirements.md` |
+| Senior UX/UI-дизайнер | `role-design-spec.mdc` | `docs/ui-ux-brief.md`, `docs/design-system-plan.md` |
+| Старший frontend-разработчик | `role-frontend-tsx.mdc` | `**/*.tsx`, `**/*.ts` |
+| Старший QA-инженер | `role-qa-review.mdc` | `**/*.tsx`, `**/*.ts` (по запросу на сверку с ТЗ) |
+| Старший инженер платформы фронтенда | `role-integration.mdc` | `package.json`, `package-lock.json` |
+| Старший инженер платформы фронтенда (сборка) | `role-integration-config.mdc` | `vite.config.*`, `postcss.config.*`, `tsconfig.json` |
 
 ## Навыки (Skills) в `.cursor/skills/`
 
 Проектные навыки с префиксом **edo-** — основные для этого репозитория:
 
-| Навык | Папка | Когда использовать |
-|---|---|---|
-| Аналитик EDO | `edo-ui-analyst/` | Требования, BR/FR, acceptance criteria |
-| Разработчик EDO | `edo-frontend-dev/` | Компоненты, сервисы, mock-данные |
-| QA EDO | `edo-qa-review/` | Сверка с ТЗ, отчёт о расхождениях |
+| Навык | Папка | Должность (ориентир) | Когда использовать |
+|---|---|---|---|
+| Аналитик EDO | `edo-ui-analyst/` | Системный аналитик | Требования, BR/FR, acceptance criteria |
+| Разработчик EDO | `edo-frontend-dev/` | Старший frontend-разработчик | Компоненты, сервисы, mock-данные |
+| QA EDO | `edo-qa-review/` | Старший QA-инженер | Сверка с ТЗ, отчёт о расхождениях |
+
+Архитектор, старший технический писатель, стейкхолдер — описаны в [`docs/project-roles.md`](docs/project-roles.md); отдельных правил `.mdc` для них нет.
 
 Отдельно в корне репозитория каталог **`roles/`** — примеры универсальных навыков в формате Anthropic (`creative-design`, `development-technical`, …). Это **не** замена `.cursor/skills/edo-*`: при конфликте для кода и ТЗ EDO Bank приоритет у таблицы выше.
 
 ## Роли команды: зона и опыт человека
 
-Матрица (**конкретные роли, предметная область, уровень Middle+/Junior+, артефакты**): [`docs/project-roles.md`](docs/project-roles.md).
+Матрица должностей (**минимум Senior**, стейкхолдер, архитектор, техпис): [`docs/project-roles.md`](docs/project-roles.md).
 
 ## Источник требований
 
