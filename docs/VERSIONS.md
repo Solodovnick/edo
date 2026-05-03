@@ -1,6 +1,6 @@
 # Реестр версий документации — EDO Bank
 
-**Version:** 1.2.0 | **Date:** 2026-05-03
+**Version:** 1.2.1 | **Date:** 2026-05-03
 
 Правила версионирования:
 - **MAJOR** — структурные изменения документа (переработка разделов)
@@ -10,6 +10,8 @@
 При выпуске новой версии старая копия переносится в `docs/archive/` с суффиксом версии.
 
 Пример: `docs/archive/functional-requirements-v1.0.0.md`
+
+**1.2.1:** матрица ролей команды — `docs/project-roles.md` (зона, опыт, предметная область); ссылка из `AGENTS.md`; **S-020**; каталог **1.0.13**.
 
 **1.2.0:** ядро контекста проекта — `docs/core-source-context.md` (ДУКО, KPI 91→99%, устные обращения, 6 мес. разработки); связки в `README.md`, `AGENTS.md`, `ui-core.mdc`, навык `edo-ui-analyst`; **S-019**; каталог **1.0.12**.
 
@@ -47,8 +49,9 @@
 | `docs/use-case.md` | 1.1.0 | 2026-05-03 | Active |
 | `docs/state-diagram.md` | 1.1.0 | 2026-05-03 | Active |
 | `docs/er-diagram.md` | 1.1.0 | 2026-05-03 | Draft |
-| `docs/artifacts-catalog.md` | 1.0.12 | 2026-05-03 | Active |
-| `docs/VERSIONS.md` | 1.2.0 | 2026-05-03 | Active |
+| `docs/artifacts-catalog.md` | 1.0.13 | 2026-05-03 | Active |
+| `docs/VERSIONS.md` | 1.2.1 | 2026-05-03 | Active |
+| `docs/project-roles.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/core-source-context.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/event-storming.md` | 1.1.0 | 2026-05-03 | Draft |
 | `docs/user-story-map.md` | — | — | Planned |
@@ -66,7 +69,7 @@
 | `docs/external-registry/excel-to-markdown.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/external-registry/use-case-registry.csv` | 1.0.0 | 2026-05-03 | Active |
 | `scripts/README.md` | 1.0.0 | 2026-05-03 | Active |
-| `AGENTS.md` | 1.0.3 | 2026-05-03 | Active |
+| `AGENTS.md` | 1.0.4 | 2026-05-03 | Active |
 | `.cursor/rules/*` | 1.0.2 | 2026-05-03 | Active |
 | `.cursor/skills/edo-*` | 1.0.3 | 2026-05-03 | Active |
 | `docs/adr/ADR-001-frontend-spa.md` | 1.0.0 | 2026-05-03 | Accepted |

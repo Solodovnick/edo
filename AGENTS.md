@@ -1,6 +1,6 @@
 # Роли агентов (Cursor) — EDO Bank
 
-**Version:** 1.0.3 | **Date:** 2026-05-03
+**Version:** 1.0.4 | **Date:** 2026-05-03
 
 Правила лежат в `.cursor/rules/*.mdc`. Роли подмешиваются в контекст по `alwaysApply` / `globs` или выбираются вручную.
 
@@ -33,6 +33,10 @@
 
 Отдельно в корне репозитория каталог **`roles/`** — примеры универсальных навыков в формате Anthropic (`creative-design`, `development-technical`, …). Это **не** замена `.cursor/skills/edo-*`: при конфликте для кода и ТЗ EDO Bank приоритет у таблицы выше.
 
+## Роли команды: зона и опыт человека
+
+Матрица (**конкретные роли, предметная область, уровень Middle+/Junior+, артефакты**): [`docs/project-roles.md`](docs/project-roles.md).
+
 ## Источник требований
 
 - **Ядро контекста (прочитать в первую очередь):** `docs/core-source-context.md` — ДУКО, модуль ЭДО, KPI 91%→99%, устные обращения, горизонты 6 мес. / +3 мес. после запуска
@@ -43,6 +47,7 @@
 - **UI / дизайн:** `docs/ui-ux-brief.md`, `docs/design-system-plan.md`
 - **Жизненный цикл:** `docs/state-diagram.md`
 - **Реестр артефактов и ADR:** `docs/artifacts-catalog.md`, `docs/adr/`
+- **Роли команды и опыт:** `docs/project-roles.md`
 - **Исторические UI-заметки:** `docs/ui-artifacts/`
 
 ## Рекомендуемый порядок работы
