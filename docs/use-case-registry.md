@@ -1,7 +1,7 @@
 # Реестр Use Case (сводка по CSV)
 
-**Version:** 1.0.0 | **Date:** 2026-05-03 | **Status:** Active  
-**Источник:** `docs/external-registry/use-case-registry.csv`, шаблон терминов сценария — `Сценарии использования …594e282f….md`
+**Version:** 1.0.1 | **Date:** 2026-05-03 | **Status:** Active  
+**Источник:** `docs/external-registry/use-case-registry.csv`, шаблон терминов сценария и CRUDL — [пакет use-cases-export-594e282f](incoming-artifacts/use-cases-export-594e282f/Сценарии+использования+594e282f-b6c1-48aa-80b1-62713d373932.md) (см. [README пакета](incoming-artifacts/use-cases-export-594e282f/README.md))
 
 ---
 

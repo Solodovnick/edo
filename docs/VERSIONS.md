@@ -1,6 +1,6 @@
 # Реестр версий документации — EDO Bank
 
-**Version:** 1.1.2 | **Date:** 2026-05-03
+**Version:** 1.1.3 | **Date:** 2026-05-03
 
 Правила версионирования:
 - **MAJOR** — структурные изменения документа (переработка разделов)
@@ -10,6 +10,8 @@
 При выпуске новой версии старая копия переносится в `docs/archive/` с суффиксом версии.
 
 Пример: `docs/archive/functional-requirements-v1.0.0.md`
+
+**1.1.3:** импорт ZIP «Сценарии использования» (594e282f) в `docs/incoming-artifacts/use-cases-export-594e282f/`; CSV реестра подтверждён идентичным `use-case-registry.csv`.
 
 **1.1.2:** процесс переноса таблиц из Excel в Markdown/CSV: `docs/external-registry/excel-to-markdown.md`, утилита `scripts/tabular-to-markdown.mjs`, `npm run tabular-to-md`.
 
@@ -27,15 +29,16 @@
 | `docs/ui-ux-brief.md` | 1.0.1 | 2026-05-03 | Active |
 | `docs/design-system-plan.md` | 1.0.1 | 2026-05-03 | Active |
 | `docs/glossary.md` | 1.0.1 | 2026-05-03 | Draft |
-| `docs/use-case-registry.md` | 1.0.0 | 2026-05-03 | Active |
+| `docs/use-case-registry.md` | 1.0.1 | 2026-05-03 | Active |
 | `docs/use-case.md` | 1.1.0 | 2026-05-03 | Active |
 | `docs/state-diagram.md` | 1.1.0 | 2026-05-03 | Active |
 | `docs/er-diagram.md` | 1.1.0 | 2026-05-03 | Draft |
-| `docs/artifacts-catalog.md` | 1.0.4 | 2026-05-03 | Active |
-| `docs/VERSIONS.md` | 1.1.2 | 2026-05-03 | Active |
+| `docs/artifacts-catalog.md` | 1.0.5 | 2026-05-03 | Active |
+| `docs/VERSIONS.md` | 1.1.3 | 2026-05-03 | Active |
 | `docs/ui-artifacts/README.md` | 1.0.0 | 2026-05-03 | Active |
-| `docs/incoming-artifacts/README.md` | 1.0.0 | 2026-05-03 | Active |
-| `docs/external-registry/README.md` | 1.0.1 | 2026-05-03 | Active |
+| `docs/incoming-artifacts/README.md` | 1.0.1 | 2026-05-03 | Active |
+| `docs/incoming-artifacts/use-cases-export-594e282f/README.md` | 1.0.0 | 2026-05-03 | Active |
+| `docs/external-registry/README.md` | 1.0.2 | 2026-05-03 | Active |
 | `docs/external-registry/excel-to-markdown.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/external-registry/use-case-registry.csv` | 1.0.0 | 2026-05-03 | Active |
 | `scripts/README.md` | 1.0.0 | 2026-05-03 | Active |

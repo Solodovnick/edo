@@ -1,6 +1,6 @@
 # Реестр артефактов — EDO Bank
 
-**Version:** 1.0.4 | **Date:** 2026-05-03 | **Status:** Active
+**Version:** 1.0.5 | **Date:** 2026-05-03 | **Status:** Active
 
 Единый реестр всех проектных артефактов с номерами, статусами и ссылками.
 
@@ -37,7 +37,7 @@
 | **S-007** | Правила агентов | [.cursor/rules/](../.cursor/rules/) | 1.0.1 | Active |
 | **S-008** | Исторические UI-артефакты | [docs/ui-artifacts/](ui-artifacts/) | — | Archive-source |
 | **S-009** | Реестр UC (CSV импорт) | [docs/external-registry/use-case-registry.csv](external-registry/use-case-registry.csv) | 1.0.0 | Active |
-| **S-010** | Входящие материалы | [docs/incoming-artifacts/README.md](incoming-artifacts/README.md) | 1.0.0 | Active |
+| **S-010** | Входящие материалы | [docs/incoming-artifacts/README.md](incoming-artifacts/README.md) | 1.0.1 | Active |
 | **S-011** | Внешние реестры (описание) | [docs/external-registry/README.md](external-registry/README.md) | 1.0.1 | Active |
 | **S-012** | Excel → Markdown (процесс) | [docs/external-registry/excel-to-markdown.md](external-registry/excel-to-markdown.md) | 1.0.0 | Active |
 | **S-013** | Скрипты репозитория | [scripts/README.md](../scripts/README.md) | 1.0.0 | Active |
