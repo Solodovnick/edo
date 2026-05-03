@@ -4,6 +4,8 @@
 
 В репозитории:
 
+- `docs/core-source-context.md` — **зачем проект** (ДУКО, KPI, устные обращения); читать перед ТЗ
+- `docs/project-status-report.md` — табличная сводка проекта (не WakaTime)
 - `docs/backend-development-plan.md` — **учебный демо-бэкенд** (REST + PostgreSQL, защита по курсу СА); см. `docs/adr/ADR-004-education-demo-backend.md`
 - `docs/` — требования, ADR, **исторические UI-заметки:** `docs/ui-artifacts/`
 - `roles/` — примеры навыков Anthropic (`SKILL.md`), см. `roles/README.md`

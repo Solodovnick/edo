@@ -1,6 +1,6 @@
 # Роли агентов (Cursor) — EDO Bank
 
-**Version:** 1.0.6 | **Date:** 2026-05-03
+**Version:** 1.0.7 | **Date:** 2026-05-03
 
 Правила лежат в `.cursor/rules/*.mdc`. Роли подмешиваются в контекст по `alwaysApply` / `globs` или выбираются вручную.
 
@@ -50,6 +50,7 @@
 - **Жизненный цикл:** `docs/state-diagram.md`
 - **Реестр артефактов и ADR:** `docs/artifacts-catalog.md`, `docs/adr/`
 - **Роли команды и опыт:** `docs/project-roles.md`
+- **Сводка для презентаций:** `docs/project-status-report.md`
 - **Учебный контур (защита в школе):** `docs/backend-development-plan.md`, `docs/adr/ADR-004-education-demo-backend.md`, **FR-17** в `docs/functional-requirements.md`
 - **Исторические UI-заметки:** `docs/ui-artifacts/`
 

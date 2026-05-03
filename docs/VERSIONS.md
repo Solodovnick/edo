@@ -1,6 +1,6 @@
 # Реестр версий документации — EDO Bank
 
-**Version:** 1.2.4 | **Date:** 2026-05-03
+**Version:** 1.2.5 | **Date:** 2026-05-03
 
 Правила версионирования:
 - **MAJOR** — структурные изменения документа (переработка разделов)
@@ -10,6 +10,8 @@
 При выпуске новой версии старая копия переносится в `docs/archive/` с суффиксом версии.
 
 Пример: `docs/archive/functional-requirements-v1.0.0.md`
+
+**1.2.5:** сводка проекта в markdown-таблицах — `docs/project-status-report.md` (**A-014**); пояснение: не интеграция WakaTime; `README`, `AGENTS` — ссылки; каталог **1.0.17**.
 
 **1.2.4:** учебный демо-бэкенд — [ADR-004](adr/ADR-004-education-demo-backend.md), [план](backend-development-plan.md); **FR-17**; дополнение [ADR-001](adr/ADR-001-frontend-spa.md) **v1.0.1**; C4 **v1.0.1**; артефакт **A-013**; каталог **1.0.16**.
 
@@ -55,8 +57,9 @@
 | `docs/use-case.md` | 1.1.0 | 2026-05-03 | Active |
 | `docs/state-diagram.md` | 1.1.0 | 2026-05-03 | Active |
 | `docs/er-diagram.md` | 1.1.0 | 2026-05-03 | Draft |
-| `docs/artifacts-catalog.md` | 1.0.16 | 2026-05-03 | Active |
-| `docs/VERSIONS.md` | 1.2.4 | 2026-05-03 | Active |
+| `docs/artifacts-catalog.md` | 1.0.17 | 2026-05-03 | Active |
+| `docs/VERSIONS.md` | 1.2.5 | 2026-05-03 | Active |
+| `docs/project-status-report.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/c4-architecture-overview.md` | 1.0.1 | 2026-05-03 | Draft |
 | `docs/backend-development-plan.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/user-story-map.md` | 1.0.0 | 2026-05-03 | Draft |
@@ -76,7 +79,7 @@
 | `docs/external-registry/excel-to-markdown.md` | 1.0.0 | 2026-05-03 | Active |
 | `docs/external-registry/use-case-registry.csv` | 1.0.0 | 2026-05-03 | Active |
 | `scripts/README.md` | 1.0.0 | 2026-05-03 | Active |
-| `AGENTS.md` | 1.0.6 | 2026-05-03 | Active |
+| `AGENTS.md` | 1.0.7 | 2026-05-03 | Active |
 | `.cursor/rules/*` | 1.0.2 | 2026-05-03 | Active |
 | `.cursor/skills/edo-*` | 1.0.3 | 2026-05-03 | Active |
 | `docs/adr/ADR-001-frontend-spa.md` | 1.0.1 | 2026-05-03 | Accepted |
