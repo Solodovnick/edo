@@ -1,6 +1,6 @@
 # Реестр артефактов — EDO Bank
 
-**Version:** 1.0.11 | **Date:** 2026-05-03 | **Status:** Active
+**Version:** 1.0.12 | **Date:** 2026-05-03 | **Status:** Active
 
 Единый реестр всех проектных артефактов с номерами, статусами и ссылками.
 
@@ -27,11 +27,11 @@
 | ID | Артефакт | Файл | Версия | Статус |
 |---|---|---|---|---|
 | **S-001** | README проекта | [README.md](../README.md) | 1.0.0 | Active |
-| **S-002** | Реестр версий | [docs/VERSIONS.md](VERSIONS.md) | 1.1.9 | Active |
+| **S-002** | Реестр версий | [docs/VERSIONS.md](VERSIONS.md) | 1.2.0 | Active |
 | **S-003** | ADR-001: Frontend SPA | [docs/adr/ADR-001-frontend-spa.md](adr/ADR-001-frontend-spa.md) | 1.0.0 | Accepted |
 | **S-004** | ADR-002: UI Stack | [docs/adr/ADR-002-ui-stack.md](adr/ADR-002-ui-stack.md) | 1.0.0 | Accepted |
 | **S-005** | ADR-003: Tailwind CSS | [docs/adr/ADR-003-tailwind.md](adr/ADR-003-tailwind.md) | 1.0.0 | Accepted |
-| **S-006** | Agent Skills | [.cursor/skills/](../.cursor/skills/) | 1.0.0 | Active |
+| **S-006** | Agent Skills | [.cursor/skills/](../.cursor/skills/) | 1.0.1 | Active |
 | **S-007** | Правила агентов | [.cursor/rules/](../.cursor/rules/) | 1.0.1 | Active |
 | **S-008** | Исторические UI-артефакты | [docs/ui-artifacts/](ui-artifacts/) | — | Archive-source |
 | **S-009** | Реестр UC (CSV импорт) | [docs/external-registry/use-case-registry.csv](external-registry/use-case-registry.csv) | 1.0.0 | Active |
@@ -40,6 +40,7 @@
 | **S-016** | Контекстная диаграмма SAB Group WIN'26 (импорт) | [docs/incoming-artifacts/sab-group-win26-edo-context/README.md](incoming-artifacts/sab-group-win26-edo-context/README.md) | 1.0.0 | Active |
 | **S-017** | Словарь данных (ZIP afaff3ea, импорт) | [docs/incoming-artifacts/data-dictionary-import-afaff3ea/README.md](incoming-artifacts/data-dictionary-import-afaff3ea/README.md) | 1.0.0 | Active |
 | **S-018** | Ограничения к системе (ZIP b0b7abff, импорт) | [docs/incoming-artifacts/constraints-import-b0b7abff/README.md](incoming-artifacts/constraints-import-b0b7abff/README.md) | 1.0.0 | Active |
+| **S-019** | Ядро контекста проекта (core source) | [docs/core-source-context.md](core-source-context.md) | 1.0.0 | Active |
 | **S-011** | Внешние реестры (описание) | [docs/external-registry/README.md](external-registry/README.md) | 1.0.3 | Active |
 | **S-012** | Excel → Markdown (процесс) | [docs/external-registry/excel-to-markdown.md](external-registry/excel-to-markdown.md) | 1.0.0 | Active |
 | **S-013** | Скрипты репозитория | [scripts/README.md](../scripts/README.md) | 1.0.0 | Active |

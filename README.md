@@ -4,6 +4,7 @@
 
 В репозитории:
 
+- `docs/core-source-context.md` — **зачем проект** (ДУКО, KPI, устные обращения); читать перед ТЗ
 - `docs/` — требования, ADR, **исторические UI-заметки:** `docs/ui-artifacts/`
 - `roles/` — примеры навыков Anthropic (`SKILL.md`), см. `roles/README.md`
 - `.cursor/rules/` и `.cursor/skills/edo-*` — роли Cursor для этого репозитория (`AGENTS.md`)

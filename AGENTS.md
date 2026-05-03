@@ -1,12 +1,14 @@
 # Роли агентов (Cursor) — EDO Bank
 
+**Version:** 1.0.3 | **Date:** 2026-05-03
+
 Правила лежат в `.cursor/rules/*.mdc`. Роли подмешиваются в контекст по `alwaysApply` / `globs` или выбираются вручную.
 
 ## Общие правила
 
 | Файл | Назначение |
 |---|---|
-| `ui-core.mdc` | Всегда: ТЗ как источник правды, стек, согласование отклонений, артефакты и ADR при новых библиотеках |
+| `ui-core.mdc` | Всегда: контекст заказа `docs/core-source-context.md`; ТЗ как источник правды (`functional-requirements.md`), стек, согласование отклонений, артефакты и ADR при новых библиотеках |
 
 ## Роли по файлам
 
@@ -33,6 +35,7 @@
 
 ## Источник требований
 
+- **Ядро контекста (прочитать в первую очередь):** `docs/core-source-context.md` — ДУКО, модуль ЭДО, KPI 91%→99%, устные обращения, горизонты 6 мес. / +3 мес. после запуска
 - **ТЗ:** `docs/functional-requirements.md`
 - **Бизнес-контекст:** `docs/business-requirements.md`
 - **Глоссарий и роли:** `docs/glossary.md`
@@ -44,7 +47,8 @@
 
 ## Рекомендуемый порядок работы
 
-1. Зафиксировать или изменить требования в `docs/functional-requirements.md` (и при необходимости `docs/business-requirements.md`).
-2. При необходимости обновить `docs/ui-ux-brief.md` / `docs/design-system-plan.md`.
-3. Реализовать в `src/app/components/`, `src/services/`, `src/data/` со ссылкой на FR в задаче или коммите.
-4. Проверка: запрос «сверка с ТЗ» + навык `edo-qa-review` или роль QA.
+1. Прочитать `docs/core-source-context.md` (контекст ДУКО и KPI).
+2. Зафиксировать или изменить требования в `docs/functional-requirements.md` (и при необходимости `docs/business-requirements.md`).
+3. При необходимости обновить `docs/ui-ux-brief.md` / `docs/design-system-plan.md`.
+4. Реализовать в `src/app/components/`, `src/services/`, `src/data/` со ссылкой на FR в задаче или коммите.
+5. Проверка: запрос «сверка с ТЗ» + навык `edo-qa-review` или роль QA.
