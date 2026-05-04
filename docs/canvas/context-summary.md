@@ -1,5 +1,5 @@
 # Context Summary — EDO Bank Project
-**Date:** 2026-05-04 | **Branch:** main | **Last commit:** a4601ff
+**Date:** 2026-05-04 | **Branch:** main | **Last commit:** acf310f
 
 ---
 
@@ -10,7 +10,8 @@
 | PostgreSQL (Docker `edo-pg`) | `localhost:5433` | ✅ |
 | Spring Boot backend | `localhost:8080` | ✅ |
 | Vite frontend | `localhost:5174` | ✅ |
-| БД: 29 обращений (V1+V2+V3 Flyway) | — | ✅ |
+| БД: 52 обращения (V1+V2+V3 Flyway + тест-данные) | — | ✅ |
+| Тестирование: 51/51 PASS | `docs/test-results.md` | ✅ |
 
 ---
 
@@ -34,12 +35,17 @@
 
 ### 4. Данные в БД
 - Добавлена Flyway-миграция `V3__more_seed_data.sql` — 20 новых обращений
-- Итого: 29 обращений, покрывают все статусы всех кабинетов
+- Итого seed: 29 обращений; после тестирования: 52
 
-### 5. Прочие правки
+### 5. Тестирование (docs/test-plan.md, docs/test-results.md)
+- 4 тест-сьюта, 51 тест-кейс: Happy Path, Alternative Path, позитивные, негативные
+- **100% PASS** — все кейсы пройдены
+- BUG-001 выявлен и исправлен: `GET /api/appeals/{invalid-uuid}` → 500 исправлено на 400
+
+### 6. Прочие правки
 - Опечатка «Запрос в БЛ» → «Запрос в БП» в 4 файлах
 - Удалена вкладка Swagger из навигации UI
-- Установлен пакет `swagger-ui-react` (для ApiDocsPage, файл оставлен)
+- GlobalExceptionHandler: добавлены обработчики `MethodArgumentTypeMismatchException`, `IllegalArgumentException`
 
 ---
 
@@ -62,13 +68,17 @@ src/
         ManagerCabinetPageUnified.tsx ← API list + card
 backend/
   src/main/java/bank/edo/
-    controller/AppealController.java  ← ?category param
-    service/AppealService.java        ← category logic
-    repository/AppealRepository.java  ← JPQL query for category+search
+    controller/AppealController.java     ← ?category param
+    controller/GlobalExceptionHandler.java ← BUG-001 fix (UUID 400)
+    service/AppealService.java           ← category logic
+    repository/AppealRepository.java     ← JPQL query for category+search
   resources/db/migration/
     V1__initial_schema.sql
     V2__seed_data.sql       ← 10 записей
     V3__more_seed_data.sql  ← 20 записей
+docs/
+  test-plan.md            ← 22 тест-кейса
+  test-results.md         ← результаты: 51/51 PASS
 ```
 
 ---
@@ -81,6 +91,7 @@ backend/
 | MED | RegistrationPage — подключить список к API |
 | MED | Сохранение статус-переходов из карточек → PATCH /api/appeals/{id} |
 | LOW | Тёмная тема (по ТЗ единственная поддерживаемая) |
+| LOW | SecretaryPage — подключение к API |
 
 ---
 
@@ -92,6 +103,7 @@ docker start edo-pg
 
 # Бэкенд (порт 8080)
 cd backend && mvn spring-boot:run
+# или: java -jar target/edo-backend-0.1.0-SNAPSHOT.jar
 
 # Фронтенд (порт 5174)
 npm run dev
@@ -102,12 +114,15 @@ npm run dev
 ## Конфигурация БД
 - Container: `edo-pg`, порт `5433`
 - User: `edo`, Password: `edo_pass`, DB: `edo_demo`
-- Backend application.yml подключается к `localhost:5433/edodb` — **несоответствие**: контейнер создан с `POSTGRES_DB=edo_demo`, но Flyway создаёт схему в той БД, к которой подключается Spring (`edodb`). Проверить при деплое.
+- `application.yml` подключается к `localhost:5433/edo_demo` — совпадает с конфигурацией контейнера ✅
 
 ---
 
 ## Git log (последние коммиты)
 ```
+acf310f test: add test plan and results (51/51 pass), fix BUG-001 UUID 500 to 400
+5148aba docs: project status report v2.0 — full artifact changelog 2026-05-04
+3f082e0 docs: checkpoint 2026-05-04 — cabinets API, filters, SLA, V3 seed data
 a4601ff feat: remove Swagger tab from UI navigation
 22d2e84 feat: add V3 seed data — 20 appeals across all cabinet statuses
 3715cd8 fix: install swagger-ui-react and types for ApiDocsPage

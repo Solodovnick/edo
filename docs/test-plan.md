@@ -201,8 +201,8 @@
 2. `PATCH` → `{"status": "Закрыто"}` (прямой переход запрещён)
 
 **Ожидаемый результат:**
-- HTTP 409 Conflict или 422 Unprocessable Entity
-- Сообщение о недопустимом переходе
+- HTTP 422 Unprocessable Entity
+- Тело: `{"status":422,"error":"Invalid Transition","message":"Недопустимый переход: …"}`
 
 ---
 

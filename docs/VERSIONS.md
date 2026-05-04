@@ -1,6 +1,6 @@
 # Реестр версий документации — EDO Bank
 
-**Version:** 1.3.1 | **Date:** 2026-05-04
+**Version:** 1.3.2 | **Date:** 2026-05-04
 
 Правила версионирования:
 - **MAJOR** — структурные изменения документа (переработка разделов)
@@ -10,6 +10,8 @@
 При выпуске новой версии старая копия переносится в `docs/archive/` с суффиксом версии.
 
 Пример: `docs/archive/functional-requirements-v1.0.0.md`
+
+**1.3.2:** QA-проверка всей документации 2026-05-04 — исправлены расхождения: `artifacts-catalog.md` v1.0.24 (A-014 версия 1.0.1→2.0; добавлены A-015 `test-plan.md`, A-016 `test-results.md`; добавлены S-022/S-023/S-024 canvas-файлы; обновлён S-002 до 1.3.2); таблица текущих версий: `business-requirements.md` 1.1.0→1.1.1, `artifacts-catalog.md` 1.0.23→1.0.24; добавлены `test-plan.md` 1.0.0, `test-results.md` 1.0.0, `project-status-report.md` 2.0; исправлено некорректное примечание о несоответствии БД в `canvas/context-summary.md`. Каталог **1.0.24**.
 
 **1.3.1:** QA-сверка документации со стороны всех проектных ролей — исправлены расхождения: `functional-requirements.md` v1.2.3 (примечание об именовании в коде, FR-10.2 полный перечень ролей); `state-diagram.md` v1.2.0 (статусы выровнены с `AppealService.java`, добавлены «На ПК», «Готово к подписи», матрица переходов по ролям); `ui-ux-brief.md` v1.0.2 (раздел 5 переписан под tab-based навигацию `App.tsx`, добавлены все 10 экранов); `glossary.md` v1.0.3 (статус Draft→Active, добавлены «Секретарь ПК», «На ПК», SLA, FCR); `artifacts-catalog.md` v1.0.23 (актуальные версии, добавлены S-022/S-023/S-024). Каталог **1.0.23**.
 
@@ -45,7 +47,7 @@
 |---|---|---|---|
 | `README.md` | 1.0.1 | 2026-05-03 | Active |
 | `docs/functional-requirements.md` | 1.2.3 | 2026-05-04 | Active |
-| `docs/business-requirements.md` | 1.1.0 | 2026-05-03 | Draft |
+| `docs/business-requirements.md` | 1.1.1 | 2026-05-03 | Draft |
 | `docs/ui-ux-brief.md` | 1.0.2 | 2026-05-04 | Active |
 | `docs/design-system-plan.md` | 1.0.1 | 2026-05-03 | Active |
 | `docs/glossary.md` | 1.0.3 | 2026-05-04 | Active |
@@ -53,10 +55,13 @@
 | `docs/use-case.md` | 1.1.0 | 2026-05-03 | Active |
 | `docs/state-diagram.md` | 1.2.0 | 2026-05-04 | Active |
 | `docs/er-diagram.md` | 1.2.0 | 2026-05-03 | Active |
-| `docs/artifacts-catalog.md` | 1.0.23 | 2026-05-04 | Active |
-| `docs/VERSIONS.md` | 1.3.1 | 2026-05-04 | Active |
+| `docs/artifacts-catalog.md` | 1.0.24 | 2026-05-04 | Active |
+| `docs/VERSIONS.md` | 1.3.2 | 2026-05-04 | Active |
 | `docs/project-roles.md` | 1.1.1 | 2026-05-03 | Active |
 | `docs/core-source-context.md` | 1.0.1 | 2026-05-03 | Active |
+| `docs/project-status-report.md` | 2.0 | 2026-05-04 | Active |
+| `docs/test-plan.md` | 1.0.0 | 2026-05-04 | Active |
+| `docs/test-results.md` | 1.0.0 | 2026-05-04 | Active |
 | `docs/canvas/context-summary.md` | 1.0.2 | 2026-05-04 | Active |
 | `docs/canvas/edo-canvas.drawio` | 1.0.0 | 2026-05-03 | Active |
 | `backend/` (Spring Boot demo) | 0.1.0-SNAPSHOT | 2026-05-04 | Active |
