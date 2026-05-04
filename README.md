@@ -13,19 +13,6 @@
 
 **Корень репозитория** — текущая директория клонирования (`Solodovnick/edo`).
 
-## Запуск
-
-```bash
-npm install
-npm run dev
-```
-
-По умолчанию dev-сервер: **http://localhost:5174**
-
-```bash
-npm run build
-npm run preview
-```
 
 ---
 
