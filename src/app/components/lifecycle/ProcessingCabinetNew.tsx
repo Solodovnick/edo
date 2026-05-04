@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Search,
   User,
@@ -8,19 +8,15 @@ import {
   ArrowUp,
   ArrowDown
 } from 'lucide-react';
-import { appealStorage } from '../../../services/appealStorage';
-import unifiedAppealsData from '../../../data/unifiedAppealsData';
-import { toast } from 'sonner';
+import { getCabinetAppeals, type CabinetAppeal } from '../../../services/appealApi';
 import { NotificationBell } from '../notifications/NotificationBell';
 
-// Допустимые статусы для кабинета ответственного
+// Статусы кабинета ответственного (бэкенд-имена)
 const ALLOWED_STATUSES = [
-  'В работе',                        // Зарегистрированные обращения
-  'На ответственном, не взято',      // Не взятые в работу
-  'На ответственном, взято',         // Взятые в работу
-  'На БП',                           // Бизнес-подразделение
-  'На ПК',                           // Претензионная комиссия
-  'На HD'                            // Helpdesk
+  'Назначено',
+  'На ответственном, взято',
+  'Запрос в БП',
+  'Готово к подписи',
 ];
 
 interface ProcessingCabinetProps {
@@ -31,41 +27,28 @@ export function ProcessingCabinetNew({ onOpenAppeal }: ProcessingCabinetProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<string>('Мои обращения');
   const [typeFilter, setTypeFilter] = useState<string>('Все обращения');
-  const [allAppeals, setAllAppeals] = useState(unifiedAppealsData);
+  const [allAppeals, setAllAppeals] = useState<CabinetAppeal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [sortColumn, setSortColumn] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  // Load appeals from localStorage on mount
-  useEffect(() => {
-    const loadAppeals = () => {
-      const savedAppeals = appealStorage.getAllAppeals();
-      
-      // Нормализуем типы заявителей - исправляем некорректные значения
-      const normalizedSavedAppeals = savedAppeals.map(appeal => {
-        if (appeal.type === 'Регулятор' || appeal.type === 'регулятор' || !(appeal.type === 'Физ лицо' || appeal.type === 'Юр лицо' || appeal.type === 'Физлицо' || appeal.type === 'Юрлицо')) {
-          console.warn(`Normalizing appeal ${appeal.id}: changing invalid type "${appeal.type}" to "Юр лицо"`);
-          return { ...appeal, type: 'Юр лицо' as any };
-        }
-        return appeal;
-      });
-      
-      // Создаем Set ПОСЛЕ нормализации
-      const savedIds = new Set(normalizedSavedAppeals.map(a => a.id));
-      
-      // Filter out unified appeals that are already in localStorage
-      const uniqueUnifiedAppeals = unifiedAppealsData.filter(a => !savedIds.has(a.id));
-      
-      // Combine: normalized saved appeals + unique unified appeals
-      const combined = [...normalizedSavedAppeals, ...uniqueUnifiedAppeals];
-      setAllAppeals(combined);
-    };
-    
-    loadAppeals();
-
-    // Reload every 5 seconds
-    const interval = setInterval(loadAppeals, 5000);
-    return () => clearInterval(interval);
+  const loadAppeals = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getCabinetAppeals(ALLOWED_STATUSES);
+      setAllAppeals(data);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Не удалось загрузить обращения');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadAppeals();
+  }, [loadAppeals]);
 
   // Filter appeals based on active filter and search
   const filteredAppeals = allAppeals.filter(appeal => {
@@ -132,6 +115,18 @@ export function ProcessingCabinetNew({ onOpenAppeal }: ProcessingCabinetProps) {
       <ArrowDown className="w-4 h-4 text-purple-600" />
     );
   };
+
+  if (loading) return (
+    <div style={{ background: '#D1C4E9', minHeight: '100vh' }} className="flex items-center justify-center">
+      <p className="text-purple-800 text-sm">Загрузка обращений…</p>
+    </div>
+  );
+  if (error) return (
+    <div style={{ background: '#D1C4E9', minHeight: '100vh' }} className="flex flex-col items-center justify-center gap-3">
+      <p className="text-red-700 text-sm">{error}</p>
+      <button onClick={loadAppeals} className="px-4 py-2 bg-purple-700 text-white rounded-lg text-sm hover:bg-purple-800">Повторить</button>
+    </div>
+  );
 
   return (
     <div style={{ background: '#D1C4E9', minHeight: '100vh', paddingBottom: '3rem' }}>

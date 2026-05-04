@@ -6,9 +6,11 @@ import {
   ChevronDown,
   User
 } from 'lucide-react';
-import { appealStorage } from '../../../services/appealStorage';
-import { auditAppealsData } from '../../../data/auditMockData';
+import { getCabinetAppeals, getAppealDetail, type CabinetAppeal } from '../../../services/appealApi';
 import { AuditCardDetailed } from './AuditCardDetailed';
+import { toast } from 'sonner';
+
+const AUDIT_STATUSES = ['Аудит', 'На аудите', 'Пройден аудит'];
 
 // CABINET COMPONENT
 function AuditCabinet({
@@ -19,42 +21,26 @@ function AuditCabinet({
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<string>('Все');
   const [viewMode, setViewMode] = useState<'my' | 'all'>('my');
-  const [allAppeals, setAllAppeals] = useState(auditAppealsData);
+  const [allAppeals, setAllAppeals] = useState<CabinetAppeal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  // Load appeals from localStorage with status "Аудит"
-  useEffect(() => {
-    const loadAppeals = () => {
-      const savedAppeals = appealStorage.getAllAppeals();
-      
-      // Фильтруем обращения со статусом "Аудит"
-      const auditAppeals = savedAppeals
-        .filter(appeal => appeal.status === 'Аудит')
-        .map(appeal => ({
-          ...appeal,
-          auditStatus: 'pending' as const,
-          deadlineCountdown: { days: 0, hours: 0, minutes: 0 },
-          isMine: appeal.responsible === 'Расул Рамазанов' || appeal.responsible === 'Александр Солодовников',
-          attachments: [],
-          history: [],
-          crmComments: [],
-        }));
-      
-      // Combine with mock data
-      const savedIds = new Set(auditAppeals.map(a => a.id));
-      const uniqueMockAppeals = auditAppealsData.filter(a => !savedIds.has(a.id));
-      const combined = [...auditAppeals, ...uniqueMockAppeals];
-      
-      setAllAppeals(combined);
-    };
-    
-    loadAppeals();
-    
-    // Reload every 5 seconds
-    const interval = setInterval(loadAppeals, 5000);
-    return () => clearInterval(interval);
+  const loadAppeals = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getCabinetAppeals(AUDIT_STATUSES);
+      setAllAppeals(data);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Не удалось загрузить обращения');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => { loadAppeals(); }, [loadAppeals]);
 
   const filteredAppeals = allAppeals.filter(appeal => {
     // View mode filter
@@ -125,6 +111,18 @@ function AuditCabinet({
     if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
     return 0;
   });
+
+  if (loading) return (
+    <div style={{ background: '#D1C4E9', minHeight: '100vh' }} className="flex items-center justify-center">
+      <p className="text-purple-800 text-sm">Загрузка обращений…</p>
+    </div>
+  );
+  if (error) return (
+    <div style={{ background: '#D1C4E9', minHeight: '100vh' }} className="flex flex-col items-center justify-center gap-3">
+      <p className="text-red-700 text-sm">{error}</p>
+      <button onClick={loadAppeals} className="px-4 py-2 bg-purple-700 text-white rounded-lg text-sm hover:bg-purple-800">Повторить</button>
+    </div>
+  );
 
   return (
     <div style={{ background: '#D1C4E9', minHeight: '100vh', paddingBottom: '3rem' }}>
@@ -363,49 +361,38 @@ function AuditCabinet({
 // MAIN AUDIT PAGE COMPONENT
 export function AuditPage() {
   const [view, setView] = useState<'cabinet' | 'card'>('cabinet');
-  const [selectedAppealId, setSelectedAppealId] = useState<string | null>(null);
-  const [allAppeals, setAllAppeals] = useState(auditAppealsData);
+  const [selectedAppeal, setSelectedAppeal] = useState<CabinetAppeal | null>(null);
+  const [cardLoading, setCardLoading] = useState(false);
 
-  // Load appeals on mount
-  useEffect(() => {
-    const savedAppeals = appealStorage.getAllAppeals();
-    if (savedAppeals.length > 0) {
-      const combined = [...auditAppealsData, ...savedAppeals.map(appeal => ({
-        ...appeal,
-        auditStatus: appeal.status === 'Одобрено' ? 'approved' as const : 
-                     appeal.status === 'Возращено на доработку' ? 'rejected' as const : 'pending' as const,
-        phone: appeal.phone || 'Не указан',
-        attachments: appeal.attachments || [],
-        history: appeal.history || [],
-        crmComments: appeal.crmComments || [],
-        deadlineCountdown: appeal.deadlineCountdown || { days: 0, hours: 0, minutes: 0 }
-      }))];
-      setAllAppeals(combined);
+  const handleOpenAppeal = useCallback(async (appealId: string) => {
+    setCardLoading(true);
+    try {
+      const detail = await getAppealDetail(appealId);
+      setSelectedAppeal(detail);
+      setView('card');
+    } catch {
+      toast.error('Не удалось загрузить карточку обращения');
+    } finally {
+      setCardLoading(false);
     }
-  }, []); // Only run on mount
-
-  const handleOpenAppeal = useCallback((appealId: string) => {
-    console.log('[AuditPage] handleOpenAppeal called with:', appealId);
-    setSelectedAppealId(appealId);
-    setView('card');
   }, []);
 
   const handleBack = () => {
     setView('cabinet');
-    setSelectedAppealId(null);
+    setSelectedAppeal(null);
   };
-
-  const selectedAppeal = allAppeals.find(a => a.id === selectedAppealId);
 
   // Expose handleOpenAppeal globally for notifications
   useEffect(() => {
-    (window as any).__auditPageOpenAppeal = handleOpenAppeal;
-    console.log('[AuditPage] Registered global appeal handler');
-    return () => {
-      delete (window as any).__auditPageOpenAppeal;
-      console.log('[AuditPage] Unregistered global appeal handler');
-    };
+    (window as any).__auditPageOpenAppeal = (id: string) => { void handleOpenAppeal(id); };
+    return () => { delete (window as any).__auditPageOpenAppeal; };
   }, [handleOpenAppeal]);
+
+  if (cardLoading) return (
+    <div className="flex flex-1 items-center justify-center text-sm text-gray-500">
+      Загрузка карточки…
+    </div>
+  );
 
   return (
     <>

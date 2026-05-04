@@ -62,7 +62,7 @@ const mockAppeals = [
     id: '123134444',
     regDate: '14/08/26',
     category: 'Регулятор',
-    status: 'Запрос в БЛ',
+    status: 'Запрос в БП',
     deadline: '26/08/26',
     responsible: 'Александр Солодовников',
     applicantName: 'N/A',
@@ -120,7 +120,7 @@ const mockAppeals = [
     id: '123178888',
     regDate: '18/08/26',
     category: 'Письменное',
-    status: 'Запрос в БЛ',
+    status: 'Запрос в БП',
     deadline: '31/08/26',
     responsible: 'Иванова М.П.',
     applicantName: 'N/A',
@@ -975,7 +975,7 @@ function ArchiveCabinet({ onSelectAppeal, searchQuery }: { onSelectAppeal: (appe
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                     appeal.status === 'В работе' 
                       ? 'bg-green-100 text-green-700' 
-                      : appeal.status === 'Запрос в БЛ'
+                      : appeal.status === 'Запрос в БП'
                       ? 'bg-yellow-100 text-yellow-700'
                       : 'bg-blue-100 text-blue-700'
                   }`}>

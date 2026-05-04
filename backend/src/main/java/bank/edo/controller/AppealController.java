@@ -12,8 +12,9 @@ public class AppealController {
     private final AppealService svc;
     @GetMapping public Page<AppealListItemDto> getAll(
         @RequestParam(defaultValue="0") int page, @RequestParam(defaultValue="20") int size,
-        @RequestParam(required=false) String search, @RequestParam(required=false) String status) {
-        return svc.getAll(page,size,search,status);
+        @RequestParam(required=false) String search, @RequestParam(required=false) String status,
+        @RequestParam(required=false) String category) {
+        return svc.getAll(page, size, search, status, category);
     }
     @GetMapping("/{id}") public AppealDto getById(@PathVariable UUID id) { return svc.getById(id); }
     @PostMapping @ResponseStatus(HttpStatus.CREATED)

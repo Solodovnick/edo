@@ -63,7 +63,7 @@ const mockAppeals = [
     id: '123134444',
     regDate: '14/08/26',
     category: 'Письменное',
-    status: 'Запрос в БЛ',
+    status: 'Запрос в БП',
     deadline: '26/08/26',
     responsible: 'Александр Солодовников',
     applicantName: 'N/A',

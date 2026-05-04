@@ -29,12 +29,19 @@ public class AppealService {
         Map.entry("Отказано", Set.of())
     );
     @Transactional(readOnly=true)
-    public Page<AppealListItemDto> getAll(int page, int size, String search, String status) {
+    public Page<AppealListItemDto> getAll(int page, int size, String search, String status, String category) {
         var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC,"regDate"));
         Page<Appeal> appeals;
-        if (StringUtils.hasText(search)) {
+        boolean hasSearch = StringUtils.hasText(search);
+        boolean hasCategory = StringUtils.hasText(category);
+        boolean hasStatus = StringUtils.hasText(status);
+        if (hasCategory && hasSearch) {
+            appeals = repo.findByCategoryAndSearch(category, search, pageable);
+        } else if (hasCategory) {
+            appeals = repo.findByApplicantCategoryIgnoreCase(category, pageable);
+        } else if (hasSearch) {
             appeals = repo.findByApplicantNameContainingIgnoreCaseOrOrganizationNameContainingIgnoreCaseOrNumberContainingIgnoreCase(search, search, search, pageable);
-        } else if (StringUtils.hasText(status)) {
+        } else if (hasStatus) {
             appeals = repo.findByStatusIgnoreCase(status, pageable);
         } else {
             appeals = repo.findAll(pageable);
