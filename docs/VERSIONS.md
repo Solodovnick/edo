@@ -1,6 +1,6 @@
 # Реестр версий документации — EDO Bank
 
-**Version:** 1.3.2 | **Date:** 2026-05-04
+**Version:** 1.4.0 | **Date:** 2026-05-04
 
 Правила версионирования:
 - **MAJOR** — структурные изменения документа (переработка разделов)
@@ -10,6 +10,8 @@
 При выпуске новой версии старая копия переносится в `docs/archive/` с суффиксом версии.
 
 Пример: `docs/archive/functional-requirements-v1.0.0.md`
+
+**1.4.0:** Адаптация бэка и фронта под OpenAPI-контракт `edo-backend.openapi.json`. Backend: базовый путь изменён на `/api/v1/`, параметр поиска `search`→`q`, формат ответа `content[]`→`items[]` (`AppealPageDto`), добавлены контроллеры `HealthController`, `StatsController`, `ResponsibleController`, `SecretaryController`, `ManagerController`, `AuditController`, метод `countByStatusIgnoreCase` в `AppealRepository`, CORS покрывает `/api/v1/**`. Frontend: `appealApi.ts` — все пути `/api/appeals`→`/api/v1/appeals`, параметр `search`→`q`, маппинг `AppealsPage.content`→`AppealsPage.items`. Документация: `backend-development-plan.md` v1.1.0 — таблица API актуализирована. Каталог **1.0.25**.
 
 **1.3.2:** QA-проверка всей документации 2026-05-04 — исправлены расхождения: `artifacts-catalog.md` v1.0.24 (A-014 версия 1.0.1→2.0; добавлены A-015 `test-plan.md`, A-016 `test-results.md`; добавлены S-022/S-023/S-024 canvas-файлы; обновлён S-002 до 1.3.2); таблица текущих версий: `business-requirements.md` 1.1.0→1.1.1, `artifacts-catalog.md` 1.0.23→1.0.24; добавлены `test-plan.md` 1.0.0, `test-results.md` 1.0.0, `project-status-report.md` 2.0; исправлено некорректное примечание о несоответствии БД в `canvas/context-summary.md`. Каталог **1.0.24**.
 

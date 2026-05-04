@@ -10,6 +10,7 @@ public interface AppealRepository extends JpaRepository<Appeal, UUID> {
     Optional<Appeal> findByNumber(String number);
     boolean existsByNumber(String number);
     Page<Appeal> findByStatusIgnoreCase(String status, Pageable pageable);
+    long countByStatusIgnoreCase(String status);
     Page<Appeal> findByApplicantNameContainingIgnoreCaseOrOrganizationNameContainingIgnoreCaseOrNumberContainingIgnoreCase(
         String name, String org, String number, Pageable pageable);
 

@@ -1,6 +1,6 @@
 # План разработки учебного демо-бэкенда (REST + PostgreSQL)
 
-**Version:** 1.0.0 | **Date:** 2026-05-03 | **Status:** Active  
+**Version:** 1.1.0 | **Date:** 2026-05-04 | **Status:** Active  
 
 **Назначение:** итоговый проект по курсу **«Системный анализ»** — показать связку **фронтенд → API → БД** для демонстрации в школе.  
 **Архитектурное решение:** [ADR-004: Учебный демо-бэкенд](adr/ADR-004-education-demo-backend.md).  
@@ -23,12 +23,20 @@
 
 1. **СУБД:** PostgreSQL 15.2+ (одна база, одна схема `public` или `edo_demo`).
 2. **Приложение:** Spring Boot 2.7+ (или 3.x при согласовании с преподавателем и обновлении этой спецификации) — REST.
-3. **API (первый инкремент):**
-   - `GET /api/appeals` — список обращений (пагинация опциональна);
-   - `GET /api/appeals/{id}` — карточка;
-   - `POST /api/appeals` — создание (упрощённая форма);
-   - `PATCH /api/appeals/{id}` — обновление статуса / ключевых полей по [state-diagram](state-diagram.md) (допустим сокращённый набор переходов).
-4. **Справочники:** `GET /api/statuses` (или вложенно в ответ) — для согласования с жизненным циклом в ТЗ.
+3. **API v1 (базовый путь `/api/v1/`, спецификация [`src/openapi/edo-backend.openapi.json`](../src/openapi/edo-backend.openapi.json)):**
+   - `GET /api/v1/appeals` — список обращений; параметры: `page`, `size`, `q` (поиск), `status`, `category`; ответ `AppealPage { items[], totalElements, totalPages, page, size }`;
+   - `GET /api/v1/appeals/{id}` — карточка обращения `AppealDto`;
+   - `POST /api/v1/appeals` — создание обращения, тело `AppealCreate`;
+   - `PATCH /api/v1/appeals/{id}` — обновление статуса / полей;
+   - `DELETE /api/v1/appeals/{id}` — удаление (тест/admin);
+   - `GET /api/v1/health` — статус сервиса `{status, version, time}`;
+   - `GET /api/v1/stats/registrar/month` — статистика регистратора;
+   - `GET /api/v1/responsible/appeals` — кабинет ответственного;
+   - `GET /api/v1/secretary/appeals` — очередь секретаря (default status=«На ПК»);
+   - `GET /api/v1/manager/dashboard/summary` — сводка руководителя;
+   - `GET /api/v1/audit/appeals` — список для аудита;
+   - `GET /api/v1/audit/appeals/{id}/log` — журнал аудита.
+4. **Справочники:** `GET /api/statuses` — список статусов для согласования с жизненным циклом в ТЗ.
 
 Идентификаторы: UUID или bigint — зафиксировать в OpenAPI/контракте при появлении репозитория бэкенда.
 

@@ -20,10 +20,10 @@ export interface AppealListItem {
 }
 
 interface AppealsPage {
-  content: AppealListItem[];
+  items: AppealListItem[];
   totalElements: number;
   totalPages: number;
-  number: number;
+  page: number;
   size: number;
 }
 
@@ -294,16 +294,16 @@ function fullDtoToCabinet(dto: any): CabinetAppeal {
 
 // ── API-вызовы ───────────────────────────────────────────────────────────────
 export async function getCabinetAppeals(statuses?: string[]): Promise<CabinetAppeal[]> {
-  const res = await fetch(`${API_BASE}/api/appeals?size=200&page=0`);
+  const res = await fetch(`${API_BASE}/api/v1/appeals?size=200&page=0`);
   if (!res.ok) throw new Error(`Ошибка API: ${res.status}`);
   const data: AppealsPage = await res.json();
-  const all = data.content.map(listItemToCabinet);
+  const all = data.items.map(listItemToCabinet);
   if (!statuses || statuses.length === 0) return all;
   return all.filter(a => statuses.includes(a.status));
 }
 
 export async function getAppealDetail(id: string): Promise<CabinetAppeal> {
-  const res = await fetch(`${API_BASE}/api/appeals/${id}`);
+  const res = await fetch(`${API_BASE}/api/v1/appeals/${id}`);
   if (!res.ok) throw new Error(`Ошибка API: ${res.status}`);
   const dto = await res.json();
   return fullDtoToCabinet(dto);
@@ -317,14 +317,14 @@ export async function getAppeals(
   category?: string,
 ): Promise<{ applications: Application[]; total: number }> {
   const params = new URLSearchParams({ page: String(page), size: String(size) });
-  if (search) params.set('search', search);
+  if (search) params.set('q', search);
   if (status) params.set('status', status);
   if (category) params.set('category', category);
-  const res = await fetch(`${API_BASE}/api/appeals?${params}`);
+  const res = await fetch(`${API_BASE}/api/v1/appeals?${params}`);
   if (!res.ok) throw new Error(`Ошибка API: ${res.status}`);
   const data: AppealsPage = await res.json();
   return {
-    applications: data.content.map(toApplication),
+    applications: data.items.map(toApplication),
     total: data.totalElements,
   };
 }
@@ -347,7 +347,7 @@ export async function createAppeal(data: CreateComplaintData): Promise<{ id: str
   if (data.category) body.appealCategory = data.category;
   if (data.assignedTo) body.responsible = data.assignedTo;
 
-  const res = await fetch(`${API_BASE}/api/appeals`, {
+  const res = await fetch(`${API_BASE}/api/v1/appeals`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
