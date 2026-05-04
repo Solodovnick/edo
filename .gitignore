@@ -33,3 +33,13 @@ ehthumbs.db
 
 # QA temp artifacts
 qa_*.txt
+
+# Windows system files
+desktop.ini
+Thumbs.db
+
+# Editor/tool artifacts
+.politics
+
+backend/target/
+

@@ -1,0 +1,28 @@
+<mxfile host="app.diagrams.net" modified="2026-05-03T00:00:00.000Z" agent="EDO" version="22.1.0" type="device">
+  <diagram id="edo-canvas" name="EDO Bank — канвас">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="kpi" value="&lt;b&gt;KPI&lt;/b&gt;&lt;br&gt;91% → 99%&lt;br&gt;ДУКО / ЭДО" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1a2e;strokeColor=#00d4ff;fontColor=#e0e0ff;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="200" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="fe" value="&lt;b&gt;Фронт&lt;/b&gt;&lt;br&gt;React+TS, ADR-001" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1a2e;strokeColor=#00d4ff;fontColor=#e0e0ff;" vertex="1" parent="1">
+          <mxGeometry x="280" y="40" width="200" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="be" value="&lt;b&gt;Демо бэк&lt;/b&gt;&lt;br&gt;Spring+PG, ADR-004" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1a2e;strokeColor=#00ff88;fontColor=#e0e0ff;" vertex="1" parent="1">
+          <mxGeometry x="520" y="40" width="200" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="fr" value="&lt;b&gt;ТЗ&lt;/b&gt;&lt;br&gt;FR / BR / State" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#141428;strokeColor=#6a6a8a;fontColor=#e0e0ff;" vertex="1" parent="1">
+          <mxGeometry x="40" y="200" width="200" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" style="endArrow=classic;html=1;strokeColor=#00d4ff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="kpi" target="fe">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" style="endArrow=classic;html=1;strokeColor=#00d4ff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="fe" target="be">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

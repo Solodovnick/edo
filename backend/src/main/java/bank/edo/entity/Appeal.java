@@ -1,0 +1,41 @@
+package bank.edo.entity;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.UpdateTimestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
+@Entity @Table(name="appeals") @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+public class Appeal {
+    @Id @GeneratedValue(strategy=GenerationType.UUID) private java.util.UUID id;
+    @Column(unique=true,nullable=false,length=30) private String number;
+    @Column(name="reg_date",nullable=false) private LocalDate regDate;
+    @Column(nullable=false) private LocalDate deadline;
+    @Column(name="appeal_type",nullable=false,length=50) private String appealType;
+    @Column(length=100) private String subcategory;
+    @Column(nullable=false,length=80) private String status;
+    @Column(name="applicant_category",nullable=false,length=30) private String applicantCategory;
+    @Column(name="applicant_name",length=300) private String applicantName;
+    @Column(name="organization_name",length=300) private String organizationName;
+    @Column(length=500) private String address;
+    @Column(length=50) private String phone;
+    @Column(length=200) private String email;
+    @Column(length=300) private String cbs;
+    @Column(name="appeal_category",length=100) private String appealCategory;
+    @Column(name="appeal_subcategory",length=100) private String appealSubcategory;
+    @Column(columnDefinition="TEXT",nullable=false) private String content;
+    @Column(columnDefinition="TEXT") private String solution;
+    @Column(columnDefinition="TEXT") private String response;
+    @Column(length=200) private String responsible;
+    @Column(length=200) private String registrar;
+    @Column(name="created_by",length=200) private String createdBy;
+    @Column(name="audit_status",length=20) @Builder.Default private String auditStatus="pending";
+    @Column(length=20) @Builder.Default private String priority="Средний";
+    @Column(name="requires_attention") @Builder.Default private Boolean requiresAttention=false;
+    @Column(name="requires_signature") @Builder.Default private Boolean requiresSignature=false;
+    @Column(name="created_at") @Builder.Default private LocalDateTime createdAt=LocalDateTime.now();
+    @UpdateTimestamp @Column(name="updated_at") private LocalDateTime updatedAt;
+    @OneToMany(mappedBy="appeal",cascade=CascadeType.ALL,orphanRemoval=true,fetch=FetchType.LAZY) @Builder.Default private List<Attachment> attachments=new ArrayList<>();
+    @OneToMany(mappedBy="appeal",cascade=CascadeType.ALL,orphanRemoval=true,fetch=FetchType.LAZY) @Builder.Default private List<CrmComment> crmComments=new ArrayList<>();
+    @OneToMany(mappedBy="appeal",cascade=CascadeType.ALL,orphanRemoval=true,fetch=FetchType.LAZY) @Builder.Default private List<HistoryEntry> history=new ArrayList<>();
+}
