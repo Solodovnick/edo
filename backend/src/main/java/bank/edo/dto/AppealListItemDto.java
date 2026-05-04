@@ -19,12 +19,13 @@ public class AppealListItemDto {
     private Boolean requiresAttention;
     private Boolean requiresSignature;
     private String auditStatus;
+    private String appealCategory;
     public static AppealListItemDto from(Appeal a) {
         return AppealListItemDto.builder().id(a.getId()).number(a.getNumber()).regDate(a.getRegDate())
             .deadline(a.getDeadline()).appealType(a.getAppealType()).status(a.getStatus())
             .applicantCategory(a.getApplicantCategory()).applicantName(a.getApplicantName())
             .organizationName(a.getOrganizationName()).responsible(a.getResponsible()).priority(a.getPriority())
             .requiresAttention(a.getRequiresAttention()).requiresSignature(a.getRequiresSignature())
-            .auditStatus(a.getAuditStatus()).build();
+            .auditStatus(a.getAuditStatus()).appealCategory(a.getAppealCategory()).build();
     }
 }

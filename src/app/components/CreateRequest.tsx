@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { CreateComplaintModal } from '@/app/components/CreateComplaintModal';
 import { AsIsToBeSwitch } from '@/app/components/AsIsToBeSwitch';
 import { toast } from 'sonner';
+import { createAppeal, type CreateComplaintData } from '@/services/appealApi';
 
 interface CreateRequestProps {
   autoOpenModal?: boolean;
@@ -18,13 +19,20 @@ export function CreateRequest({ autoOpenModal = false }: CreateRequestProps) {
     }
   }, [autoOpenModal]);
 
-  const handleCreateComplaint = (data: any) => {
-    console.log('Created complaint:', data);
-    toast.success('✅ Обращение успешно создано', {
-      description: `Номер обращения: ${Math.floor(Math.random() * 90000) + 10000}`,
-      duration: 3000,
-    });
-    setIsModalOpen(false);
+  const handleCreateComplaint = async (data: CreateComplaintData) => {
+    try {
+      const result = await createAppeal(data);
+      toast.success('Обращение успешно создано', {
+        description: `Номер обращения: ${result.number}`,
+        duration: 3000,
+      });
+      setIsModalOpen(false);
+    } catch (e) {
+      toast.error('Не удалось сохранить обращение', {
+        description: e instanceof Error ? e.message : 'Неизвестная ошибка',
+        duration: 5000,
+      });
+    }
   };
 
   // AS IS состояние - базовый функционал

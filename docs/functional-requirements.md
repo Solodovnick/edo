@@ -1,6 +1,6 @@
 # Функциональные требования — EDO Bank
 
-**Version:** 1.2.2 | **Date:** 2026-05-03 | **Status:** Active  
+**Version:** 1.2.3 | **Date:** 2026-05-04 | **Status:** Active  
 **Author:** System Analyst  
 **Источник:** `docs/ui-artifacts/`, реестр UC в `docs/external-registry/use-case-registry.csv`, фрагменты UC заказчика (Au.*, словарь данных). **КPI своевременности заказчика** — `docs/core-source-context.md`. **Учебный демо-бэкенд** — [ADR-004](adr/ADR-004-education-demo-backend.md), [план](backend-development-plan.md).
 

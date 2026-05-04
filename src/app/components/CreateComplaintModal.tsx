@@ -1,25 +1,15 @@
 import { useState } from 'react';
 import { X, User, Building, Mail, Phone, Calendar, AlertCircle } from 'lucide-react';
+import { type CreateComplaintData } from '@/services/appealApi';
 
 interface CreateComplaintModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (data: ComplaintData) => void;
+  onCreate: (data: CreateComplaintData) => void;
 }
 
-interface ComplaintData {
-  title: string;
-  type: string;
-  category: string;
-  date: string;
-  client: string;
-  clientType: 'individual' | 'organization' | 'regulator';
-  subject: string;
+interface ComplaintData extends CreateComplaintData {
   status: string;
-  description: string;
-  assignedTo: string;
-  priority: 'high' | 'medium' | 'low';
-  slaDeadline: string;
   slaDays: number;
 }
 

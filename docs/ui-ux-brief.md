@@ -1,6 +1,6 @@
 # UI/UX Бриф — EDO Bank
 
-**Version:** 1.0.1 | **Date:** 2026-05-03 | **Status:** Active  
+**Version:** 1.0.2 | **Date:** 2026-05-04 | **Status:** Active  
 **Источник:** `docs/ui-artifacts/` — UNIFIED_DESIGN_SYSTEM.md, DESIGN_HANDOFF.md, RESPONSIBLE_CABINET_REDESIGN.md (исторические заметки)
 
 ---
@@ -82,19 +82,20 @@
 
 ## 5. Страницы / Экраны
 
-| Маршрут | Экран | Компонент |
-|---|---|---|
-| `/` | Стартовая страница | `StartPage.tsx` |
-| `/dashboard` | Dashboard | `Dashboard.tsx` + `KPICards.tsx` |
-| `/applications` | Таблица обращений | `Applications.tsx` |
-| `/applications/:id` | Карточка обращения | `ApplicationDetail.tsx` |
-| `/process/:id` | Кабинет ответственного | `ProcessRequest.tsx` |
-| `/audit` | Кабинет аудитора | `Audit.tsx` |
-| `/analytics` | Аналитика | `Analytics.tsx` |
-| `/archive` | Архив | `Archive.tsx` |
-| `/notifications` | Уведомления | `Notifications.tsx` |
-| `/administration` | Администрирование | `Administration.tsx` |
+Навигация реализована через **tab-based state** в App.tsx (ctiveTab) без URL-роутинга (React Router не используется).
 
+| activeTab | Экран | Компонент |
+|-----------|-------|-----------|
+| start | Стартовая страница | StartPage.tsx |
+| create *(по умолчанию)* | Создание / регистрация обращения | RegistrationPage (lifecycle/) |
+| process | Кабинет ответственного специалиста | ProcessingPage (lifecycle/) |
+| secretary | Кабинет секретаря ПК | SecretaryOfficePage (lifecycle/) |
+| udit | Кабинет аудитора | AuditPage (lifecycle/) |
+| manager | Кабинет руководителя | ManagerCabinetPage (lifecycle/) |
+| pplications | Реестр всех обращений | Applications.tsx |
+| nalytics | Аналитика и Dashboard | Analytics.tsx |
+| dministration | Администрирование | Administration.tsx |
+| help | Справка / Руководство | Help.tsx |
 ---
 
 ## 6. Состояния UI
