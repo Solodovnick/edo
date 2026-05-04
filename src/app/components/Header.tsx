@@ -1,4 +1,4 @@
-import { Bell, User, Plus, ClipboardCheck, CheckCircle, Shield, Archive, XCircle, Briefcase, FileEdit, BookOpen } from 'lucide-react';
+import { Bell, User, Plus, ClipboardCheck, CheckCircle, Shield, Archive, XCircle, Briefcase, FileEdit } from 'lucide-react';
 import { NotificationBell } from './notifications/NotificationBell';
 import { UserRole } from '../../services/notificationService';
 import type { ApiDbStatus } from '../../services/apiHealth';
@@ -29,8 +29,6 @@ export function Header({ activeTab, onTabChange, slaViolations, onLogoClick, onN
         return 'manager';
       case 'audit':
         return 'auditor';
-      case 'api-docs':
-        return 'auditor';
       default:
         return 'registrar';
     }
@@ -44,7 +42,6 @@ export function Header({ activeTab, onTabChange, slaViolations, onLogoClick, onN
     { id: 'secretary', line1: 'Секретарь', line2: null, icon: FileEdit },
     { id: 'manager', line1: 'Руководитель', line2: null, icon: Briefcase },
     { id: 'audit', line1: 'Аудит', line2: null, icon: Shield },
-    { id: 'api-docs', line1: 'Swagger', line2: null, icon: BookOpen },
   ];
 
   return (

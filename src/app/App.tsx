@@ -12,7 +12,6 @@ import {
   AuditPage,
   ManagerCabinetPage
 } from './components/lifecycle';
-import { ApiDocsPage } from './components/ApiDocsPage';
 import { initializeTestNotifications } from '../utils/initializeNotifications';
 import { fetchApiHealth, type ApiDbStatus } from '../services/apiHealth';
 
@@ -46,7 +45,7 @@ export default function App() {
   const slaViolations = 2;
 
   const handleTabChange = (tab: string) => {
-    const workflowTabs = ['start', 'create', 'process', 'secretary', 'manager', 'audit', 'api-docs'];
+    const workflowTabs = ['start', 'create', 'process', 'secretary', 'manager', 'audit'];
     
     if (workflowTabs.includes(tab)) {
       setActiveTab(tab);
@@ -109,8 +108,6 @@ export default function App() {
         return <SecretaryOfficePage />;
       case 'audit':
         return <AuditPage />;
-      case 'api-docs':
-        return <ApiDocsPage />;
       case 'manager':
         return <ManagerCabinetPage />;
       case 'applications':
