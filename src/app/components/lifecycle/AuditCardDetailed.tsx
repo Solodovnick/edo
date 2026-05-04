@@ -13,13 +13,13 @@ import {
   History,
   CheckCircle
 } from 'lucide-react';
-import { auditAppealsData } from '../../../data/auditMockData';
+import type { UnifiedAppeal } from '../../../data/unifiedAppealsData';
 import { appealStorage } from '../../../services/appealStorage';
 import { toast } from 'sonner';
 
 interface AuditCardDetailedProps {
   onBack: () => void;
-  appealData: typeof auditAppealsData[0];
+  appealData: UnifiedAppeal;
 }
 
 interface SavedAuditResult {

@@ -277,7 +277,11 @@ export function edoApiMockMiddleware(): Connect.NextHandleFunction {
       }
 
       if (method === 'GET' && pathname === '/api/v1/audit/appeals') {
-        writeJson(resHttp, 200, { items: [sampleAppeal('a-9')], page: 0, size: 50 })
+        writeJson(resHttp, 200, {
+          items: [{ ...sampleAppeal('a-9'), status: 'На аудите' }],
+          page: 0,
+          size: 50,
+        })
         return
       }
 

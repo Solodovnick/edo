@@ -44,5 +44,6 @@ git submodule update --remote roles/claude-skills
 | `enterprise-communication/` | Коммуникации, документы для бизнеса |
 | `document-skills/` | Работа с PDF, DOCX, таблицами и т.п. (ориентир на паттерны из upstream) |
 | `claude-skills/` | Submodule: универсальные навыки из [alirezarezvani/claude-skills](https://github.com/alirezarezvani/claude-skills) (engineering, product, marketing, compliance и др.) |
+| `kafka-skills-sh/` | **Apache Kafka:** каталог с [skills.sh `?q=kafka`](https://skills.sh/?q=kafka), таблица репозиториев, `vendor/` с копиями upstream-`SKILL.md` (Apache-2.0 / MIT) |
 
 Для production-сложных document-навыков смотри исходники в репозитории Anthropic: `skills/docx`, `skills/pdf`, `skills/pptx`, `skills/xlsx`.

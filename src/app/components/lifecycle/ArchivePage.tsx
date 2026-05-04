@@ -329,7 +329,7 @@ function ArchiveCard({ appeal, onBack }: { appeal: any; onBack: () => void }) {
 
   return (
     <div 
-      className="flex flex-col h-screen overflow-hidden relative"
+      className="flex flex-col min-h-[calc(100vh-60px)] max-h-[calc(100vh-60px)] overflow-hidden relative"
       style={{ 
         background: 'linear-gradient(135deg, #1A1A2E 0%, #16213E 50%, #1A1A2E 100%)',
         fontFamily: 'Nunito, sans-serif'
@@ -1025,7 +1025,7 @@ export function ArchivePage() {
 
   // Otherwise show ArchiveCabinet (по умолчанию)
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col min-h-[calc(100vh-60px)] max-h-[calc(100vh-60px)] bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-8 py-4 shadow-sm">
         <div className="flex items-center justify-between">

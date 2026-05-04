@@ -14,6 +14,9 @@ export function ApiDocsPage() {
       <div className="border-b border-gray-200 bg-violet-50 px-4 py-2 text-sm text-gray-700">
         Базовый URL мока: <code className="rounded bg-white px-1.5 py-0.5">/api/v1</code>
         {' · '}
+        Маппинг кабинетов (Регистрация / Процесс / Руководитель / Аудит) → UC и словарь данных:{' '}
+        <code className="rounded bg-white px-1.5 py-0.5">docs/api-cabinets.md</code>
+        {' · '}
         Симуляция ошибок: заголовок <code className="rounded bg-white px-1.5 py-0.5">X-Debug-Status</code> ={' '}
         <code>400</code> … <code>500</code>
         {' · '}

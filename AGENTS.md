@@ -1,6 +1,6 @@
 # Роли агентов (Cursor) — EDO Bank
 
-**Version:** 1.0.4 | **Date:** 2026-05-03
+**Version:** 1.0.5 | **Date:** 2026-05-04
 
 Правила лежат в `.cursor/rules/*.mdc`. Роли подмешиваются в контекст по `alwaysApply` / `globs` или выбираются вручную.
 
@@ -30,8 +30,9 @@
 | Аналитик EDO | `edo-ui-analyst/` | Требования, BR/FR, acceptance criteria |
 | Разработчик EDO | `edo-frontend-dev/` | Компоненты, сервисы, mock-данные |
 | QA EDO | `edo-qa-review/` | Сверка с ТЗ, отчёт о расхождениях |
+| Kafka / skills.sh | `edo-kafka-integration/` | Интеграции на Kafka, Spring Kafka; каталог `roles/kafka-skills-sh/` ([skills.sh](https://skills.sh/?q=kafka)) |
 
-Отдельно в корне репозитория каталог **`roles/`** — примеры универсальных навыков в формате Anthropic (`creative-design`, `development-technical`, …) и submodule **`roles/claude-skills`** ([alirezarezvani/claude-skills](https://github.com/alirezarezvani/claude-skills)); см. `roles/README.md` (инициализация submodule). Это **не** замена `.cursor/skills/edo-*`: при конфликте для кода и ТЗ EDO Bank приоритет у таблицы выше.
+Отдельно в корне репозитория каталог **`roles/`** — примеры универсальных навыков в формате Anthropic (`creative-design`, `development-technical`, …), submodule **`roles/claude-skills`** ([alirezarezvani/claude-skills](https://github.com/alirezarezvani/claude-skills)) и каталог **`roles/kafka-skills-sh`** ([skills.sh Kafka](https://skills.sh/?q=kafka)); см. `roles/README.md` (инициализация submodule). Это **не** замена `.cursor/skills/edo-*`: при конфликте для кода и ТЗ EDO Bank приоритет у таблицы выше.
 
 ## Роли команды: зона и опыт человека
 

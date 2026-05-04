@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Calendar, Save, X, BookOpen, Search, ChevronRight, HelpCircle } from 'lucide-react';
 import { appealStorage, Appeal } from '../../../services/appealStorage';
+import { persistRegisteredAppeal } from '../../../services/edoCabinetApi';
 import { toast } from 'sonner';
 import { knowledgeItems, searchKnowledge } from './CategoryKnowledgeBase';
 import { NotificationBell } from '../notifications/NotificationBell';
@@ -236,7 +237,7 @@ export function AppealRegistrationCard({ onBack, onSave }: AppealRegistrationCar
     calculateDeadline(type);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Validation
     if (applicantType === 'individual' && !applicantName.trim()) {
       toast.error('Заполните ФИО заявителя');
@@ -290,12 +291,13 @@ export function AppealRegistrationCard({ onBack, onSave }: AppealRegistrationCar
       updatedAt: new Date().toISOString(),
     };
 
-    // Save to localStorage
-    const success = appealStorage.saveAppeal(appeal);
-    
-    if (success) {
-      toast.success(`Обращение №${id} успешно зарегистрировано!`);
-      onSave(appeal);
+    const { ok, appeal: stored } = await persistRegisteredAppeal(appeal, (a) =>
+      appealStorage.saveAppeal(a)
+    );
+
+    if (ok) {
+      toast.success(`Обращение №${stored.id} успешно зарегистрировано!`);
+      onSave(stored);
       onBack();
     } else {
       toast.error('Ошибка при сохранении обращения');

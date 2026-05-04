@@ -113,5 +113,6 @@ git submodule update --init --recursive roles/claude-skills
 | `docs/ui-artifacts/` | Исторические UI-заметки |
 | `src/openapi/` | OpenAPI контракты (в т.ч. для моков/доков) |
 | `roles/README.md` | Навыки в формате Anthropic и submodule [claude-skills](https://github.com/alirezarezvani/claude-skills) |
+| `roles/kafka-skills-sh/` | Kafka: [skills.sh](https://skills.sh/?q=kafka), vendored `SKILL.md`; в Cursor — навык `edo-kafka-integration` |
 
 Репозиторий на GitHub: [Solodovnick/edo](https://github.com/Solodovnick/edo).

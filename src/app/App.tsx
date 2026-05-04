@@ -10,7 +10,8 @@ import {
   ProcessingPage,
   SecretaryOfficePage,
   AuditPage,
-  ManagerCabinetPage
+  ManagerCabinetPage,
+  ArchivePage,
 } from './components/lifecycle';
 import { ApiDocsPage } from './components/ApiDocsPage';
 import { initializeTestNotifications } from '../utils/initializeNotifications';
@@ -46,7 +47,7 @@ export default function App() {
   const slaViolations = 2;
 
   const handleTabChange = (tab: string) => {
-    const workflowTabs = ['start', 'create', 'process', 'secretary', 'manager', 'audit', 'api-docs'];
+    const workflowTabs = ['start', 'create', 'process', 'secretary', 'manager', 'audit', 'archive', 'api-docs'];
     
     if (workflowTabs.includes(tab)) {
       setActiveTab(tab);
@@ -109,6 +110,8 @@ export default function App() {
         return <SecretaryOfficePage />;
       case 'audit':
         return <AuditPage />;
+      case 'archive':
+        return <ArchivePage />;
       case 'api-docs':
         return <ApiDocsPage />;
       case 'manager':

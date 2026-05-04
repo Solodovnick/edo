@@ -18,6 +18,7 @@ import {
 import { toast, Toaster } from 'sonner';
 import { AppealRegistrationCard } from './AppealRegistrationCard';
 import { appealStorage, Appeal } from '../../../services/appealStorage';
+import { persistRegisteredAppeal } from '../../../services/edoCabinetApi';
 import bankCategories from '../../../imports/bank-categories.json';
 import { notificationService } from '../../../services/notificationService';
 import { initializeTestNotifications } from '../../../utils/initializeNotifications';
@@ -1016,7 +1017,7 @@ function RegistrationCard({ onBack, onRegisterSuccess }: { onBack: () => void, o
     handleFileUpload(e.dataTransfer.files);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Validate required fields and scroll to first empty field
     if (applicantType === 'individual') {
       if (!applicantName.trim()) {
@@ -1092,10 +1093,11 @@ function RegistrationCard({ onBack, onRegisterSuccess }: { onBack: () => void, o
       deadline.setDate(deadline.getDate() + 3); // Регуляторные - 3 дня
     }
     
-    const newAppeal = {
+    const newAppeal: Appeal = {
       id: newAppealId,
       regDate: registrationDate,
       category: appealType === 'oral' ? 'Устное' : 'Письменное',
+      subcategory,
       status: 'В работе',
       deadline: deadline.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }),
       responsible: responsibleName || 'Не назначено',
@@ -1103,22 +1105,23 @@ function RegistrationCard({ onBack, onRegisterSuccess }: { onBack: () => void, o
       organizationName: applicantType === 'company' ? organizationName : 'N/A',
       address: address || 'N/A',
       cbs: 'N/A',
-      type: applicantType === 'individual' ? 'Физ лицо' as const : 'Юр лицо' as const,
+      type: applicantType === 'individual' ? 'Физ лицо' : 'Юр лицо',
       isMine: false,
       content: appealContent,
       solution: solutionDescription || '',
       response: responseForm || '',
       phone: phone || '',
       email: email || '',
-      appealType: appealType === 'oral' ? 'Устное' as const : 'Письменное' as const,
+      appealType: appealType === 'oral' ? 'Устное' : 'Письменное',
       createdBy: registratorName || 'Регистратор',
+      updatedAt: new Date().toISOString(),
     };
-    
-    const saved = appealStorage.saveAppeal(newAppeal);
-    
-    if (saved) {
-      toast.success(`Обращение №${newAppealId} зарегистрировано!`, {
-        description: `Статус: "В работе", срок исполнения: ${newAppeal.deadline}`,
+
+    const { ok, appeal } = await persistRegisteredAppeal(newAppeal, (a) => appealStorage.saveAppeal(a));
+
+    if (ok) {
+      toast.success(`Обращение №${appeal.id} зарегистрировано!`, {
+        description: `Статус: "В работе", срок исполнения: ${appeal.deadline}`,
       });
       onRegisterSuccess();
     } else {

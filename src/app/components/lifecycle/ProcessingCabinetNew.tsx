@@ -8,8 +8,7 @@ import {
   ArrowUp,
   ArrowDown
 } from 'lucide-react';
-import { appealStorage } from '../../../services/appealStorage';
-import unifiedAppealsData from '../../../data/unifiedAppealsData';
+import type { UnifiedAppeal } from '../../../data/unifiedAppealsData';
 import { toast } from 'sonner';
 import { NotificationBell } from '../notifications/NotificationBell';
 
@@ -25,47 +24,20 @@ const ALLOWED_STATUSES = [
 
 interface ProcessingCabinetProps {
   onOpenAppeal: (appealId: string) => void;
+  appeals: UnifiedAppeal[];
 }
 
-export function ProcessingCabinetNew({ onOpenAppeal }: ProcessingCabinetProps) {
+export function ProcessingCabinetNew({ onOpenAppeal, appeals }: ProcessingCabinetProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<string>('Мои обращения');
   const [typeFilter, setTypeFilter] = useState<string>('Все обращения');
-  const [allAppeals, setAllAppeals] = useState(unifiedAppealsData);
+  const [allAppeals, setAllAppeals] = useState(appeals);
   const [sortColumn, setSortColumn] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  // Load appeals from localStorage on mount
   useEffect(() => {
-    const loadAppeals = () => {
-      const savedAppeals = appealStorage.getAllAppeals();
-      
-      // Нормализуем типы заявителей - исправляем некорректные значения
-      const normalizedSavedAppeals = savedAppeals.map(appeal => {
-        if (appeal.type === 'Регулятор' || appeal.type === 'регулятор' || !(appeal.type === 'Физ лицо' || appeal.type === 'Юр лицо' || appeal.type === 'Физлицо' || appeal.type === 'Юрлицо')) {
-          console.warn(`Normalizing appeal ${appeal.id}: changing invalid type "${appeal.type}" to "Юр лицо"`);
-          return { ...appeal, type: 'Юр лицо' as any };
-        }
-        return appeal;
-      });
-      
-      // Создаем Set ПОСЛЕ нормализации
-      const savedIds = new Set(normalizedSavedAppeals.map(a => a.id));
-      
-      // Filter out unified appeals that are already in localStorage
-      const uniqueUnifiedAppeals = unifiedAppealsData.filter(a => !savedIds.has(a.id));
-      
-      // Combine: normalized saved appeals + unique unified appeals
-      const combined = [...normalizedSavedAppeals, ...uniqueUnifiedAppeals];
-      setAllAppeals(combined);
-    };
-    
-    loadAppeals();
-
-    // Reload every 5 seconds
-    const interval = setInterval(loadAppeals, 5000);
-    return () => clearInterval(interval);
-  }, []);
+    setAllAppeals(appeals);
+  }, [appeals]);
 
   // Filter appeals based on active filter and search
   const filteredAppeals = allAppeals.filter(appeal => {
@@ -328,7 +300,9 @@ export function ProcessingCabinetNew({ onOpenAppeal }: ProcessingCabinetProps) {
                       >
                         <td className="px-4 py-3 whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <span className="text-purple-700 font-semibold">№{appeal.id}</span>
+                            <span className="text-purple-700 font-semibold">
+                              №{appeal.publicNumber ?? appeal.id}
+                            </span>
                             {isMyAppeal && (
                               <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full font-medium">
                                 МОЁ

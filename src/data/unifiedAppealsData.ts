@@ -4,6 +4,8 @@
 export interface UnifiedAppeal {
   // БАЗОВЫЕ ПОЛЯ
   id: string;
+  /** Публичный номер (реестр); для строк из API `/responsible/appeals` может отличаться от `id` ресурса. */
+  publicNumber?: string;
   regDate: string;
   category: 'Письменное' | 'Устное' | 'Регулятор';
   status: string;
@@ -67,6 +69,8 @@ export interface UnifiedAppeal {
   // МЕТАДАННЫЕ
   createdAt?: string;
   updatedAt?: string;
+  /** Регистратор (кабинет аудита / карточка). */
+  registrar?: string;
 }
 
 export const unifiedAppealsData: UnifiedAppeal[] = [

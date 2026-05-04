@@ -1,51 +1,81 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ProcessingCardNew } from './ProcessingCardNew';
-import unifiedAppealsData from '../../../data/unifiedAppealsData';
 import { Toaster } from 'sonner';
 import { ProcessingCabinetNew } from './ProcessingCabinetNew';
 import { appealStorage } from '../../../services/appealStorage';
+import type { UnifiedAppeal } from '../../../data/unifiedAppealsData';
+import {
+  appealDtoToUnified,
+  fetchResponsibleAppealDetail,
+  fetchResponsibleListUnified,
+  mergeUnifiedById,
+  storageAppealToUnified,
+} from '../../../services/edoCabinetApi';
 
-// Допустимые статусы для кабинета ответственного (3, 4, 5, 6, 7)
 const ALLOWED_STATUSES = [
-  'В работе',                        // Зарегистрированные обращения
-  'На ответственном, не взято',      // 3
-  'На ответственном, взято',         // 4
-  'На БП',                           // 5
-  'На ПК',                           // 6
-  'На HD'                            // 7
+  'В работе',
+  'На ответственном, не взято',
+  'На ответственном, взято',
+  'На БП',
+  'На ПК',
+  'На HD',
 ];
 
-// MAIN PROCESSING PAGE COMPONENT
 export function ProcessingPage() {
   const [view, setView] = useState<'cabinet' | 'card'>('cabinet');
   const [selectedAppealId, setSelectedAppealId] = useState<string | null>(null);
-  const [allAppeals, setAllAppeals] = useState(() => {
-    const savedAppeals = appealStorage.getAllAppeals();
-    const savedIds = new Set(savedAppeals.map(a => a.id));
-    const uniqueUnifiedAppeals = unifiedAppealsData.filter(a => !savedIds.has(a.id) && ALLOWED_STATUSES.includes(a.status));
-    return [...savedAppeals.filter(a => ALLOWED_STATUSES.includes(a.status)), ...uniqueUnifiedAppeals];
-  });
+  const [allAppeals, setAllAppeals] = useState<UnifiedAppeal[]>([]);
+  const [detailAppeal, setDetailAppeal] = useState<UnifiedAppeal | null>(null);
 
-  // Load appeals from localStorage on mount
   useEffect(() => {
-    const loadAppeals = () => {
-      const savedAppeals = appealStorage.getAllAppeals();
-      const savedIds = new Set(savedAppeals.map(a => a.id));
-      
-      // Filter out unified appeals that are already in localStorage AND filter by allowed statuses
-      const uniqueUnifiedAppeals = unifiedAppealsData.filter(a => !savedIds.has(a.id) && ALLOWED_STATUSES.includes(a.status));
-      
-      // Combine: saved appeals (updated versions, filtered by status) + unique unified appeals
-      const combined = [...savedAppeals.filter(a => ALLOWED_STATUSES.includes(a.status)), ...uniqueUnifiedAppeals];
-      setAllAppeals(combined);
+    let cancelled = false;
+
+    const load = async () => {
+      let apiRows: UnifiedAppeal[] = [];
+      try {
+        apiRows = await fetchResponsibleListUnified();
+      } catch {
+        apiRows = [];
+      }
+      if (cancelled) return;
+
+      const saved = appealStorage
+        .getAllAppeals()
+        .filter((a) => ALLOWED_STATUSES.includes(a.status))
+        .map(storageAppealToUnified);
+
+      setAllAppeals(mergeUnifiedById(apiRows, saved));
     };
-    
-    loadAppeals();
-    
-    // Reload every 5 seconds
-    const interval = setInterval(loadAppeals, 5000);
-    return () => clearInterval(interval);
+
+    void load();
+    const interval = window.setInterval(() => void load(), 15_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
   }, []);
+
+  useEffect(() => {
+    if (!selectedAppealId) {
+      setDetailAppeal(null);
+      return;
+    }
+    let cancelled = false;
+    void fetchResponsibleAppealDetail(selectedAppealId).then((d) => {
+      if (cancelled || !d?.header) return;
+      setDetailAppeal(appealDtoToUnified(d.header));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedAppealId]);
+
+  const selectedAppeal = useMemo(() => {
+    if (!selectedAppealId) return undefined;
+    const fromList = allAppeals.find((a) => a.id === selectedAppealId);
+    if (!detailAppeal) return fromList;
+    return { ...fromList, ...detailAppeal } as UnifiedAppeal;
+  }, [allAppeals, detailAppeal, selectedAppealId]);
 
   const handleOpenAppeal = (appealId: string) => {
     setSelectedAppealId(appealId);
@@ -57,14 +87,12 @@ export function ProcessingPage() {
     setSelectedAppealId(null);
   };
 
-  const selectedAppeal = allAppeals.find(a => a.id === selectedAppealId);
-
   return (
     <>
       {view === 'card' && selectedAppeal ? (
         <ProcessingCardNew onBack={handleBack} appealData={selectedAppeal} />
       ) : (
-        <ProcessingCabinetNew onOpenAppeal={handleOpenAppeal} />
+        <ProcessingCabinetNew onOpenAppeal={handleOpenAppeal} appeals={allAppeals} />
       )}
       <Toaster position="top-right" />
     </>

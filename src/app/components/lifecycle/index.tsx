@@ -5,6 +5,7 @@ export { ProcessingPageMobile } from './ProcessingPageMobile';
 export { AuditPage } from './AuditPageUnified';
 export { ManagerCabinetPage } from './ManagerCabinetPageUnified';
 export { SecretaryOfficePage } from './SecretaryOfficePage';
+export { ArchivePage } from './ArchivePage';
 
 // Export shared components
 export { ComplaintHeader } from './shared/ComplaintHeader';

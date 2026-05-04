@@ -29,6 +29,8 @@ export function Header({ activeTab, onTabChange, slaViolations, onLogoClick, onN
         return 'manager';
       case 'audit':
         return 'auditor';
+      case 'archive':
+        return 'manager';
       case 'api-docs':
         return 'auditor';
       default:
@@ -44,6 +46,7 @@ export function Header({ activeTab, onTabChange, slaViolations, onLogoClick, onN
     { id: 'secretary', line1: 'Секретарь', line2: null, icon: FileEdit },
     { id: 'manager', line1: 'Руководитель', line2: null, icon: Briefcase },
     { id: 'audit', line1: 'Аудит', line2: null, icon: Shield },
+    { id: 'archive', line1: 'Архив', line2: null, icon: Archive },
     { id: 'api-docs', line1: 'Swagger', line2: null, icon: BookOpen },
   ];
 

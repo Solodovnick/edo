@@ -9,14 +9,15 @@ import {
   ArrowUpDown,
   User
 } from 'lucide-react';
+import type { UnifiedAppeal } from '../../../data/unifiedAppealsData';
 import { appealStorage } from '../../../services/appealStorage';
-import unifiedAppealsData from '../../../data/unifiedAppealsData';
 import { ManagerCardDetailed } from './ManagerCardDetailed';
+import { loadManagerCabinetAppeals } from '../../../services/edoCabinetApi';
 import { toast, Toaster } from 'sonner';
 import { NotificationBell } from '../notifications/NotificationBell';
 
 export function ManagerCabinetPage() {
-  const [allAppeals, setAllAppeals] = useState([...unifiedAppealsData, ...appealStorage.getAllAppeals()]);
+  const [allAppeals, setAllAppeals] = useState<UnifiedAppeal[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAppeal, setSelectedAppeal] = useState<any>(null);
   const [view, setView] = useState<'cabinet' | 'card'>('cabinet');
@@ -24,42 +25,26 @@ export function ManagerCabinetPage() {
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  // Load appeals from LocalStorage and unifiedAppealsData
   useEffect(() => {
-    const loadAppeals = () => {
+    let cancelled = false;
+
+    const loadAppeals = async () => {
       try {
-        const savedAppeals = appealStorage.getAllAppeals();
-        
-        // Нормализуем типы заявителей - исправляем некорректные значения
-        const normalizedSavedAppeals = savedAppeals.map(appeal => {
-          if (appeal.type === 'Регулятор' || appeal.type === 'регулятор' || !(appeal.type === 'Физ лицо' || appeal.type === 'Юр лицо' || appeal.type === 'Физлицо' || appeal.type === 'Юрлицо')) {
-            console.warn(`Normalizing appeal ${appeal.id}: changing invalid type "${appeal.type}" to "Юр лицо"`);
-            return { ...appeal, type: 'Юр лицо' as any };
-          }
-          return appeal;
-        });
-        
-        // Создаем Set ПОСЛЕ нормализации
-        const savedIds = new Set(normalizedSavedAppeals.map(a => a.id));
-        
-        // Filter out unified appeals that are already in localStorage
-        const uniqueUnifiedAppeals = unifiedAppealsData.filter(a => !savedIds.has(a.id));
-        
-        // Combine: normalized saved appeals + unique unified appeals
-        const combined = [...normalizedSavedAppeals, ...uniqueUnifiedAppeals];
-        setAllAppeals(combined);
-      } catch (error) {
+        const merged = await loadManagerCabinetAppeals();
+        if (!cancelled) setAllAppeals(merged);
+      } catch {
         toast.error('Ошибка доступа к базе данных', {
           description: 'Обращения недоступны для просмотра. Попробуйте обновить страницу.',
         });
       }
     };
-    
-    loadAppeals();
-    
-    // Reload every 5 seconds to catch new appeals
-    const interval = setInterval(loadAppeals, 5000);
-    return () => clearInterval(interval);
+
+    void loadAppeals();
+    const interval = window.setInterval(() => void loadAppeals(), 15_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
   }, []);
 
   // Handle opening appeal card with logging
@@ -103,24 +88,13 @@ export function ManagerCabinetPage() {
   const handleBack = () => {
     setView('cabinet');
     setSelectedAppeal(null);
-    // Reload appeals to show updated view history
-    const loadAppeals = () => {
-      const savedAppeals = appealStorage.getAllAppeals();
-      
-      // Нормализуем типы заявителей
-      const normalizedSavedAppeals = savedAppeals.map(appeal => {
-        if (appeal.type === 'Регулятор' || appeal.type === 'регулятор' || !(appeal.type === 'Физ лицо' || appeal.type === 'Юр лицо' || appeal.type === 'Физлицо' || appeal.type === 'Юрлицо')) {
-          return { ...appeal, type: 'Юр лицо' as any };
-        }
-        return appeal;
+    void loadManagerCabinetAppeals()
+      .then(setAllAppeals)
+      .catch(() => {
+        toast.error('Ошибка доступа к базе данных', {
+          description: 'Обращения недоступны для просмотра. Попробуйте обновить страницу.',
+        });
       });
-      
-      const savedIds = new Set(normalizedSavedAppeals.map(a => a.id));
-      const uniqueUnifiedAppeals = unifiedAppealsData.filter(a => !savedIds.has(a.id));
-      const combined = [...normalizedSavedAppeals, ...uniqueUnifiedAppeals];
-      setAllAppeals(combined);
-    };
-    loadAppeals();
   };
 
   // Handle sorting

@@ -6,57 +6,25 @@ import {
   ChevronDown,
   User
 } from 'lucide-react';
-import { appealStorage } from '../../../services/appealStorage';
-import { auditAppealsData } from '../../../data/auditMockData';
+import type { UnifiedAppeal } from '../../../data/unifiedAppealsData';
+import { loadAuditCabinetAppeals } from '../../../services/edoCabinetApi';
 import { AuditCardDetailed } from './AuditCardDetailed';
 
 // CABINET COMPONENT
 function AuditCabinet({
-  onOpenAppeal
+  onOpenAppeal,
+  appeals,
 }: {
-  onOpenAppeal: (appealId: string) => void
+  onOpenAppeal: (appealId: string) => void;
+  appeals: UnifiedAppeal[];
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<string>('Все');
   const [viewMode, setViewMode] = useState<'my' | 'all'>('my');
-  const [allAppeals, setAllAppeals] = useState(auditAppealsData);
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  // Load appeals from localStorage with status "Аудит"
-  useEffect(() => {
-    const loadAppeals = () => {
-      const savedAppeals = appealStorage.getAllAppeals();
-      
-      // Фильтруем обращения со статусом "Аудит"
-      const auditAppeals = savedAppeals
-        .filter(appeal => appeal.status === 'Аудит')
-        .map(appeal => ({
-          ...appeal,
-          auditStatus: 'pending' as const,
-          deadlineCountdown: { days: 0, hours: 0, minutes: 0 },
-          isMine: appeal.responsible === 'Расул Рамазанов' || appeal.responsible === 'Александр Солодовников',
-          attachments: [],
-          history: [],
-          crmComments: [],
-        }));
-      
-      // Combine with mock data
-      const savedIds = new Set(auditAppeals.map(a => a.id));
-      const uniqueMockAppeals = auditAppealsData.filter(a => !savedIds.has(a.id));
-      const combined = [...auditAppeals, ...uniqueMockAppeals];
-      
-      setAllAppeals(combined);
-    };
-    
-    loadAppeals();
-    
-    // Reload every 5 seconds
-    const interval = setInterval(loadAppeals, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const filteredAppeals = allAppeals.filter(appeal => {
+  const filteredAppeals = appeals.filter((appeal) => {
     // View mode filter
     let viewModeMatch = true;
     if (viewMode === 'my') {
@@ -84,11 +52,11 @@ function AuditCabinet({
     return viewModeMatch && statusMatch && searchMatch;
   });
 
-  const myAppealsCount = allAppeals.filter(a => a.isMine === true).length;
-  const allAppealsCount = allAppeals.length; // Все обращения (и мои, и не мои)
-  const pendingCount = allAppeals.filter(a => a.auditStatus === 'pending').length;
-  const approvedCount = allAppeals.filter(a => a.auditStatus === 'approved').length;
-  const rejectedCount = allAppeals.filter(a => a.auditStatus === 'rejected').length;
+  const myAppealsCount = appeals.filter((a) => a.isMine === true).length;
+  const allAppealsCount = appeals.length;
+  const pendingCount = appeals.filter((a) => a.auditStatus === 'pending').length;
+  const approvedCount = appeals.filter((a) => a.auditStatus === 'approved').length;
+  const rejectedCount = appeals.filter((a) => a.auditStatus === 'rejected').length;
 
   // Handle sorting
   const handleSort = (column: string) => {
@@ -364,25 +332,21 @@ function AuditCabinet({
 export function AuditPage() {
   const [view, setView] = useState<'cabinet' | 'card'>('cabinet');
   const [selectedAppealId, setSelectedAppealId] = useState<string | null>(null);
-  const [allAppeals, setAllAppeals] = useState(auditAppealsData);
+  const [allAppeals, setAllAppeals] = useState<UnifiedAppeal[]>([]);
 
-  // Load appeals on mount
   useEffect(() => {
-    const savedAppeals = appealStorage.getAllAppeals();
-    if (savedAppeals.length > 0) {
-      const combined = [...auditAppealsData, ...savedAppeals.map(appeal => ({
-        ...appeal,
-        auditStatus: appeal.status === 'Одобрено' ? 'approved' as const : 
-                     appeal.status === 'Возращено на доработку' ? 'rejected' as const : 'pending' as const,
-        phone: appeal.phone || 'Не указан',
-        attachments: appeal.attachments || [],
-        history: appeal.history || [],
-        crmComments: appeal.crmComments || [],
-        deadlineCountdown: appeal.deadlineCountdown || { days: 0, hours: 0, minutes: 0 }
-      }))];
-      setAllAppeals(combined);
-    }
-  }, []); // Only run on mount
+    let cancelled = false;
+    const load = async () => {
+      const merged = await loadAuditCabinetAppeals();
+      if (!cancelled) setAllAppeals(merged);
+    };
+    void load();
+    const interval = window.setInterval(() => void load(), 15_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, []);
 
   const handleOpenAppeal = useCallback((appealId: string) => {
     console.log('[AuditPage] handleOpenAppeal called with:', appealId);
@@ -412,7 +376,7 @@ export function AuditPage() {
       {view === 'card' && selectedAppeal ? (
         <AuditCardDetailed onBack={handleBack} appealData={selectedAppeal} />
       ) : (
-        <AuditCabinet onOpenAppeal={handleOpenAppeal} />
+        <AuditCabinet onOpenAppeal={handleOpenAppeal} appeals={allAppeals} />
       )}
     </>
   );

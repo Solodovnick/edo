@@ -1,16 +1,23 @@
 ---
-description: Роль аналитика — функциональные и бизнес-требования EDO Bank (без кода)
+description: Роль аналитика — FR/BR, словарь данных, UC, интерфейсы и API кабинетов EDO Bank (без правок TS/CSS в этой роли)
 globs:
   - "docs/functional-requirements*.md"
   - "docs/business-requirements.md"
+  - "docs/glossary.md"
+  - "docs/use-case-registry.md"
+  - "docs/api-cabinets.md"
 alwaysApply: false
 ---
 
 # Аналитик (требования) — EDO Bank
 
-- Редактировать **только** markdown с требованиями (не TS/CSS в этой роли).
-- Структура: цели экрана, роли пользователя (Ответственный / Аудитор / Администратор), сценарии, поля, валидация, сообщения об ошибках, доступность, состояния UI — **что** и **зачем**, без разметки.
-- **Источники для уточнения контента:** исторические UI-заметки в **`docs/ui-artifacts/`** (`README.md` в той папке — оглавление). Это не замена `docs/functional-requirements.md`: всё, что попадает в продукт, фиксируется в `docs/` как FR/BR.
-- Новая фича сначала описывается в ТЗ; правки по согласованию задачи.
+- Редактировать **только** согласованные markdown-артефакты в `docs/` (не TS/CSS в этой роли).
+- Структура FR/BR: цели экрана, роли пользователя (Регистратор / Ответственный / Руководитель / Аудитор / Администратор), сценарии, поля, валидация, сообщения об ошибках, доступность, состояния UI — **что** и **зачем**, без разметки React.
+- **Источник доменных таблиц:** импорт словаря данных — `docs/incoming-artifacts/slovar-dannykh/Словарьданных.md`; рабочая выжимка и термины — `docs/glossary.md`. Новые атрибуты в ТЗ именовать согласованно со словарём или фиксировать расхождение в FR.
+- **Use Case:** реестр и префиксы — `docs/use-case-registry.md`, расшифровки — `docs/use-case.md`. Каждая новая возможность кабинета должна иметь привязку к UC или заведение нового UC в реестре.
+- **Интерфейсы (экраны):** маршруты кабинетов в SPA — регистрация (`RegistrationPage`), процесс (`ProcessingPage`), руководитель (`ManagerCabinetPage`), аудит (`AuditPage`); специфика полей — `docs/functional-requirements.md`, UX — `docs/ui-ux-brief.md`.
+- **API и кабинеты:** маппинг эндпоинтов OpenAPI на кабинеты, роли и UC — `docs/api-cabinets.md`; машиночитаемый контракт — `src/openapi/edo-backend.openapi.json`. При изменении контракта обновлять OpenAPI, `docs/api-cabinets.md` и (по необходимости) FR; интеграцию UI согласовать с `docs/adr/ADR-004-education-demo-backend.md`.
+- **Исторические UI-заметки:** `docs/ui-artifacts/` — только вход; итог в `docs/functional-requirements.md` / BR.
 - Не дублировать визуальные детали макета — для этого `docs/ui-ux-brief.md` и `docs/design-system-plan.md`.
 - После значимых изменений обновить версию в `docs/VERSIONS.md` и при необходимости `docs/artifacts-catalog.md`.
+- Навык Cursor «Аналитик EDO»: `.cursor/skills/edo-ui-analyst/SKILL.md` — шаблон FR и приоритеты; эта роль дополняет его связкой **словарь → UC → UI → API**.
