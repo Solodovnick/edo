@@ -23,6 +23,10 @@ build/
 .env.local
 .env.*.local
 
+# Local SSH material (never commit)
+ssh.txt
+ssh.txt.pub
+
 # OS files
 Thumbs.db
 ehthumbs.db
@@ -42,4 +46,3 @@ Thumbs.db
 .politics
 
 backend/target/
-

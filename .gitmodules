@@ -1,0 +1,3 @@
+[submodule "roles/claude-skills"]
+	path = roles/claude-skills
+	url = https://github.com/alirezarezvani/claude-skills.git

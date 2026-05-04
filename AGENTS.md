@@ -31,7 +31,7 @@
 | Разработчик EDO | `edo-frontend-dev/` | Компоненты, сервисы, mock-данные |
 | QA EDO | `edo-qa-review/` | Сверка с ТЗ, отчёт о расхождениях |
 
-Отдельно в корне репозитория каталог **`roles/`** — примеры универсальных навыков в формате Anthropic (`creative-design`, `development-technical`, …). Это **не** замена `.cursor/skills/edo-*`: при конфликте для кода и ТЗ EDO Bank приоритет у таблицы выше.
+Отдельно в корне репозитория каталог **`roles/`** — примеры универсальных навыков в формате Anthropic (`creative-design`, `development-technical`, …) и submodule **`roles/claude-skills`** ([alirezarezvani/claude-skills](https://github.com/alirezarezvani/claude-skills)); см. `roles/README.md` (инициализация submodule). Это **не** замена `.cursor/skills/edo-*`: при конфликте для кода и ТЗ EDO Bank приоритет у таблицы выше.
 
 ## Роли команды: зона и опыт человека
 

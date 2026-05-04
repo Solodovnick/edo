@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: edo-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: edo
+      POSTGRES_PASSWORD: edo
+      POSTGRES_DB: edo
+    ports:
+      - "5432:5432"
+    volumes:
+      - edo_pgdata:/var/lib/postgresql/data
+      - ./server/init:/docker-entrypoint-initdb.d:ro
+
+volumes:
+  edo_pgdata:

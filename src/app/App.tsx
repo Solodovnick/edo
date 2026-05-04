@@ -12,22 +12,41 @@ import {
   AuditPage,
   ManagerCabinetPage
 } from './components/lifecycle';
+import { ApiDocsPage } from './components/ApiDocsPage';
 import { initializeTestNotifications } from '../utils/initializeNotifications';
+import { fetchApiHealth, type ApiDbStatus } from '../services/apiHealth';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('create');
   const [activeNavTab, setActiveNavTab] = useState<string | null>('create');
   const [pendingAppealId, setPendingAppealId] = useState<string | null>(null);
+  const [dbApiStatus, setDbApiStatus] = useState<ApiDbStatus>('loading');
 
   // Initialize test notifications on first load
   useEffect(() => {
     initializeTestNotifications();
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    fetchApiHealth().then(({ status }) => {
+      if (!cancelled) setDbApiStatus(status);
+    });
+    const id = window.setInterval(() => {
+      fetchApiHealth().then(({ status }) => {
+        if (!cancelled) setDbApiStatus(status);
+      });
+    }, 30_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, []);
+
   const slaViolations = 2;
 
   const handleTabChange = (tab: string) => {
-    const workflowTabs = ['start', 'create', 'process', 'secretary', 'audit', 'manager'];
+    const workflowTabs = ['start', 'create', 'process', 'secretary', 'manager', 'audit', 'api-docs'];
     
     if (workflowTabs.includes(tab)) {
       setActiveTab(tab);
@@ -90,6 +109,8 @@ export default function App() {
         return <SecretaryOfficePage />;
       case 'audit':
         return <AuditPage />;
+      case 'api-docs':
+        return <ApiDocsPage />;
       case 'manager':
         return <ManagerCabinetPage />;
       case 'applications':
@@ -113,6 +134,7 @@ export default function App() {
         slaViolations={slaViolations}
         onLogoClick={handleLogoClick}
         onNotificationClick={handleNotificationClick}
+        dbApiStatus={dbApiStatus}
       />
       {renderContent()}
     </div>
