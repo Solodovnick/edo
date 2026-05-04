@@ -1,7 +1,6 @@
 import { Bell, User, Plus, ClipboardCheck, CheckCircle, Shield, Archive, XCircle, Briefcase, FileEdit } from 'lucide-react';
 import { NotificationBell } from './notifications/NotificationBell';
 import { UserRole } from '../../services/notificationService';
-import type { ApiDbStatus } from '../../services/apiHealth';
 
 interface HeaderProps {
   activeTab: string | null;
@@ -9,11 +8,9 @@ interface HeaderProps {
   slaViolations: number;
   onLogoClick: () => void;
   onNotificationClick?: (appealId: string) => void;
-  /** Состояние API + PostgreSQL (`/api/health`) */
-  dbApiStatus?: ApiDbStatus;
 }
 
-export function Header({ activeTab, onTabChange, slaViolations, onLogoClick, onNotificationClick, dbApiStatus }: HeaderProps) {
+export function Header({ activeTab, onTabChange, slaViolations, onLogoClick, onNotificationClick }: HeaderProps) {
   // Map activeTab to UserRole
   const getRoleFromTab = (tab: string | null): UserRole => {
     switch (tab) {
@@ -92,29 +89,6 @@ export function Header({ activeTab, onTabChange, slaViolations, onLogoClick, onN
 
       {/* Иконки справа */}
       <div className="flex items-center gap-4">
-        {dbApiStatus && (
-          <span
-            className="flex items-center gap-1.5 text-[11px] text-gray-500 max-sm:hidden"
-            title="Состояние API и PostgreSQL"
-          >
-            <span
-              className={`h-2 w-2 rounded-full ${
-                dbApiStatus === "online"
-                  ? "bg-emerald-500"
-                  : dbApiStatus === "loading"
-                    ? "bg-amber-400 animate-pulse"
-                    : "bg-red-500"
-              }`}
-            />
-            <span className="whitespace-nowrap">
-              {dbApiStatus === "online"
-                ? "PostgreSQL"
-                : dbApiStatus === "loading"
-                  ? "БД…"
-                  : "БД offline"}
-            </span>
-          </span>
-        )}
         <NotificationBell variant="header" role={currentRole} onNotificationClick={onNotificationClick} />
         <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
           <User className="w-5 h-5 text-gray-600" />

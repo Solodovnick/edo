@@ -13,33 +13,15 @@ import {
   ManagerCabinetPage
 } from './components/lifecycle';
 import { initializeTestNotifications } from '../utils/initializeNotifications';
-import { fetchApiHealth, type ApiDbStatus } from '../services/apiHealth';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('create');
   const [activeNavTab, setActiveNavTab] = useState<string | null>('create');
   const [pendingAppealId, setPendingAppealId] = useState<string | null>(null);
-  const [dbApiStatus, setDbApiStatus] = useState<ApiDbStatus>('loading');
 
   // Initialize test notifications on first load
   useEffect(() => {
     initializeTestNotifications();
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetchApiHealth().then(({ status }) => {
-      if (!cancelled) setDbApiStatus(status);
-    });
-    const id = window.setInterval(() => {
-      fetchApiHealth().then(({ status }) => {
-        if (!cancelled) setDbApiStatus(status);
-      });
-    }, 30_000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(id);
-    };
   }, []);
 
   const slaViolations = 2;
@@ -131,7 +113,6 @@ export default function App() {
         slaViolations={slaViolations}
         onLogoClick={handleLogoClick}
         onNotificationClick={handleNotificationClick}
-        dbApiStatus={dbApiStatus}
       />
       {renderContent()}
     </div>
