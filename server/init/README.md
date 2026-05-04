@@ -2,6 +2,12 @@
 
 Файлы в этой папке монтируются в `/docker-entrypoint-initdb.d` и выполняются **один раз** при создании пустого volume.
 
+## `02-app-dictionary-and-appeals.sql`
+
+- Схема **`app`**: справочники `dict_appeal_status`, `dict_applicant_type`, `dict_appeal_channel` (связь статусов с кабинетами через массив `cabinets`) и единая таблица **`app.appeal_card`** (`id`, `status_code` → словарь, `data` JSONB — тело как у REST `AppealDto`).
+- Используется Node-сервером (`server/edoPgStore.mjs`) при заданном **`DATABASE_URL`** в `.env`.
+- Если volume Postgres уже создан **до** появления этого файла, накатите вручную: `npm run db:init-app` (контейнер `edo-postgres` должен быть запущен).
+
 ## `01-edo-schema.sql`
 
 - Полная схема из ERD (таблицы `appeals`, `attachments`, `audit`, …).

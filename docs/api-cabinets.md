@@ -6,6 +6,8 @@
 **Реализация в dev:** Vite middleware [`src/server/edoApiMockMiddleware.ts`](../src/server/edoApiMockMiddleware.ts); базовый URL по умолчанию `/api/v1`.  
 **Клиент UI:** [`src/services/edoCabinetApi.ts`](../src/services/edoCabinetApi.ts) (`VITE_EDO_API_BASE` — необязательный префикс хоста без `/api/v1`).
 
+**Поднять PostgreSQL и индикатор «БД» в шапке:** `npm run db:up` → `cp .env.example .env` → `npm run dev` (Vite + Node на `:3001`). `GET /api/health` проверяет `DATABASE_URL`; данные кабинетов при активной БД — из `app.appeal_card` (см. `server/init/02-app-dictionary-and-appeals.sql`).
+
 ---
 
 ## 1. Словарь данных и сущности

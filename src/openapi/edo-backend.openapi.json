@@ -10,9 +10,18 @@
     { "name": "System", "description": "Служебные методы" },
     { "name": "Registrar", "description": "Регистрация и учёт обращений" },
     { "name": "Responsible", "description": "Кабинет ответственного" },
-    { "name": "Secretary", "description": "Кабинет секретаря" },
-    { "name": "Manager", "description": "Кабинет руководителя" },
-    { "name": "Audit", "description": "Аудит" },
+    {
+      "name": "Secretary",
+      "description": "Кабинет секретаря ПК. UC: сценарии Претензионной комиссии (см. `docs/state-diagram.md`, статус «На ПК»). FR: FR-02.1 (жизненный цикл), FR-02.2."
+    },
+    {
+      "name": "Manager",
+      "description": "Кабинет руководителя. UC: UC-RU-03 назначение, UC-RU-04 списки, UC-RU-02/05 шаблоны (часть — вне этих ручек), UC-AR-01 архив, UC-ADM.01 история. FR: FR-14.1–FR-14.4."
+    },
+    {
+      "name": "Audit",
+      "description": "Аудитор. UC: UC-AU.01 уведомления/взятие в работу, UC-AU.02 отказ, UC-AU.03 проведение аудита. FR: FR-05.x, FR-13.1–FR-13.3."
+    },
     { "name": "Notifications", "description": "Уведомления" },
     { "name": "CRM", "description": "Поиск клиента" }
   ],
@@ -153,6 +162,50 @@
           "title": { "type": "string" },
           "read": { "type": "boolean" },
           "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AssignResponsibleRequest": {
+        "type": "object",
+        "description": "Тело для UC-RU-03 / FR-14.1",
+        "properties": {
+          "userName": { "type": "string", "description": "Отображаемое имя ответственного" },
+          "responsibleName": { "type": "string" }
+        }
+      },
+      "SecretaryPkDecisionRequest": {
+        "type": "object",
+        "required": ["decision"],
+        "description": "Решение секретаря ПК по обращению на стадии «На ПК» (FR-02, state-diagram)",
+        "properties": {
+          "decision": { "type": "string", "enum": ["APPROVE", "REJECT"], "description": "APPROVE — вернуть в работу (В работе), REJECT — в пул (На ответственном, не взято)" },
+          "comment": { "type": "string" }
+        }
+      },
+      "AuditDeclineRequest": {
+        "type": "object",
+        "description": "UC-AU.02 / FR-13.2",
+        "properties": {
+          "reason": { "type": "string" },
+          "comment": { "type": "string" }
+        }
+      },
+      "AuditPublishRequest": {
+        "type": "object",
+        "description": "UC-AU.03 / FR-13.3 — публикация результатов аудита",
+        "properties": {
+          "templateId": { "type": "string" },
+          "comment": { "type": "string" }
+        }
+      },
+      "ManagerAppealsPage": {
+        "type": "object",
+        "description": "Список для UC-RU-04 / FR-14.2",
+        "properties": {
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/AppealDto" } },
+          "page": { "type": "integer" },
+          "size": { "type": "integer" },
+          "totalElements": { "type": "integer" },
+          "totalPages": { "type": "integer" }
         }
       }
     },
@@ -554,7 +607,8 @@
     "/secretary/appeals": {
       "get": {
         "tags": ["Secretary"],
-        "summary": "Очередь секретаря (фильтр по статусу)",
+        "summary": "Очередь секретаря ПК (фильтр по статусу)",
+        "description": "Реестр обращений на стадии ПК. **UC:** сценарии ПК в реестре UC (статус «На ПК»). **FR:** FR-02.1, FR-02.2.",
         "operationId": "listSecretaryAppeals",
         "parameters": [
           {
@@ -584,10 +638,138 @@
         }
       }
     },
+    "/secretary/appeals/{appealId}": {
+      "get": {
+        "tags": ["Secretary"],
+        "summary": "Карточка обращения для секретаря",
+        "description": "**FR:** просмотр данных обращения на стадии ПК (согласовано с FR-04/FR-02 по полям карточки в UI).",
+        "operationId": "getSecretaryAppeal",
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealDto" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/secretary/appeals/{appealId}/decision": {
+      "post": {
+        "tags": ["Secretary"],
+        "summary": "Решение секретаря ПК (одобрить / отклонить)",
+        "description": "Фиксация решения по обращению «На ПК». **FR:** FR-02 (переходы жизненного цикла).",
+        "operationId": "postSecretaryPkDecision",
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/SecretaryPkDecisionRequest" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Обновлённое обращение",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealDto" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "422": { "$ref": "#/components/responses/Validation" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/manager/appeals": {
+      "get": {
+        "tags": ["Manager"],
+        "summary": "Реестр обращений для руководителя",
+        "description": "**UC:** UC-RU-04 (просмотр списком). **FR:** FR-14.2.",
+        "operationId": "listManagerAppeals",
+        "parameters": [
+          { "name": "q", "in": "query", "schema": { "type": "string" }, "description": "Поиск по номеру/ФИО/организации" },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 0 } },
+          { "name": "size", "in": "query", "schema": { "type": "integer", "default": 20 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ManagerAppealsPage" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/manager/appeals/{appealId}/assign-responsible": {
+      "post": {
+        "tags": ["Manager"],
+        "summary": "Назначить ответственного",
+        "description": "**UC:** UC-RU-03. **FR:** FR-14.1.",
+        "operationId": "postManagerAssignResponsible",
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/AssignResponsibleRequest" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Обновлённое обращение",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealDto" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/manager/appeals/{appealId}/history": {
+      "get": {
+        "tags": ["Manager"],
+        "summary": "История событий по обращению",
+        "description": "**UC:** UC-ADM.01 (история для руководителя и аудита). **FR:** FR-14.3.",
+        "operationId": "getManagerAppealHistory",
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "appealId": { "type": "string" },
+                    "entries": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "at": { "type": "string", "format": "date-time" },
+                          "actor": { "type": "string" },
+                          "action": { "type": "string" },
+                          "details": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
     "/manager/dashboard/summary": {
       "get": {
         "tags": ["Manager"],
-        "summary": "Сводка для руководителя",
+        "summary": "Сводка для руководителя (виджеты дашборда)",
+        "description": "Агрегаты для UI дашборда. **FR:** FR-07.x (аналитика), частично пересекается с UC-RU-04 по обзору нагрузки.",
         "operationId": "getManagerDashboardSummary",
         "responses": {
           "200": {
@@ -614,6 +796,7 @@
       "get": {
         "tags": ["Audit"],
         "summary": "Поиск обращений для аудита",
+        "description": "**UC:** UC-AU.03 (контекст проведения аудита), UC-RU-04 (просмотр списком для ролей). **FR:** FR-05.1, FR-05.2.",
         "operationId": "searchAuditAppeals",
         "parameters": [
           { "name": "q", "in": "query", "schema": { "type": "string" } },
@@ -642,10 +825,93 @@
         }
       }
     },
+    "/audit/appeals/{appealId}": {
+      "get": {
+        "tags": ["Audit"],
+        "summary": "Карточка обращения для аудита",
+        "description": "**FR:** FR-05.2, FR-05.4 (данные для карточки аудитора).",
+        "operationId": "getAuditAppeal",
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealDto" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/audit/appeals/{appealId}/take-work": {
+      "post": {
+        "tags": ["Audit"],
+        "summary": "Взять обращение в работу (аудитор)",
+        "description": "**UC:** UC-AU.01. **FR:** FR-13.1.",
+        "operationId": "postAuditTakeWork",
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "responses": {
+          "200": {
+            "description": "Обновлённое обращение",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealDto" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/audit/appeals/{appealId}/decline": {
+      "post": {
+        "tags": ["Audit"],
+        "summary": "Отказ аудитора от обработки",
+        "description": "**UC:** UC-AU.02. **FR:** FR-13.2.",
+        "operationId": "postAuditDecline",
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/AuditDeclineRequest" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Обновлённое обращение",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealDto" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/audit/appeals/{appealId}/publish": {
+      "post": {
+        "tags": ["Audit"],
+        "summary": "Опубликовать результаты аудита",
+        "description": "**UC:** UC-AU.03. **FR:** FR-13.3, FR-05.3.",
+        "operationId": "postAuditPublish",
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/AuditPublishRequest" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Обновлённое обращение",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealDto" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
     "/audit/appeals/{appealId}/log": {
       "get": {
         "tags": ["Audit"],
-        "summary": "Журнал аудита по обращению",
+        "summary": "Журнал событий / аудита по обращению",
+        "description": "**UC:** UC-ADM.01 (отображение истории). **FR:** FR-02.3, FR-14.3.",
         "operationId": "getAuditAppealLog",
         "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
         "responses": {
@@ -761,8 +1027,11 @@
                       "items": {
                         "type": "object",
                         "properties": {
+                          "id": { "type": "string" },
                           "name": { "type": "string" },
                           "inn": { "type": "string" },
+                          "phone": { "type": "string" },
+                          "type": { "type": "string" },
                           "matchScore": { "type": "number" }
                         }
                       }
@@ -773,6 +1042,51 @@
             }
           },
           "401": { "$ref": "#/components/responses/Unauthorized" },
+          "422": { "$ref": "#/components/responses/Validation" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/crm/clients": {
+      "post": {
+        "tags": ["CRM"],
+        "summary": "Создать клиента (демо)",
+        "operationId": "createCrmClient",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "inn": { "type": "string" },
+                  "phone": { "type": "string" },
+                  "type": { "type": "string", "enum": ["individual", "organization"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Создано",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "name": { "type": "string" },
+                    "inn": { "type": "string" },
+                    "phone": { "type": "string" },
+                    "type": { "type": "string" },
+                    "matchScore": { "type": "number" }
+                  }
+                }
+              }
+            }
+          },
           "422": { "$ref": "#/components/responses/Validation" },
           "500": { "$ref": "#/components/responses/InternalError" }
         }

@@ -239,6 +239,44 @@ export function edoApiMockMiddleware(): Connect.NextHandleFunction {
         return
       }
 
+      // --- Manager (UC-RU-04 / FR-14.2, UC-RU-03 / FR-14.1, UC-ADM.01 / FR-14.3) ---
+      if (method === 'GET' && pathname === '/api/v1/manager/appeals') {
+        writeJson(resHttp, 200, {
+          items: [sampleAppeal('100001'), sampleAppeal('100002')],
+          page: 0,
+          size: 20,
+          totalElements: 2,
+          totalPages: 1,
+        })
+        return
+      }
+
+      const mgrAssign = pathname.match(/^\/api\/v1\/manager\/appeals\/([^/]+)\/assign-responsible$/)
+      if (mgrAssign && method === 'POST') {
+        writeJson(resHttp, 200, {
+          ...sampleAppeal(mgrAssign[1]),
+          responsible: 'Назначенный (мок)',
+        })
+        return
+      }
+
+      const mgrHist = pathname.match(/^\/api\/v1\/manager\/appeals\/([^/]+)\/history$/)
+      if (mgrHist && method === 'GET') {
+        writeJson(resHttp, 200, {
+          appealId: mgrHist[1],
+          entries: [
+            {
+              id: 'log-mock-1',
+              at: new Date().toISOString(),
+              actor: 'manager@bank',
+              action: 'VIEW',
+              details: 'История (мок)',
+            },
+          ],
+        })
+        return
+      }
+
       // --- Secretary ---
       if (method === 'GET' && pathname === '/api/v1/secretary/appeals') {
         writeJson(resHttp, 200, {
@@ -248,7 +286,20 @@ export function edoApiMockMiddleware(): Connect.NextHandleFunction {
         return
       }
 
-      // --- Manager ---
+      const secCard = pathname.match(/^\/api\/v1\/secretary\/appeals\/([^/]+)$/)
+      if (secCard && method === 'GET') {
+        writeJson(resHttp, 200, sampleAppeal(secCard[1]))
+        return
+      }
+
+      const secDecision = pathname.match(/^\/api\/v1\/secretary\/appeals\/([^/]+)\/decision$/)
+      if (secDecision && method === 'POST') {
+        await readBody(req as IncomingMessage)
+        writeJson(resHttp, 200, { ...sampleAppeal(secDecision[1]), status: 'В работе' })
+        return
+      }
+
+      // --- Manager dashboard ---
       if (method === 'GET' && pathname === '/api/v1/manager/dashboard/summary') {
         writeJson(resHttp, 200, {
           openAppeals: 42,
@@ -258,7 +309,7 @@ export function edoApiMockMiddleware(): Connect.NextHandleFunction {
         return
       }
 
-      // --- Audit ---
+      // --- Audit (UC-AU.* / FR-05, FR-13) ---
       const auditLog = pathname.match(/^\/api\/v1\/audit\/appeals\/([^/]+)\/log$/)
       if (auditLog && method === 'GET') {
         writeJson(resHttp, 200, {
@@ -276,12 +327,46 @@ export function edoApiMockMiddleware(): Connect.NextHandleFunction {
         return
       }
 
+      const auditTake = pathname.match(/^\/api\/v1\/audit\/appeals\/([^/]+)\/take-work$/)
+      if (auditTake && method === 'POST') {
+        writeJson(resHttp, 200, {
+          ...sampleAppeal(auditTake[1]),
+          status: 'На аудите',
+          responsible: 'Аудитор (в работе)',
+        })
+        return
+      }
+
+      const auditDecl = pathname.match(/^\/api\/v1\/audit\/appeals\/([^/]+)\/decline$/)
+      if (auditDecl && method === 'POST') {
+        await readBody(req as IncomingMessage)
+        writeJson(resHttp, 200, {
+          ...sampleAppeal(auditDecl[1]),
+          status: 'В работе',
+          responsible: 'Не назначено',
+        })
+        return
+      }
+
+      const auditPub = pathname.match(/^\/api\/v1\/audit\/appeals\/([^/]+)\/publish$/)
+      if (auditPub && method === 'POST') {
+        await readBody(req as IncomingMessage)
+        writeJson(resHttp, 200, { ...sampleAppeal(auditPub[1]), status: 'Решено' })
+        return
+      }
+
       if (method === 'GET' && pathname === '/api/v1/audit/appeals') {
         writeJson(resHttp, 200, {
           items: [{ ...sampleAppeal('a-9'), status: 'На аудите' }],
           page: 0,
           size: 50,
         })
+        return
+      }
+
+      const auditCard = pathname.match(/^\/api\/v1\/audit\/appeals\/([^/]+)$/)
+      if (auditCard && method === 'GET') {
+        writeJson(resHttp, 200, { ...sampleAppeal(auditCard[1]), status: 'На аудите' })
         return
       }
 
@@ -310,7 +395,41 @@ export function edoApiMockMiddleware(): Connect.NextHandleFunction {
       // --- CRM ---
       if (method === 'GET' && pathname.startsWith('/api/v1/crm/clients/search')) {
         writeJson(resHttp, 200, {
-          hits: [{ name: 'Петров П.П.', inn: '7707083893', matchScore: 0.95 }],
+          hits: [
+            {
+              id: 'c-mock-1',
+              name: 'Петров П.П.',
+              inn: '7707083893',
+              phone: '+79001112233',
+              type: 'individual',
+              matchScore: 0.95,
+            },
+          ],
+        })
+        return
+      }
+
+      if (method === 'POST' && pathname === '/api/v1/crm/clients') {
+        const rawBody = await readBody(req as IncomingMessage)
+        let body: Record<string, unknown> = {}
+        try {
+          body = rawBody ? (JSON.parse(rawBody) as Record<string, unknown>) : {}
+        } catch {
+          writeJson(resHttp, 400, err(400, 'BAD_JSON', 'Некорректный JSON'))
+          return
+        }
+        if (!body.name && !body.phone && !body.inn) {
+          writeJson(resHttp, 422, err(422, 'VALIDATION', 'Укажите name, phone или inn'))
+          return
+        }
+        const id = `c-mock-${Date.now()}`
+        writeJson(resHttp, 201, {
+          id,
+          name: String(body.name ?? 'Клиент'),
+          inn: String(body.inn ?? ''),
+          phone: String(body.phone ?? ''),
+          type: body.type === 'organization' ? 'organization' : 'individual',
+          matchScore: 1,
         })
         return
       }

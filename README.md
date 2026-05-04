@@ -15,7 +15,104 @@
 
 ## 2. Архитектура проекта
 
-### Слои и стек
+Архитектурный контур **C4** (уровни *System Context* и *Container*): участники, внешние системы, целевые микросервисы МОО и шина — подробно в **[`docs/c4-architecture-overview.md`](docs/c4-architecture-overview.md)** (согласование с ТЗ, ADR-001/004, IcePanel). Здесь — пересобранные **Mermaid**-диаграммы в том же смысле, что в документе.
+
+### C4 — уровень 1: системный контекст (МОО)
+
+**МОО** — платформа обработки обращений; UI-прототип в репозитории — **EDO Bank**. Внешние системы и роли — сводно по [`docs/c4-architecture-overview.md`](docs/c4-architecture-overview.md) §2.
+
+```mermaid
+flowchart TB
+  subgraph people["Участники"]
+    Z["Заявитель"]
+    Reg["Регистратор"]
+    Otv["Ответственный"]
+    Ruk["Руководитель"]
+    Aud["Аудитор"]
+    Other["ПК / БП / ВК / Админ"]
+  end
+
+  MOO["Платформа обработки обращений\n(МОО)"]
+
+  subgraph ext["Внешние системы"]
+    CRM["CRM"]
+    ABS["АБС"]
+    HD["Help Desk"]
+    Ex["Exchange"]
+    MOKI["МОКИ"]
+    DD["DaData"]
+    KB["База знаний"]
+    EDOK["Модули ЭДО и ИБ"]
+  end
+
+  Z -.-> MOO
+  Reg --> MOO
+  Otv --> MOO
+  Ruk --> MOO
+  Aud --> MOO
+  Other --> MOO
+
+  MOO <--> CRM
+  MOO <--> ABS
+  MOO <--> HD
+  MOO <--> Ex
+  MOO <--> MOKI
+  MOO <--> DD
+  MOO <--> KB
+  MOO <--> EDOK
+```
+
+### C4 — уровень 2: контейнеры (целевая МОО)
+
+Контейнеры **целевые** для проектирования бэкенда и интеграций; **в Git сейчас** в основном реализован **МОО Web (SPA)** и учебный контур «фронт ↔ API ↔ PostgreSQL» ([ADR-001](docs/adr/ADR-001-frontend-spa.md), [ADR-004](docs/adr/ADR-004-education-demo-backend.md)).
+
+```mermaid
+flowchart TB
+  subgraph users["Пользователи"]
+    U["Роли МОО"]
+  end
+
+  subgraph moo["Платформа МОО"]
+    WEB["МОО Web SPA"]
+    GW["API Gateway"]
+    MS_CORE["МС обработки обращений"]
+    MS_AUD["МС назначения и аудита"]
+    MS_AR["МС архива"]
+    MS_AN["МС аналитики"]
+    MS_EXT["МС внешних обращений"]
+    BUS["Шина сообщений"]
+    DB[("Хранилища данных")]
+  end
+
+  subgraph extc["Внешние системы"]
+    CRM2["CRM"]
+    EXT2["Прочие интеграции"]
+  end
+
+  U --> WEB
+  WEB --> GW
+  GW --> MS_CORE
+  GW --> MS_AUD
+  GW --> MS_AR
+  GW --> MS_AN
+  GW --> MS_EXT
+
+  MS_CORE <--> BUS
+  MS_AUD <--> BUS
+  MS_AR <--> BUS
+  MS_AN <--> BUS
+  MS_EXT <--> BUS
+
+  MS_CORE --> DB
+  MS_AUD --> DB
+  MS_AR --> DB
+  MS_AN --> DB
+
+  MS_EXT <--> EXT2
+  MS_CORE <--> CRM2
+```
+
+### Слои и стек в этом репозитории
 
 | Слой | Технологии и расположение |
 |------|---------------------------|
@@ -28,7 +125,7 @@
 | **Документация и роли** | `docs/` — ТЗ, ADR, диаграммы, отчёты; `AGENTS.md` — роли Cursor; `roles/` — шаблоны навыков и при необходимости submodule сторонних навыков (`roles/README.md`). |
 | **Учебный контур «фронт → API → БД»** | По плану курса СА описан **Spring Boot** + PostgreSQL в каталоге **`backend/`** и в [`docs/backend-development-plan.md`](docs/backend-development-plan.md) ([ADR-004](docs/adr/ADR-004-education-demo-backend.md)); текущий минимальный «живой» контур в репозитории — **Node API + Postgres** выше. |
 
-### Схема взаимодействия (локальная разработка)
+### Локальная разработка (упрощённая схема репозитория)
 
 ```mermaid
 flowchart LR
@@ -92,7 +189,11 @@ flowchart LR
    npm run dev
    ```
 
-Остановка контейнера: `npm run db:down`. Логи Postgres: `npm run db:logs`. Только Vite: `npm run dev:vite`. Только API (при уже запущенной БД): `npm run dev:api`.
+Остановка контейнера: `npm run db:down`. Логи Postgres: `npm run db:logs`. Полный сброс volume и повторная инициализация init-скриптов: `npm run db:reset`. Если Postgres уже был создан **до** добавления `server/init/02-app-dictionary-and-appeals.sql`, накатите схему приложения: `npm run db:init-app` (контейнер должен быть запущен).
+
+Только Vite: `npm run dev:vite` (индикатор **«БД offline»** — нормально: нет прокси на API). Только API (при уже запущенной БД): `npm run dev:api`.
+
+**Netlify:** в панели сайта задайте **`DATABASE_URL`** (та же строка, что для локального наката). Сборка — `npm run build`, публикация — `dist/`; запросы **`/api/*`** проксируются на **`netlify/functions/api.mjs`**. Схему под API накатывайте скриптом **`npm run db:netlify-init`** (или `node scripts/netlify-db-init.mjs`; опция **`--erd`** добавляет `01-edo-schema.sql`; **`--dry-run`** — только порядок файлов). Перед запуском положите `DATABASE_URL` в `.env` или в окружение; при TLS-ошибках к облаку — **`PGSSL_REJECT_UNAUTHORIZED=0`**. Локально: `npx netlify dev`.
 
 По умолчанию: приложение **http://localhost:5174**, Postgres **localhost:5432** (пользователь/БД `edo`, пароль `edo`). После смены DDL см. `server/init/README.md` (часто нужен пересозданный volume: `docker compose down -v && docker compose up -d`).
 
@@ -109,10 +210,13 @@ git submodule update --init --recursive roles/claude-skills
 | Путь | Содержание |
 |------|------------|
 | `AGENTS.md`, `.cursor/rules/`, `.cursor/skills/edo-*` | Роли и проектные навыки Cursor для работы по ТЗ EDO Bank |
+| `docs/c4-architecture-overview.md` | C4: контекст МОО, контейнеры, внешние системы (полный текст и таблицы) |
 | `docs/reports/` | Канвас-отчёты и WakaTime, см. `docs/reports/README.md` |
 | `docs/ui-artifacts/` | Исторические UI-заметки |
 | `src/openapi/` | OpenAPI контракты (в т.ч. для моков/доков) |
 | `roles/README.md` | Навыки в формате Anthropic и submodule [claude-skills](https://github.com/alirezarezvani/claude-skills) |
 | `roles/kafka-skills-sh/` | Kafka: [skills.sh](https://skills.sh/?q=kafka), vendored `SKILL.md`; в Cursor — навык `edo-kafka-integration` |
+| `netlify.toml`, `netlify/functions/api.mjs` | Netlify: статический `dist/` + rewrite **`/api/*`** на serverless Express (ручки `/api/appeals`, `/api/health`, `/api/v1/...`) |
+| `scripts/netlify-db-init.mjs`, `npm run db:netlify-init` | Накат `server/init/*.sql` на облачный Postgres под тот же `DATABASE_URL`, что в Netlify |
 
 Репозиторий на GitHub: [Solodovnick/edo](https://github.com/Solodovnick/edo).

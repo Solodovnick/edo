@@ -2,7 +2,7 @@ export type ApiDbStatus = "loading" | "online" | "offline";
 
 export type HealthResponse =
   | { ok: true; database: string; db?: string; postgres?: string }
-  | { ok: false; database: string; error?: string };
+  | { ok: false; database: string; error?: string; errorCode?: string };
 
 export async function fetchApiHealth(): Promise<{
   status: ApiDbStatus;

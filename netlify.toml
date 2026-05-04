@@ -1,0 +1,24 @@
+# Статический фронт (Vite → dist) + API через Netlify Functions (см. netlify/functions/api.mjs).
+# В Netlify UI: Site configuration → Environment variables → DATABASE_URL (строка Postgres, без коммита в Git).
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[functions]
+  node_bundler = "esbuild"
+  # Нативные / тяжёлые модули не бандлить в один файл (стабильнее для pg).
+  external_node_modules = ["express", "pg", "cors", "dotenv"]
+
+# Прокси на serverless Express: браузер по-прежнему вызывает /api/...
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+  force = true
+
+# SPA (React Router и т.п.)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

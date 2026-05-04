@@ -1,4 +1,7 @@
-const API_BASE = (import.meta as any).env?.VITE_API_URL ?? 'http://localhost:8080';
+/** Пустая строка = тот же origin (Netlify + rewrite на `/.netlify/functions/api`). Иначе полный URL бэкенда. */
+const API_BASE = String((import.meta as any).env?.VITE_API_URL ?? '')
+  .trim()
+  .replace(/\/$/, '');
 
 // ── Backend DTO (AppealListItemDto) ──────────────────────────────────────────
 export interface AppealListItem {
