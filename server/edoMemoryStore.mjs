@@ -3,6 +3,8 @@
  * Для продакшена с Postgres замените на SQL-слой по ADR.
  */
 
+import { statusToResponsibleCode } from "./edoPgStore.mjs"
+
 function nowIso() {
   return new Date().toISOString()
 }
@@ -149,6 +151,65 @@ const RESPONSIBLE_CABINET_STATUSES = new Set([
   "Запрос в БП",
   "Готово к подписи",
 ])
+
+/** Статусы с кабинетом responsible в app.dict_appeal_status (без «Решено»). */
+const RESPONSIBLE_CABINET_STATUSES_FOR_LIST = new Set([
+  "В работе",
+  "На ответственном, не взято",
+  "На ответственном, взято",
+  "На БП",
+  "На ПК",
+  "На HD",
+  "На аудите",
+  "Аудит",
+  "Назначено",
+  "Запрос в БП",
+  "Готово к подписи",
+  "Зарегистрировано",
+])
+
+/**
+ * GET /v1/responsible/appeals без Postgres — те же фильтры, что в Swagger (status, q, page, size).
+ * @param {{ page?: number; size?: number; status?: string; q?: string }} [query]
+ */
+export function listResponsibleAppeals(query = {}) {
+  const page = Math.max(0, Number.isFinite(query.page) ? query.page : parseInt(String(query.page ?? "0"), 10) || 0)
+  const size = Math.min(
+    200,
+    Math.max(1, Number.isFinite(query.size) ? query.size : parseInt(String(query.size ?? "50"), 10) || 50),
+  )
+  let rows = appeals.filter((a) => RESPONSIBLE_CABINET_STATUSES_FOR_LIST.has(String(a.status ?? "")))
+  if (query.status && String(query.status).trim()) {
+    const st = String(query.status).trim()
+    rows = rows.filter((a) => String(a.status ?? "") === st)
+  }
+  if (query.q && String(query.q).trim()) {
+    const n = String(query.q).trim().toLowerCase()
+    rows = rows.filter(
+      (a) =>
+        String(a.id).toLowerCase().includes(n) ||
+        String(a.applicantName ?? "").toLowerCase().includes(n) ||
+        String(a.organizationName ?? "").toLowerCase().includes(n) ||
+        String(a.content ?? "").toLowerCase().includes(n),
+    )
+  }
+  const slice = rows.slice(page * size, page * size + size)
+  const items = slice.map((a) => ({
+    id: a.id,
+    publicNumber: a.id,
+    title: (a.content && String(a.content).slice(0, 120)) || a.applicantName || "—",
+    categoryCode: "GENERAL",
+    statusCode: statusToResponsibleCode(a.status),
+    priorityCode: "NORMAL",
+    updatedAt: a.updatedAt ?? nowIso(),
+    slaDueAt: new Date(Date.now() + 864e5 * 5).toISOString(),
+    flags: { overdue: false },
+  }))
+  return {
+    items,
+    nextCursor: slice.length === size ? String(page + 1) : null,
+  }
+}
 
 export function listAppealsDto() {
   return [...appeals]

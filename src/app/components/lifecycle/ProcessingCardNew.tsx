@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { appealStorage } from '../../../services/appealStorage';
 import { toast } from 'sonner';
+import { ResponseDocumentEditor } from './ResponseDocumentEditor';
 
 // Допустимые статусы для кабинета ответственного
 const ALLOWED_STATUSES = [
@@ -1231,18 +1232,12 @@ export function ProcessingCardNew({ onBack, appealData }: ProcessingCardProps) {
                 </p>
               </div>
 
-              {/* Response Form Textarea */}
+              {/* Форма ответа: документ с полями из контекстного меню (ПКМ) — рамка фиолетовая у активного поля, серая у неактивного */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
                   Форма ответа клиенту <span className="text-red-600">*</span>
                 </label>
-                <textarea
-                  value={response}
-                  onChange={(e) => setResponse(e.target.value)}
-                  rows={12}
-                  placeholder="Введите текст ответа клиенту или выберите шаблон выше..."
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none resize-none font-mono"
-                />
+                <ResponseDocumentEditor value={response} onChange={setResponse} className="font-sans" minHeightPx={288} />
               </div>
             </div>
           </div>

@@ -21,7 +21,7 @@ function normalizeDto(raw) {
   return d
 }
 
-function statusToResponsibleCode(status) {
+export function statusToResponsibleCode(status) {
   const m = {
     "В работе": "IN_PROGRESS",
     "Назначено": "NOT_ASSIGNED",
@@ -277,22 +277,70 @@ export async function pgListByCabinet(pool, cabinet) {
   })
 }
 
-export async function pgResponsibleList(pool) {
-  const dtos = await pgListByCabinet(pool, "responsible")
-  return {
-    items: dtos.map((a) => ({
+/**
+ * GET /v1/responsible/appeals — из БД по словарю кабинетов + фильтры Swagger (status, q, page, size).
+ * @param {import('pg').Pool} pool
+ * @param {{ status?: string; q?: string; page?: number; size?: number }} [query]
+ */
+export async function pgResponsibleList(pool, query = {}) {
+  const page = Math.max(0, Number.isFinite(query.page) ? query.page : parseInt(String(query.page ?? "0"), 10) || 0)
+  const size = Math.min(
+    200,
+    Math.max(1, Number.isFinite(query.size) ? query.size : parseInt(String(query.size ?? "50"), 10) || 50),
+  )
+  const statusRaw = query.status != null && String(query.status).trim() ? String(query.status).trim() : null
+  const qRaw = query.q != null && String(query.q).trim() ? String(query.q).trim() : null
+
+  let sql = `
+    SELECT c.id, c.data, c.status_code, c.updated_at
+    FROM app.appeal_card c
+    INNER JOIN app.dict_appeal_status s ON s.code = c.status_code
+    WHERE 'responsible' = ANY(s.cabinets)`
+  const params = []
+  let i = 1
+  if (statusRaw) {
+    sql += ` AND c.status_code = $${i}`
+    params.push(statusRaw)
+    i += 1
+  }
+  if (qRaw) {
+    const needle = qRaw.toLowerCase()
+    sql += ` AND (
+      position($${i} in lower(c.id::text)) > 0
+      OR position($${i} in lower(coalesce(c.data->>'applicantName',''))) > 0
+      OR position($${i} in lower(coalesce(c.data->>'organizationName',''))) > 0
+      OR position($${i} in lower(coalesce(c.data->>'content',''))) > 0
+    )`
+    params.push(needle)
+    i += 1
+  }
+  sql += ` ORDER BY c.updated_at DESC NULLS LAST LIMIT $${i} OFFSET $${i + 1}`
+  params.push(size, page * size)
+
+  const { rows } = await pool.query(sql, params)
+
+  const items = rows.map((r) => {
+    const a = normalizeDto(r.data)
+    a.id = a.id ?? r.id
+    a.status = a.status ?? r.status_code
+    const updatedAt =
+      a.updatedAt ??
+      (r.updated_at instanceof Date ? r.updated_at.toISOString() : r.updated_at != null ? String(r.updated_at) : nowIso())
+    return {
       id: a.id,
       publicNumber: a.id,
       title: (a.content && String(a.content).slice(0, 120)) || a.applicantName || "—",
       categoryCode: "GENERAL",
       statusCode: statusToResponsibleCode(a.status),
       priorityCode: "NORMAL",
-      updatedAt: a.updatedAt ?? nowIso(),
+      updatedAt,
       slaDueAt: new Date(Date.now() + 864e5 * 5).toISOString(),
       flags: { overdue: false },
-    })),
-    nextCursor: null,
-  }
+    }
+  })
+
+  const nextCursor = items.length === size ? String(page + 1) : null
+  return { items, nextCursor }
 }
 
 export async function pgAuditAppealsPage(pool) {

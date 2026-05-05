@@ -193,28 +193,18 @@ export function createEdoApiRouter(getPool = () => null) {
 
   r.get(
     "/v1/responsible/appeals",
-    ah(async (_req, res) => {
+    ah(async (req, res) => {
+      const page = Math.max(0, parseInt(String(req.query.page ?? "0"), 10) || 0)
+      const size = Math.min(200, Math.max(1, parseInt(String(req.query.size ?? "50"), 10) || 50))
+      const status = req.query.status != null && String(req.query.status).trim() ? String(req.query.status).trim() : undefined
+      const q = req.query.q != null && String(req.query.q).trim() ? String(req.query.q).trim() : undefined
+      const query = { page, size, status, q }
       const p = getPool()
       if (p) {
-        res.json(await pgs.pgResponsibleList(p))
+        res.json(await pgs.pgResponsibleList(p, query))
         return
       }
-      res.json({
-        items: [
-          {
-            id: "r-1",
-            publicNumber: "347823",
-            title: "Навязывание услуги",
-            categoryCode: "CARDS",
-            statusCode: "IN_PROGRESS",
-            priorityCode: "NORMAL",
-            updatedAt: new Date().toISOString(),
-            slaDueAt: new Date(Date.now() + 864e5 * 5).toISOString(),
-            flags: { overdue: false },
-          },
-        ],
-        nextCursor: null,
-      })
+      res.json(store.listResponsibleAppeals(query))
     }),
   )
 
