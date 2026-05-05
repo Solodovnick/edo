@@ -24,13 +24,43 @@ function normalizeDto(raw) {
 function statusToResponsibleCode(status) {
   const m = {
     "В работе": "IN_PROGRESS",
+    "Назначено": "NOT_ASSIGNED",
     "На ответственном, не взято": "NOT_ASSIGNED",
     "На ответственном, взято": "ASSIGNED",
     "На БП": "ON_BP",
+    "Запрос в БП": "ON_BP",
     "На ПК": "ON_PK",
     "На HD": "ON_HD",
+    "Готово к подписи": "IN_PROGRESS",
   }
   return m[status] ?? "IN_PROGRESS"
+}
+
+/**
+ * Коды app.dict_appeal_status (02 + 05-dict-cabinet-statuses.sql) для колонки status_code (FK).
+ * БД без миграции 05: неизвестный статус сводится к «В работе».
+ */
+const DICT_APPEAL_STATUS_CODES = new Set([
+  "В работе",
+  "На ответственном, не взято",
+  "На ответственном, взято",
+  "На БП",
+  "На ПК",
+  "На HD",
+  "На аудите",
+  "Аудит",
+  "Решено",
+  "Назначено",
+  "Запрос в БП",
+  "Готово к подписи",
+  "Зарегистрировано",
+])
+
+export function mapAppealUiStatusToDictCode(uiStatus) {
+  const s = typeof uiStatus === "string" ? uiStatus.trim() : ""
+  if (!s) return "В работе"
+  if (DICT_APPEAL_STATUS_CODES.has(s)) return s
+  return "В работе"
 }
 
 export async function pgListAppealsDto(pool) {
@@ -65,35 +95,85 @@ async function nextNumericAppealId(pool) {
   return String(rows[0].n)
 }
 
+const RESPONSIBLE_CABINET_STATUSES_PG = new Set([
+  "Назначено",
+  "На ответственном, взято",
+  "Запрос в БП",
+  "Готово к подписи",
+])
+
 export async function pgAddAppealFromV1Create(pool, body) {
   const id = await nextNumericAppealId(pool)
+  const rawAppealType =
+    typeof body.appealType === "string" && body.appealType.trim()
+      ? body.appealType.trim()
+      : typeof body.category === "string" && /уст|регулятор|письм/i.test(body.category)
+        ? body.category
+        : "Письменное"
+  const categoryForUi =
+    rawAppealType === "Устное" || /уст/i.test(rawAppealType)
+      ? "Устное"
+      : rawAppealType === "Регулятор" || /регулятор/i.test(rawAppealType)
+        ? "Регулятор"
+        : "Письменное"
+
+  const respRaw =
+    typeof body.responsible === "string" && body.responsible.trim()
+      ? body.responsible.trim()
+      : "Не назначено"
+  const responsible = !respRaw || respRaw === "Не назначено" ? "Не назначено" : respRaw
+
+  const statusFromClient =
+    typeof body.status === "string" && body.status.trim() ? body.status.trim() : ""
+  const status =
+    statusFromClient && RESPONSIBLE_CABINET_STATUSES_PG.has(statusFromClient)
+      ? statusFromClient
+      : responsible !== "Не назначено"
+        ? "На ответственном, взято"
+        : "Назначено"
+
+  const deadlineStr =
+    typeof body.deadline === "string" && body.deadline.trim()
+      ? body.deadline.trim()
+      : ruShort(new Date(Date.now() + 864e5 * 15).toISOString())
+
+  const applicantCat = body.applicantCategory ?? body.type
+  const typeNorm = applicantCat === "Юр лицо" || applicantCat === "Юрлицо" ? "Юр лицо" : "Физ лицо"
+
   const dto = {
     id,
+    number: id,
     regDate: ruShort(nowIso()),
-    category: "Письменное",
+    category: categoryForUi,
     subcategory: typeof body.category === "string" ? body.category : "Общее",
-    status: "В работе",
-    deadline: ruShort(new Date(Date.now() + 864e5 * 15).toISOString()),
-    responsible: "Не назначено",
+    status,
+    deadline: deadlineStr,
+    responsible,
     applicantName: body.applicantName ?? "—",
     organizationName: body.organizationName ?? "N/A",
     address: "",
     cbs: "N/A",
-    type: body.type === "Юр лицо" || body.type === "Юрлицо" ? "Юр лицо" : "Физ лицо",
+    type: typeNorm,
     isMine: false,
     content: String(body.content ?? ""),
     solution: "",
     response: "",
     phone: body.phone ?? "",
     email: body.email ?? "",
-    appealType: "Письменное",
-    createdBy: "api",
+    appealType: categoryForUi,
+    createdBy: typeof body.createdBy === "string" ? body.createdBy : "api",
     updatedAt: nowIso(),
   }
+  const statusCode = mapAppealUiStatusToDictCode(status)
   await pool.query(
     `INSERT INTO app.appeal_card (id, status_code, data, updated_at) VALUES ($1, $2, $3::jsonb, now())`,
-    [id, "В работе", JSON.stringify(dto)],
+    [id, statusCode, JSON.stringify(dto)],
   )
+  await pgAppendNotification(pool, {
+    id: `n-${id}-${Date.now()}`,
+    type: "new_written_appeal",
+    title: `Зарегистрировано обращение ${id}`,
+  })
   return dto
 }
 
@@ -102,11 +182,7 @@ export async function pgPatchAppeal(pool, id, patch) {
   if (!cur) return null
   const merged = { ...cur, ...patch, updatedAt: nowIso() }
   const status = merged.status ?? cur.status
-  const { rows: dictRows } = await pool.query(
-    `SELECT code FROM app.dict_appeal_status WHERE code = $1 LIMIT 1`,
-    [status],
-  )
-  const statusCode = dictRows[0]?.code ?? "В работе"
+  const statusCode = mapAppealUiStatusToDictCode(status)
   await pool.query(
     `UPDATE app.appeal_card SET data = $2::jsonb, status_code = $3, updated_at = now() WHERE id = $1`,
     [String(id), JSON.stringify(merged), statusCode],
@@ -161,14 +237,19 @@ export async function pgListLegacySpringPage(pool, page, size, search) {
 export async function pgCreateLegacyFromBody(pool, body) {
   const dto = await pgAddAppealFromV1Create(pool, {
     content: body.content ?? body.appealCategory ?? "",
-    category: body.appealCategory,
+    category: body.category ?? body.appealCategory,
     applicantName: body.applicantName,
     organizationName: body.organizationName,
-    type: body.applicantCategory,
+    type: body.applicantCategory ?? body.type,
     phone: body.phone,
     email: body.email,
+    responsible: body.responsible,
+    appealType: body.appealType,
+    deadline: body.deadline,
+    status: body.status,
+    createdBy: body.createdBy,
   })
-  return { id: dto.id, number: dto.id }
+  return { id: dto.id, number: dto.number ?? dto.id }
 }
 
 export async function pgListByCabinet(pool, cabinet) {
@@ -358,4 +439,167 @@ export async function pgAuditPublish(pool, appealId, body) {
     details: { templateId, comment, uc: "UC-AU.03", fr: "FR-13.3" },
   })
   return pgPatchAppeal(pool, appealId, { status: "Решено" })
+}
+
+async function pgAppendNotification(pool, { id, type, title, userSub = "default" }) {
+  await pool.query(
+    `INSERT INTO app.notification (id, user_sub, type, title, read) VALUES ($1, $2, $3, $4, false)
+     ON CONFLICT (id) DO NOTHING`,
+    [id, userSub, type, title],
+  )
+}
+
+export async function pgListNotifications(pool, userSub = "default") {
+  const { rows } = await pool.query(
+    `SELECT id, type, title, read, created_at FROM app.notification WHERE user_sub = $1 ORDER BY created_at DESC LIMIT 200`,
+    [userSub],
+  )
+  return {
+    items: rows.map((r) => ({
+      id: r.id,
+      type: r.type,
+      title: r.title,
+      read: r.read === true,
+      createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+    })),
+  }
+}
+
+export async function pgMarkNotificationRead(pool, id, userSub = "default") {
+  const { rows } = await pool.query(
+    `UPDATE app.notification SET read = true WHERE id = $1 AND user_sub = $2 RETURNING id, read`,
+    [String(id), userSub],
+  )
+  if (!rows[0]) return null
+  return { id: rows[0].id, read: rows[0].read === true }
+}
+
+export async function pgSearchClients(pool, name, inn) {
+  const qName = (name ?? "").trim().toLowerCase()
+  const qInn = (inn ?? "").trim()
+  const { rows } = await pool.query(`SELECT id, name, inn, phone, type FROM app.crm_client`)
+  const hits = []
+  for (const c of rows) {
+    let score = 0
+    if (qInn && c.inn && String(c.inn).includes(qInn)) score = 0.99
+    else if (qName && String(c.name).toLowerCase().includes(qName)) score = 0.85
+    else if (qName && String(c.phone).includes(qName)) score = 0.7
+    if (score > 0) {
+      hits.push({
+        id: c.id,
+        name: c.name,
+        inn: c.inn || "—",
+        phone: c.phone,
+        type: c.type,
+        matchScore: score,
+      })
+    }
+  }
+  hits.sort((a, b) => b.matchScore - a.matchScore)
+  return { hits }
+}
+
+export async function pgCreateClient(pool, body) {
+  const id = `c-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  const name = String(body.name ?? "").trim() || "Без имени"
+  const inn = String(body.inn ?? "").trim()
+  const phone = String(body.phone ?? "").trim()
+  const type = body.type === "organization" ? "organization" : "individual"
+  await pool.query(
+    `INSERT INTO app.crm_client (id, name, inn, phone, type) VALUES ($1, $2, $3, $4, $5)`,
+    [id, name, inn, phone, type],
+  )
+  return { id, name, inn, phone, type, matchScore: 1 }
+}
+
+export async function pgAppealTimeline(pool, appealId) {
+  const { rows } = await pool.query(
+    `SELECT id::text, at, actor, action, details FROM app.event_log WHERE appeal_id = $1 ORDER BY at DESC`,
+    [String(appealId)],
+  )
+  return {
+    items: rows.map((r) => {
+      let payload = {}
+      if (r.details != null && typeof r.details === "object") payload = { ...r.details }
+      else if (typeof r.details === "string" && r.details) {
+        try {
+          payload = JSON.parse(r.details)
+        } catch {
+          payload = { raw: r.details }
+        }
+      }
+      return {
+        id: r.id,
+        type: r.action,
+        actorId: r.actor,
+        createdAt: r.at instanceof Date ? r.at.toISOString() : String(r.at),
+        payload,
+      }
+    }),
+    nextCursor: null,
+  }
+}
+
+export async function pgResponsibleAppealDetail(pool, appealId) {
+  const header = await pgFindAppeal(pool, appealId)
+  if (!header) return null
+  const { rows } = await pool.query(
+    `SELECT action, actor, at, details FROM app.event_log WHERE appeal_id = $1 ORDER BY at DESC LIMIT 8`,
+    [String(appealId)],
+  )
+  const actionsPreview = rows.map((r) => ({
+    action: r.action,
+    actor: r.actor,
+    at: r.at instanceof Date ? r.at.toISOString() : String(r.at),
+    details: r.details,
+  }))
+  return { header, actionsPreview, attachments: [] }
+}
+
+export async function pgResponsiblePostAction(pool, appealId, body) {
+  const cur = await pgFindAppeal(pool, appealId)
+  if (!cur) return null
+  const type = String(body?.type ?? "")
+  const payload = body?.payload && typeof body.payload === "object" ? body.payload : {}
+  await pgAppendEvent(pool, appealId, { actor: "responsible", action: type, details: payload })
+  switch (type) {
+    case "ACCEPT":
+      return pgPatchAppeal(pool, appealId, { status: "На ответственном, взято", isMine: true })
+    case "RETURN_TO_POOL":
+      return pgPatchAppeal(pool, appealId, { status: "На ответственном, не взято", responsible: "Не назначено" })
+    case "RESOLVE":
+      return pgPatchAppeal(pool, appealId, { status: "Решено" })
+    case "ESCALATE":
+      return pgPatchAppeal(pool, appealId, { status: "На HD" })
+    case "REQUEST_INFO":
+      return pgPatchAppeal(pool, appealId, { ...payload })
+    default:
+      return pgFindAppeal(pool, appealId)
+  }
+}
+
+export async function pgPrepareAttachmentUpload(pool, appealId, body) {
+  const a = await pgFindAppeal(pool, appealId)
+  if (!a) return null
+  const attId = `att-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+  await pool.query(
+    `INSERT INTO app.attachment_prepare (id, appeal_id, file_name, mime_type, byte_size) VALUES ($1, $2, $3, $4, $5)`,
+    [
+      attId,
+      String(appealId),
+      body?.fileName != null ? String(body.fileName) : null,
+      body?.mimeType != null ? String(body.mimeType) : null,
+      body?.byteSize != null ? Number(body.byteSize) : null,
+    ],
+  )
+  await pgAppendEvent(pool, appealId, {
+    actor: "responsible",
+    action: "PREPARE_UPLOAD",
+    details: { attachmentId: attId, fileName: body?.fileName },
+  })
+  return {
+    uploadUrl: "https://storage.example/presigned-mock",
+    expiresAt: new Date(Date.now() + 3600e3).toISOString(),
+    attachmentId: attId,
+  }
 }

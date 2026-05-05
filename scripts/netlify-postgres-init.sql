@@ -8,6 +8,9 @@
 --   server/init/01-schema.sql
 --   server/init/02-app-dictionary-and-appeals.sql
 --   server/init/03-app-event-log.sql
+--   server/init/04-app-notifications-crm-attachments.sql
+--   server/init/05-dict-cabinet-statuses.sql
+--   server/init/05-dict-cabinet-statuses.sql
 --
 -- Идемпотентность: CREATE IF NOT EXISTS, INSERT … ON CONFLICT DO NOTHING.
 -- При изменении init-файлов обновите этот файл или накатывайте через:
@@ -210,5 +213,79 @@ CREATE TABLE IF NOT EXISTS app.event_log (
 );
 
 CREATE INDEX IF NOT EXISTS idx_event_log_appeal_at ON app.event_log (appeal_id, at DESC);
+
+COMMIT;
+
+-- --- server/init/04-app-notifications-crm-attachments.sql ---------------------
+
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS app.notification (
+  id          TEXT PRIMARY KEY,
+  user_sub    TEXT NOT NULL DEFAULT 'default',
+  type        TEXT NOT NULL,
+  title       TEXT NOT NULL,
+  read        BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_notification_user_read ON app.notification (user_sub, read, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS app.crm_client (
+  id          TEXT PRIMARY KEY,
+  name        TEXT NOT NULL,
+  inn         TEXT NOT NULL DEFAULT '',
+  phone       TEXT NOT NULL DEFAULT '',
+  type        TEXT NOT NULL DEFAULT 'individual',
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_crm_client_name_lower ON app.crm_client (lower(name));
+CREATE INDEX IF NOT EXISTS idx_crm_client_inn ON app.crm_client (inn);
+
+CREATE TABLE IF NOT EXISTS app.attachment_prepare (
+  id          TEXT PRIMARY KEY,
+  appeal_id   TEXT NOT NULL REFERENCES app.appeal_card (id) ON DELETE CASCADE,
+  file_name   TEXT,
+  mime_type   TEXT,
+  byte_size   BIGINT,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO app.crm_client (id, name, inn, phone, type) VALUES
+  ('c-1', 'Иванов Иван Иванович', '', '+79001234567', 'individual'),
+  ('c-2', 'ООО "Ромашка"', '7707083893', '+74951234567', 'organization'),
+  ('c-3', 'Петров Пётр Петрович', '7701234567', '+79009999999', 'individual')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO app.notification (id, user_sub, type, title, read) VALUES
+  ('n-seed-1', 'default', 'new_written_appeal', 'Новое письменное обращение', FALSE)
+ON CONFLICT (id) DO NOTHING;
+
+COMMIT;
+
+-- --- server/init/05-dict-cabinet-statuses.sql ---------------------------------
+
+BEGIN;
+
+INSERT INTO app.dict_appeal_status (code, label_ru, cabinets) VALUES
+  ('Назначено', 'Назначено', ARRAY['responsible', 'manager', 'registrar']),
+  ('Запрос в БП', 'Запрос в БП', ARRAY['responsible', 'manager']),
+  ('Готово к подписи', 'Готово к подписи', ARRAY['responsible', 'manager']),
+  ('Зарегистрировано', 'Зарегистрировано', ARRAY['registrar', 'manager', 'responsible'])
+ON CONFLICT (code) DO NOTHING;
+
+COMMIT;
+
+-- --- server/init/05-dict-cabinet-statuses.sql ---------------------------------
+
+BEGIN;
+
+INSERT INTO app.dict_appeal_status (code, label_ru, cabinets) VALUES
+  ('Назначено', 'Назначено', ARRAY['responsible', 'manager', 'registrar']),
+  ('Запрос в БП', 'Запрос в БП', ARRAY['responsible', 'manager']),
+  ('Готово к подписи', 'Готово к подписи', ARRAY['responsible', 'manager']),
+  ('Зарегистрировано', 'Зарегистрировано', ARRAY['registrar', 'manager', 'responsible'])
+ON CONFLICT (code) DO NOTHING;
 
 COMMIT;

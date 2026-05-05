@@ -1,11 +1,9 @@
 import { appealStorage, type Appeal } from './appealStorage'
 import type { UnifiedAppeal } from '../data/unifiedAppealsData'
+import { edoApiV1BaseUrl } from './edoApiBase'
 
-/** База URL без завершающего `/`. Пусто = тот же origin (`/api/v1`, Vite-мок или прокси). */
 function apiRoot(): string {
-  const raw = import.meta.env.VITE_EDO_API_BASE as string | undefined
-  const trimmed = typeof raw === 'string' ? raw.trim().replace(/\/$/, '') : ''
-  return trimmed ? `${trimmed}/api/v1` : '/api/v1'
+  return edoApiV1BaseUrl()
 }
 
 async function apiGet<T>(path: string): Promise<T> {
@@ -348,6 +346,11 @@ function appealToRegistrarCreateBody(a: Appeal): Record<string, unknown> {
     type: a.type,
     phone: a.phone,
     email: a.email,
+    responsible: a.responsible,
+    appealType: a.appealType ?? a.category,
+    deadline: a.deadline,
+    status: a.status,
+    createdBy: a.createdBy,
   }
 }
 
@@ -363,8 +366,20 @@ export async function persistRegisteredAppeal(
     const created = await apiPost<AppealDto>('/appeals', appealToRegistrarCreateBody(appeal))
     merged = {
       ...merged,
-      id: created.id ?? merged.id,
+      id: created.id != null ? String(created.id) : merged.id,
       updatedAt: created.updatedAt ?? merged.updatedAt,
+      status: created.status ?? merged.status,
+      responsible: created.responsible ?? merged.responsible,
+      deadline: created.deadline ?? merged.deadline,
+      regDate: created.regDate ?? merged.regDate,
+      applicantName: created.applicantName ?? merged.applicantName,
+      organizationName: created.organizationName ?? merged.organizationName,
+      type:
+        created.type === 'Юр лицо' || created.type === 'Юрлицо'
+          ? 'Юр лицо'
+          : created.type === 'Физ лицо' || created.type === 'Физлицо'
+            ? 'Физ лицо'
+            : merged.type,
     }
   } catch {
     /* остаётся локальный id */

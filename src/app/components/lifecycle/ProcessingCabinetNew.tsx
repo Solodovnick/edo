@@ -37,7 +37,8 @@ export function ProcessingCabinetNew({ onOpenAppeal }: ProcessingCabinetProps) {
     setLoading(true);
     setError(null);
     try {
-      const data = await getCabinetAppeals(ALLOWED_STATUSES);
+      // Полный список с API; фильтр по статусам кабинета — на клиенте (иначе сиды «В работе» и новые записи расходятся).
+      const data = await getCabinetAppeals();
       setAllAppeals(data);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Не удалось загрузить обращения');
@@ -50,8 +51,10 @@ export function ProcessingCabinetNew({ onOpenAppeal }: ProcessingCabinetProps) {
     loadAppeals();
   }, [loadAppeals]);
 
+  const allowedAppeals = allAppeals.filter((a) => ALLOWED_STATUSES.includes(a.status));
+
   // Filter appeals based on active filter and search
-  const filteredAppeals = allAppeals.filter(appeal => {
+  const filteredAppeals = allowedAppeals.filter(appeal => {
     let ownershipMatch = true;
     if (activeFilter === 'Мои обращения') {
       ownershipMatch = appeal.responsible === 'Расул Рамазанов' || appeal.responsible === 'Александр Солодовников';
@@ -73,7 +76,7 @@ export function ProcessingCabinetNew({ onOpenAppeal }: ProcessingCabinetProps) {
       appeal.category.toLowerCase().includes(searchLower) ||
       appeal.status.toLowerCase().includes(searchLower);
 
-    return ownershipMatch && typeMatch && searchMatch && ALLOWED_STATUSES.includes(appeal.status);
+    return ownershipMatch && typeMatch && searchMatch;
   });
 
   // Sort appeals
@@ -87,10 +90,10 @@ export function ProcessingCabinetNew({ onOpenAppeal }: ProcessingCabinetProps) {
     return 0;
   });
 
-  const myAppealsCount = allAppeals.filter(
+  const myAppealsCount = allowedAppeals.filter(
     a => a.responsible === 'Расул Рамазанов' || a.responsible === 'Александр Солодовников'
   ).length;
-  const allAppealsCount = allAppeals.length;
+  const allAppealsCount = allowedAppeals.length;
 
   // Handle sort column click
   const handleSort = (column: string) => {

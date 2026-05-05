@@ -13,15 +13,14 @@ function ruShort(iso) {
   return d.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "2-digit" })
 }
 
-/** @type {Record<string, unknown>[]} */
-let appeals = [
-  {
-    id: "100001",
+function seedAppeal(id, patch) {
+  const base = {
+    id,
     regDate: ruShort(nowIso()),
     category: "Письменное",
-    subcategory: "Карты",
-    status: "В работе",
-    deadline: ruShort(new Date(Date.now() + 864e5 * 12).toISOString()),
+    subcategory: "Общее",
+    status: "Назначено",
+    deadline: ruShort(new Date(Date.now() + 864e5 * 14).toISOString()),
     responsible: "Не назначено",
     applicantName: "Иванов Иван Иванович",
     organizationName: "N/A",
@@ -29,38 +28,99 @@ let appeals = [
     cbs: "N/A",
     type: "Физ лицо",
     isMine: false,
-    content: "Демо-обращение из API",
+    content: "Демо-обращение (seed)",
     solution: "",
     response: "",
     phone: "+79001234567",
-    email: "client@example.com",
-    appealType: "Письменное",
-    createdBy: "seed",
-    updatedAt: nowIso(),
-  },
-  {
-    id: "100002",
-    regDate: ruShort(nowIso()),
-    category: "Письменное",
-    subcategory: "Кредиты",
-    status: "В работе",
-    deadline: ruShort(new Date(Date.now() + 864e5 * 10).toISOString()),
-    responsible: "Не назначено",
-    applicantName: "Петрова Анна Сергеевна",
-    organizationName: "N/A",
-    address: "",
-    cbs: "N/A",
-    type: "Физ лицо",
-    isMine: false,
-    content: "Второе демо-обращение",
-    solution: "",
-    response: "",
-    phone: "+79007654321",
     email: "",
     appealType: "Письменное",
     createdBy: "seed",
     updatedAt: nowIso(),
-  },
+  }
+  return { ...base, ...patch }
+}
+
+/** Демо-реестр для кабинета ответственного: статусы из ProcessingCabinetNew.ALLOWED_STATUSES */
+/** @type {Record<string, unknown>[]} */
+let appeals = [
+  seedAppeal("100001", {
+    status: "На ответственном, взято",
+    responsible: "Александр Солодовников",
+    category: "Устное",
+    appealType: "Устное",
+    subcategory: "Дистанционные сервисы",
+    applicantName: "Смирнов Алексей Викторович",
+    content: "Жалоба на задержку ответа в чате поддержки",
+  }),
+  seedAppeal("100002", {
+    status: "На ответственном, взято",
+    responsible: "Расул Рамазанов",
+    subcategory: "Кредиты",
+    applicantName: "Кузнецова Мария Олеговна",
+    content: "Претензия по срокам рассмотрения заявки на кредит",
+  }),
+  seedAppeal("100003", {
+    status: "Назначено",
+    responsible: "Не назначено",
+    subcategory: "Карты",
+    applicantName: "Николаев Пётр Сергеевич",
+    content: "Блокировка карты без уведомления",
+  }),
+  seedAppeal("100004", {
+    status: "На ответственном, взято",
+    responsible: "Александр Солодовников",
+    type: "Юр лицо",
+    applicantName: "N/A",
+    organizationName: 'ООО "Вектор"',
+    subcategory: "РКО",
+    content: "Несогласие с комиссией за расчётно-кассовое обслуживание",
+  }),
+  seedAppeal("100005", {
+    status: "Запрос в БП",
+    responsible: "Расул Рамазанов",
+    subcategory: "Валютный контроль",
+    applicantName: "Орлова Елена Дмитриевна",
+    content: "Запрос статуса валютной операции",
+  }),
+  seedAppeal("100006", {
+    status: "Готово к подписи",
+    responsible: "Александр Солодовников",
+    subcategory: "Ипотека",
+    applicantName: "Волков Дмитрий Андреевич",
+    content: "Согласование графика досрочных платежей",
+  }),
+  seedAppeal("100007", {
+    status: "Назначено",
+    responsible: "Не назначено",
+    type: "Юр лицо",
+    applicantName: "N/A",
+    organizationName: "АО «Северсталь-Финанс»",
+    subcategory: "Гарантии",
+    content: "Уточнение условий банковской гарантии",
+  }),
+  seedAppeal("100008", {
+    status: "На ответственном, взято",
+    responsible: "Александр Солодовников",
+    category: "Устное",
+    appealType: "Устное",
+    subcategory: "Колл-центр",
+    applicantName: "Тихонов Игорь Николаевич",
+    content: "Устная жалоба на навязывание страховки при выдаче кредита",
+  }),
+  seedAppeal("100009", {
+    status: "Запрос в БП",
+    responsible: "Не назначено",
+    subcategory: "Переводы",
+    applicantName: "Морозова Анна Павловна",
+    content: "Перевод не поступил на счёт получателя",
+  }),
+  seedAppeal("100010", {
+    status: "Назначено",
+    responsible: "Петрова Ирина Сергеевна",
+    subcategory: "Вклады",
+    applicantName: "Лебедев Константин Юрьевич",
+    content: "Перерасчёт процентов по вкладу",
+  }),
 ]
 
 /** @type {{ id: string, name: string, inn: string, phone: string, type: string, matchScore?: number }[]} */
@@ -70,7 +130,25 @@ let clients = [
   { id: "c-3", name: "Петров Пётр Петрович", inn: "7701234567", phone: "+79009999999", type: "individual" },
 ]
 
-let nextAppealNum = 100003
+/** @type {{ id: string, type: string, title: string, read: boolean, createdAt: string }[]} */
+let notifications = [
+  {
+    id: "n1",
+    type: "new_written_appeal",
+    title: "Новое письменное обращение",
+    read: false,
+    createdAt: new Date().toISOString(),
+  },
+]
+
+let nextAppealNum = 100011
+
+const RESPONSIBLE_CABINET_STATUSES = new Set([
+  "Назначено",
+  "На ответственном, взято",
+  "Запрос в БП",
+  "Готово к подписи",
+])
 
 export function listAppealsDto() {
   return [...appeals]
@@ -86,14 +164,47 @@ export function findAppeal(id) {
 
 export function addAppealFromV1Create(body) {
   const id = String(nextAppealNum++)
+  const rawAppealType =
+    typeof body.appealType === "string" && body.appealType.trim()
+      ? body.appealType.trim()
+      : typeof body.category === "string" && /уст|регулятор|письм/i.test(body.category)
+        ? body.category
+        : "Письменное"
+  const categoryForUi =
+    rawAppealType === "Устное" || /уст/i.test(rawAppealType)
+      ? "Устное"
+      : rawAppealType === "Регулятор" || /регулятор/i.test(rawAppealType)
+        ? "Регулятор"
+        : "Письменное"
+
+  const respRaw =
+    typeof body.responsible === "string" && body.responsible.trim()
+      ? body.responsible.trim()
+      : "Не назначено"
+  const responsible = !respRaw || respRaw === "Не назначено" ? "Не назначено" : respRaw
+
+  const statusFromClient =
+    typeof body.status === "string" && body.status.trim() ? body.status.trim() : ""
+  const status =
+    statusFromClient && RESPONSIBLE_CABINET_STATUSES.has(statusFromClient)
+      ? statusFromClient
+      : responsible !== "Не назначено"
+        ? "На ответственном, взято"
+        : "Назначено"
+
+  const deadlineStr =
+    typeof body.deadline === "string" && body.deadline.trim()
+      ? body.deadline.trim()
+      : ruShort(new Date(Date.now() + 864e5 * 15).toISOString())
+
   const dto = {
     id,
     regDate: ruShort(nowIso()),
-    category: "Письменное",
+    category: categoryForUi,
     subcategory: typeof body.category === "string" ? body.category : "Общее",
-    status: "В работе",
-    deadline: ruShort(new Date(Date.now() + 864e5 * 15).toISOString()),
-    responsible: "Не назначено",
+    status,
+    deadline: deadlineStr,
+    responsible,
     applicantName: body.applicantName ?? "—",
     organizationName: body.organizationName ?? "N/A",
     address: "",
@@ -105,11 +216,18 @@ export function addAppealFromV1Create(body) {
     response: "",
     phone: body.phone ?? "",
     email: body.email ?? "",
-    appealType: "Письменное",
-    createdBy: "api",
+    appealType: categoryForUi,
+    createdBy: typeof body.createdBy === "string" ? body.createdBy : "api",
     updatedAt: nowIso(),
   }
   appeals = [dto, ...appeals]
+  notifications.unshift({
+    id: `n-${id}-${Date.now()}`,
+    type: "new_written_appeal",
+    title: `Зарегистрировано обращение ${id}`,
+    read: false,
+    createdAt: nowIso(),
+  })
   return dto
 }
 
@@ -162,6 +280,11 @@ export function createLegacyFromBody(body) {
     type: body.applicantCategory,
     phone: body.phone,
     email: body.email,
+    responsible: body.responsible,
+    appealType: body.appealType,
+    deadline: body.deadline,
+    status: body.status,
+    createdBy: body.createdBy,
   })
   return { id: dto.id, number: dto.id }
 }
@@ -312,4 +435,85 @@ export function auditPublish(id, body) {
     }),
   })
   return patchAppeal(id, { status: "Решено" })
+}
+
+export function listNotifications() {
+  return { items: notifications.map((n) => ({ ...n })) }
+}
+
+export function markNotificationRead(notificationId) {
+  const i = notifications.findIndex((n) => n.id === String(notificationId))
+  if (i === -1) return null
+  notifications[i] = { ...notifications[i], read: true }
+  return { id: notifications[i].id, read: true }
+}
+
+export function appealTimeline(appealId) {
+  const log = getAuditLog(appealId)
+  return {
+    items: log.entries.map((e) => ({
+      id: e.id,
+      type: e.action,
+      actorId: e.actor,
+      createdAt: e.at,
+      payload: (() => {
+        try {
+          return e.details ? JSON.parse(e.details) : {}
+        } catch {
+          return { raw: e.details }
+        }
+      })(),
+    })),
+    nextCursor: null,
+  }
+}
+
+export function responsibleAppealDetail(appealId) {
+  const header = findAppeal(appealId)
+  if (!header) return null
+  const log = getAuditLog(appealId)
+  const actionsPreview = log.entries.slice(0, 8).map((e) => ({
+    action: e.action,
+    actor: e.actor,
+    at: e.at,
+    details: e.details,
+  }))
+  return { header, actionsPreview, attachments: [] }
+}
+
+export function responsiblePostAction(appealId, body) {
+  const cur = findAppeal(appealId)
+  if (!cur) return null
+  const type = String(body?.type ?? "")
+  const payload = body?.payload && typeof body.payload === "object" ? body.payload : {}
+  appendEventLog(appealId, { actor: "responsible", action: type, details: JSON.stringify(payload) })
+  switch (type) {
+    case "ACCEPT":
+      return patchAppeal(appealId, { status: "На ответственном, взято", isMine: true })
+    case "RETURN_TO_POOL":
+      return patchAppeal(appealId, { status: "На ответственном, не взято", responsible: "Не назначено" })
+    case "RESOLVE":
+      return patchAppeal(appealId, { status: "Решено" })
+    case "ESCALATE":
+      return patchAppeal(appealId, { status: "На HD" })
+    case "REQUEST_INFO":
+      return patchAppeal(appealId, { ...payload })
+    default:
+      return findAppeal(appealId)
+  }
+}
+
+export function prepareAttachmentUpload(appealId, body) {
+  if (!findAppeal(appealId)) return null
+  const attId = `att-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+  appendEventLog(appealId, {
+    actor: "responsible",
+    action: "PREPARE_UPLOAD",
+    details: JSON.stringify({ attachmentId: attId, fileName: body?.fileName }),
+  })
+  return {
+    uploadUrl: "https://storage.example/presigned-mock",
+    expiresAt: new Date(Date.now() + 3600e3).toISOString(),
+    attachmentId: attId,
+  }
 }

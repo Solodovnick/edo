@@ -221,43 +221,67 @@ export function createEdoApiRouter(getPool = () => null) {
   r.get(
     "/v1/responsible/appeals/:id",
     ah(async (req, res) => {
-      res.json({
-        header: await sampleFallback(getPool, req.params.id),
-        actionsPreview: [],
-        attachments: [],
-      })
+      const { id } = req.params
+      const p = getPool()
+      if (p) {
+        const detail = await pgs.pgResponsibleAppealDetail(p, id)
+        if (!detail) return res.status(404).json(err(404, "NOT_FOUND", "Обращение не найдено"))
+        return res.json(detail)
+      }
+      const detail = store.responsibleAppealDetail(id)
+      if (!detail) return res.status(404).json(err(404, "NOT_FOUND", "Обращение не найдено"))
+      res.json(detail)
     }),
   )
 
-  r.get("/v1/responsible/appeals/:id/timeline", (_req, res) => {
-    res.json({
-      items: [
-        {
-          id: "a1",
-          type: "ACCEPT",
-          actorId: "user-1",
-          createdAt: new Date().toISOString(),
-          payload: {},
-        },
-      ],
-      nextCursor: null,
-    })
-  })
+  r.get(
+    "/v1/responsible/appeals/:id/timeline",
+    ah(async (req, res) => {
+      const { id } = req.params
+      const p = getPool()
+      if (p) {
+        const a = await pgs.pgFindAppeal(p, id)
+        if (!a) return res.status(404).json(err(404, "NOT_FOUND", "Обращение не найдено"))
+        return res.json(await pgs.pgAppealTimeline(p, id))
+      }
+      if (!store.findAppeal(id)) return res.status(404).json(err(404, "NOT_FOUND", "Обращение не найдено"))
+      res.json(store.appealTimeline(id))
+    }),
+  )
 
-  r.post("/v1/responsible/appeals/:id/actions", (req, res) => {
-    const { id } = req.params
-    if (id === "403") return res.status(403).json(err(403, "FORBIDDEN", "Обращение не назначено на вас"))
-    if (!req.body?.type) return res.status(422).json(err(422, "VALIDATION", "Поле type обязательно"))
-    res.json({ accepted: true, appealId: id, type: req.body.type })
-  })
+  r.post(
+    "/v1/responsible/appeals/:id/actions",
+    ah(async (req, res) => {
+      const { id } = req.params
+      if (id === "403") return res.status(403).json(err(403, "FORBIDDEN", "Обращение не назначено на вас"))
+      if (!req.body?.type) return res.status(422).json(err(422, "VALIDATION", "Поле type обязательно"))
+      const p = getPool()
+      if (p) {
+        const updated = await pgs.pgResponsiblePostAction(p, id, req.body ?? {})
+        if (!updated) return res.status(404).json(err(404, "NOT_FOUND", "Обращение не найдено"))
+        return res.json({ accepted: true, appealId: id, type: req.body.type })
+      }
+      const updated = store.responsiblePostAction(id, req.body ?? {})
+      if (!updated) return res.status(404).json(err(404, "NOT_FOUND", "Обращение не найдено"))
+      res.json({ accepted: true, appealId: id, type: req.body.type })
+    }),
+  )
 
-  r.post("/v1/responsible/appeals/:id/attachments\\:prepareUpload", (_req, res) => {
-    res.json({
-      uploadUrl: "https://storage.example/presigned-mock",
-      expiresAt: new Date(Date.now() + 3600e3).toISOString(),
-      attachmentId: "att-mock-1",
-    })
-  })
+  r.post(
+    "/v1/responsible/appeals/:id/attachments\\:prepareUpload",
+    ah(async (req, res) => {
+      const { id } = req.params
+      const p = getPool()
+      if (p) {
+        const out = await pgs.pgPrepareAttachmentUpload(p, id, req.body ?? {})
+        if (!out) return res.status(404).json(err(404, "NOT_FOUND", "Обращение не найдено"))
+        return res.json(out)
+      }
+      const out = store.prepareAttachmentUpload(id, req.body ?? {})
+      if (!out) return res.status(404).json(err(404, "NOT_FOUND", "Обращение не найдено"))
+      res.json(out)
+    }),
+  )
 
   r.get(
     "/v1/secretary/appeals",
@@ -429,37 +453,53 @@ export function createEdoApiRouter(getPool = () => null) {
     }),
   )
 
-  r.get("/v1/notifications", (_req, res) => {
-    res.json({
-      items: [
-        {
-          id: "n1",
-          type: "new_written_appeal",
-          title: "Новое письменное обращение",
-          read: false,
-          createdAt: new Date().toISOString(),
-        },
-      ],
-    })
-  })
+  r.get(
+    "/v1/notifications",
+    ah(async (_req, res) => {
+      const p = getPool()
+      if (p) return res.json(await pgs.pgListNotifications(p))
+      res.json(store.listNotifications())
+    }),
+  )
 
-  r.patch("/v1/notifications/:id/read", (req, res) => {
-    res.json({ id: req.params.id, read: true })
-  })
+  r.patch(
+    "/v1/notifications/:id/read",
+    ah(async (req, res) => {
+      const p = getPool()
+      if (p) {
+        const row = await pgs.pgMarkNotificationRead(p, req.params.id)
+        if (!row) return res.status(404).json(err(404, "NOT_FOUND", "Уведомление не найдено"))
+        return res.json(row)
+      }
+      const row = store.markNotificationRead(req.params.id)
+      if (!row) return res.status(404).json(err(404, "NOT_FOUND", "Уведомление не найдено"))
+      res.json(row)
+    }),
+  )
 
-  r.get("/v1/crm/clients/search", (req, res) => {
-    const name = req.query.name ? String(req.query.name) : ""
-    const inn = req.query.inn ? String(req.query.inn) : ""
-    res.json(store.searchClients({ name, inn }))
-  })
+  r.get(
+    "/v1/crm/clients/search",
+    ah(async (req, res) => {
+      const name = req.query.name ? String(req.query.name) : ""
+      const inn = req.query.inn ? String(req.query.inn) : ""
+      const p = getPool()
+      if (p) return res.json(await pgs.pgSearchClients(p, name, inn))
+      res.json(store.searchClients({ name, inn }))
+    }),
+  )
 
-  r.post("/v1/crm/clients", (req, res) => {
-    const body = req.body ?? {}
-    if (!body.name && !body.phone && !body.inn) {
-      return res.status(422).json(err(422, "VALIDATION", "Укажите name, phone или inn"))
-    }
-    res.status(201).json(store.createClient(body))
-  })
+  r.post(
+    "/v1/crm/clients",
+    ah(async (req, res) => {
+      const body = req.body ?? {}
+      if (!body.name && !body.phone && !body.inn) {
+        return res.status(422).json(err(422, "VALIDATION", "Укажите name, phone или inn"))
+      }
+      const p = getPool()
+      const created = p ? await pgs.pgCreateClient(p, body) : store.createClient(body)
+      res.status(201).json(created)
+    }),
+  )
 
   r.get(
     "/v1/stats/registrar/month",

@@ -266,21 +266,26 @@ export function AppealRegistrationCard({ onBack, onSave }: AppealRegistrationCar
     // Determine type - только Физлицо или Юрлицо
     const type = applicantType === 'company' ? 'Юрлицо' : 'Физлицо';
 
+    const respTrim = (responsible || '').trim()
+    const hasAssignee = Boolean(respTrim) && respTrim !== 'Не назначено'
+    const cabinetStatus = hasAssignee ? 'На ответственном, взято' : 'Назначено'
+
     // Create appeal object
     const appeal: Appeal = {
       id,
       regDate,
       category: appealType,
       subcategory,
-      status: 'В работе',
+      status: cabinetStatus,
       deadline,
-      responsible,
+      responsible: respTrim || 'Не назначено',
       applicantName: applicantType === 'individual' ? applicantName : 'N/A',
       organizationName: applicantType === 'company' ? organizationName : 'N/A',
       address: address || 'N/A',
       cbs: 'N/A',
       type,
-      isMine: responsible === 'Расул Рамазанов' || responsible === 'Александр Солодовников',
+      isMine:
+        respTrim === 'Расул Рамазанов' || respTrim === 'Александр Солодовников',
       content,
       solution: '',
       response: '',

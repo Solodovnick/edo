@@ -1,7 +1,4 @@
-/** Пустая строка = тот же origin (Netlify + rewrite на `/.netlify/functions/api`). Иначе полный URL бэкенда. */
-const API_BASE = String((import.meta as any).env?.VITE_API_URL ?? '')
-  .trim()
-  .replace(/\/$/, '');
+import { edoApiV1BaseUrl } from './edoApiBase';
 
 // ── Backend DTO (AppealListItemDto) ──────────────────────────────────────────
 export interface AppealListItem {
@@ -223,35 +220,45 @@ function calcDeadlineCountdown(deadline: string): { days: number; hours: number;
   return { days, hours, minutes };
 }
 
-function listItemToCabinet(a: AppealListItem): CabinetAppeal {
+function listItemToCabinet(raw: Record<string, unknown>): CabinetAppeal {
+  const a = raw
+  const appealTypeStr = String(a.appealType ?? a.category ?? 'Письменное')
+  const applicantCatRaw = a.applicantCategory ?? a.type
+  const applicantCategory =
+    applicantCatRaw != null && String(applicantCatRaw).trim() !== ''
+      ? String(applicantCatRaw)
+      : 'Физ лицо'
+  const applicantNorm =
+    applicantCategory === 'Юр лицо' || applicantCategory === 'Юрлицо' ? 'Юр лицо' : 'Физ лицо'
   return {
-    id: a.id,
-    number: a.number ?? '',
-    regDate: a.regDate ?? '',
-    deadline: a.deadline ?? '',
-    category: APPEAL_TYPE_TO_CATEGORY[a.appealType] ?? 'Письменное',
-    status: a.status ?? '',
-    applicantCategory: a.applicantCategory ?? '',
-    type: a.applicantCategory === 'Физ лицо' ? 'Физ лицо' : 'Юр лицо',
-    applicantName: a.applicantName ?? '',
-    organizationName: a.organizationName ?? '',
+    id: String(a.id ?? ''),
+    number: String(a.number ?? a.id ?? ''),
+    regDate: String(a.regDate ?? ''),
+    deadline: String(a.deadline ?? ''),
+    category: APPEAL_TYPE_TO_CATEGORY[appealTypeStr] ?? 'Письменное',
+    status: String(a.status ?? ''),
+    applicantCategory,
+    type: applicantNorm === 'Физ лицо' ? 'Физ лицо' : 'Юр лицо',
+    applicantName: a.applicantName != null ? String(a.applicantName) : '',
+    organizationName: a.organizationName != null ? String(a.organizationName) : '',
     content: '',
     solution: '',
     response: '',
-    responsible: a.responsible ?? '',
+    responsible: a.responsible != null ? String(a.responsible) : '',
     registrar: '',
-    appealCategory: a.appealCategory ?? '',
+    appealCategory: a.appealCategory != null ? String(a.appealCategory) : '',
     appealSubcategory: '',
     cbs: '',
     phone: '',
     email: '',
     address: '',
-    auditStatus: AUDIT_STATUS_MAP[a.status] ?? (a.auditStatus as CabinetAppeal['auditStatus']) ?? 'pending',
+    auditStatus:
+      AUDIT_STATUS_MAP[String(a.status)] ?? (a.auditStatus as CabinetAppeal['auditStatus']) ?? 'pending',
     priority: (a.priority as CabinetAppeal['priority']) ?? 'Средний',
-    requiresAttention: a.requiresAttention ?? false,
-    requiresSignature: a.requiresSignature ?? false,
+    requiresAttention: Boolean(a.requiresAttention),
+    requiresSignature: Boolean(a.requiresSignature),
     isMine: false,
-    deadlineCountdown: calcDeadlineCountdown(a.deadline ?? ''),
+    deadlineCountdown: calcDeadlineCountdown(String(a.deadline ?? '')),
     attachments: [],
     crmComments: [],
     history: [],
@@ -297,16 +304,16 @@ function fullDtoToCabinet(dto: any): CabinetAppeal {
 
 // ── API-вызовы ───────────────────────────────────────────────────────────────
 export async function getCabinetAppeals(statuses?: string[]): Promise<CabinetAppeal[]> {
-  const res = await fetch(`${API_BASE}/api/v1/appeals?size=200&page=0`);
+  const res = await fetch(`${edoApiV1BaseUrl()}/appeals?size=200&page=0`);
   if (!res.ok) throw new Error(`Ошибка API: ${res.status}`);
   const data: AppealsPage = await res.json();
-  const all = data.items.map(listItemToCabinet);
+  const all = data.items.map((row) => listItemToCabinet(row as unknown as Record<string, unknown>));
   if (!statuses || statuses.length === 0) return all;
   return all.filter(a => statuses.includes(a.status));
 }
 
 export async function getAppealDetail(id: string): Promise<CabinetAppeal> {
-  const res = await fetch(`${API_BASE}/api/v1/appeals/${id}`);
+  const res = await fetch(`${edoApiV1BaseUrl()}/appeals/${encodeURIComponent(id)}`);
   if (!res.ok) throw new Error(`Ошибка API: ${res.status}`);
   const dto = await res.json();
   return fullDtoToCabinet(dto);
@@ -323,7 +330,7 @@ export async function getAppeals(
   if (search) params.set('q', search);
   if (status) params.set('status', status);
   if (category) params.set('category', category);
-  const res = await fetch(`${API_BASE}/api/v1/appeals?${params}`);
+  const res = await fetch(`${edoApiV1BaseUrl()}/appeals?${params}`);
   if (!res.ok) throw new Error(`Ошибка API: ${res.status}`);
   const data: AppealsPage = await res.json();
   return {
@@ -350,7 +357,7 @@ export async function createAppeal(data: CreateComplaintData): Promise<{ id: str
   if (data.category) body.appealCategory = data.category;
   if (data.assignedTo) body.responsible = data.assignedTo;
 
-  const res = await fetch(`${API_BASE}/api/v1/appeals`, {
+  const res = await fetch(`${edoApiV1BaseUrl()}/appeals`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -359,6 +366,8 @@ export async function createAppeal(data: CreateComplaintData): Promise<{ id: str
     const err = await res.json().catch(() => ({}));
     throw new Error((err as any).message ?? `Ошибка сохранения: ${res.status}`);
   }
-  const created = await res.json();
-  return { id: created.id, number: created.number };
+  const created = (await res.json()) as { id?: string; number?: string };
+  const id = created.id != null ? String(created.id) : '';
+  const number = created.number != null ? String(created.number) : id;
+  return { id, number };
 }

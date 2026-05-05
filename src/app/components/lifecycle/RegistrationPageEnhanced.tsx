@@ -1093,14 +1093,18 @@ function RegistrationCard({ onBack, onRegisterSuccess }: { onBack: () => void, o
       deadline.setDate(deadline.getDate() + 3); // Регуляторные - 3 дня
     }
     
+    const respTrim = (responsibleName || '').trim()
+    const hasAssignee = Boolean(respTrim) && respTrim !== 'Не назначено'
+    const cabinetStatus = hasAssignee ? 'На ответственном, взято' : 'Назначено'
+
     const newAppeal: Appeal = {
       id: newAppealId,
       regDate: registrationDate,
       category: appealType === 'oral' ? 'Устное' : 'Письменное',
       subcategory,
-      status: 'В работе',
+      status: cabinetStatus,
       deadline: deadline.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }),
-      responsible: responsibleName || 'Не назначено',
+      responsible: respTrim || 'Не назначено',
       applicantName: applicantType === 'individual' ? applicantName : 'N/A',
       organizationName: applicantType === 'company' ? organizationName : 'N/A',
       address: address || 'N/A',
@@ -1121,7 +1125,7 @@ function RegistrationCard({ onBack, onRegisterSuccess }: { onBack: () => void, o
 
     if (ok) {
       toast.success(`Обращение №${appeal.id} зарегистрировано!`, {
-        description: `Статус: "В работе", срок исполнения: ${appeal.deadline}`,
+        description: `Статус: «${appeal.status}», срок исполнения: ${appeal.deadline}`,
       });
       onRegisterSuccess();
     } else {
