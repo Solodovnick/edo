@@ -1,3 +1,4 @@
+
 # EDO Bank
 
 Веб-интерфейс **внутреннего модуля ЭДО** банка для департамента **ДУКО** (управление качеством обслуживания): учёт и обработка **обращений** клиентов и регулятора. Исходный UI-магнит: [Figma — EDO-Bank](https://www.figma.com/design/ohKA7YUB4W1nvmFqxpFa7G/EDO-Bank).
@@ -12,7 +13,8 @@
 - **Контекст:** легаси система в существующем банке не может быть доработана и новый модуль должен быть интегрирован в действующую архитектуру, поэтому в процессе решения мы подстраиваемся в то, что уже сейчас в проде.
 - **Источник правды по смыслу «зачем»:** [`docs/core-source-context.md`](docs/core-source-context.md). Поведение экранов и полей — в [`docs/functional-requirements.md`](docs/functional-requirements.md) и связанных артефактах.
 
-![Uploading Gemini_Generated_Image_th7f4xth7f4xth7f.png…]()
+<img width="1408" height="768" alt="Gemini_Generated_Image_th7f4xth7f4xth7f" src="https://github.com/user-attachments/assets/5349dace-64f2-4638-ace3-5f02de8eb223" />
+
 
 ---
 
