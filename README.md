@@ -14,6 +14,7 @@
 - **Источник правды по смыслу «зачем»:** [`docs/core-source-context.md`](docs/core-source-context.md). Поведение экранов и полей — в [`docs/functional-requirements.md`](docs/functional-requirements.md) и связанных артефактах.
 
 <img width="1408" height="768" alt="Gemini_Generated_Image_th7f4xth7f4xth7f" src="https://github.com/user-attachments/assets/5349dace-64f2-4638-ace3-5f02de8eb223" />
+```mermaid
 
 sequenceDiagram
     autonumber
@@ -50,7 +51,7 @@ sequenceDiagram
             end
         end
     end
-
+```
 ---
 
 ## 2. Архитектура проекта
