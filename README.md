@@ -13,7 +13,9 @@
 - **Контекст:** легаси система в существующем банке не может быть доработана и новый модуль должен быть интегрирован в действующую архитектуру, поэтому в процессе решения мы подстраиваемся в то, что уже сейчас в проде.
 - **Источник правды по смыслу «зачем»:** [`docs/core-source-context.md`](docs/core-source-context.md). Поведение экранов и полей — в [`docs/functional-requirements.md`](docs/functional-requirements.md) и связанных артефактах.
 
-<img width="1408" height="768" alt="Gemini_Generated_Image_th7f4xth7f4xth7f" src="https://github.com/user-attachments/assets/5349dace-64f2-4638-ace3-5f02de8eb223" />
+<img width="1408" height="768" alt="Gemini_Generated_Image_th7f4xth7f4xth7f" src="https://github.com/user-attachments/assets/4224d1fb-9cab-4f44-a316-febf9532df8e" />
+
+
 
 ```mermaid
 sequenceDiagram
