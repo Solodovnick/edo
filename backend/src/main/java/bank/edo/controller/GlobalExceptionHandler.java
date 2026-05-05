@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -17,6 +18,12 @@ public class GlobalExceptionHandler {
         String msg = ex.getBindingResult().getFieldErrors().stream().map(FieldError::getDefaultMessage).collect(Collectors.joining("; "));
         return ErrorResponse.of(400,"Validation Error",msg);
     }
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class) @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse typeMismatch(MethodArgumentTypeMismatchException ex) {
+        return ErrorResponse.of(400,"Bad Request","Некорректный формат параметра '" + ex.getName() + "': " + ex.getValue());
+    }
+    @ExceptionHandler(IllegalArgumentException.class) @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse illegalArg(IllegalArgumentException ex) { return ErrorResponse.of(400,"Bad Request",ex.getMessage()); }
     @ExceptionHandler(Exception.class) @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse generic(Exception ex) { return ErrorResponse.of(500,"Internal Error",ex.getMessage()); }
 }

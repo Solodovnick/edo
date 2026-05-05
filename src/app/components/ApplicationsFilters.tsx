@@ -1,47 +1,67 @@
-import { Plus, Search, Pin, Inbox, ListChecks, Star, Calendar } from 'lucide-react';
-import { useState } from 'react';
+import { Plus, Search, Pin, ListChecks, User, Building2, Shield } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 
-interface ApplicationsFiltersProps {
-  onFilterChange: (filters: any) => void;
+export interface FilterState {
+  search: string;
+  category: string;
+  slaStatus: string;
 }
 
-export function ApplicationsFilters({ onFilterChange }: ApplicationsFiltersProps) {
-  const [activeTab, setActiveTab] = useState('my-queue');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilters, setStatusFilters] = useState({
-    new: true,
-    inProgress: true,
-    waiting: true,
-  });
-  const [urgencyFilter, setUrgencyFilter] = useState('all');
-  const [slaFilter, setSlaFilter] = useState('all');
-  const [typeFilters, setTypeFilters] = useState({
-    written: true,
-    verbal: true,
-    regulatory: true,
-  });
+interface ApplicationsFiltersProps {
+  onFilterChange: (filters: FilterState) => void;
+  onNewAppeal?: () => void;
+}
 
-  const tabs = [
-    { id: 'my-queue', label: 'Мои очередь', icon: Pin },
-    { id: 'incoming', label: 'Входящие (Не распределены)', icon: Inbox },
-    { id: 'by-status', label: 'По статусам', icon: ListChecks },
-    { id: 'favorites', label: 'Избранные', icon: Star },
-    { id: 'by-date', label: 'По датам', icon: Calendar },
-  ];
+const CATEGORY_TABS = [
+  { id: '', label: 'Все обращения', icon: ListChecks },
+  { id: 'mine', label: 'Мои обращения', icon: Pin },
+  { id: 'Физ лицо', label: 'Физ. лицо', icon: User },
+  { id: 'Юр лицо', label: 'Юр. лицо', icon: Building2 },
+  { id: 'Регулятор', label: 'Регулятор', icon: Shield },
+] as const;
+
+const SLA_OPTIONS = [
+  { id: '', label: 'Все' },
+  { id: 'warning', label: 'Близко к дедлайну' },
+  { id: 'violated', label: 'В нарушении' },
+];
+
+export function ApplicationsFilters({ onFilterChange, onNewAppeal }: ApplicationsFiltersProps) {
+  const [category, setCategory] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [slaStatus, setSlaStatus] = useState('');
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Emit immediately on category / sla change; debounce search
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      onFilterChange({ search: searchQuery, category: category === 'mine' ? '' : category, slaStatus });
+    }, 350);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, category, slaStatus]);
 
   return (
-    <aside className="w-[240px] bg-white border-r border-gray-200 overflow-y-auto">
+    <aside className="w-[240px] bg-white border-r border-gray-200 overflow-y-auto flex-shrink-0">
       {/* Быстрые действия */}
       <div className="p-4 border-b border-gray-200">
-        <button className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#00AA44] text-white rounded-lg hover:bg-[#008833] transition-colors text-sm font-medium mb-3">
-          <Plus className="w-4 h-4" />
-          Новое обращение
-        </button>
+        {onNewAppeal && (
+          <button
+            onClick={onNewAppeal}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#00AA44] text-white rounded-lg hover:bg-[#008833] transition-colors text-sm font-medium mb-3"
+          >
+            <Plus className="w-4 h-4" />
+            Новое обращение
+          </button>
+        )}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
             type="text"
-            placeholder="Поиск..."
+            placeholder="Поиск по имени, номеру…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0051BA] focus:border-transparent"
@@ -49,190 +69,48 @@ export function ApplicationsFilters({ onFilterChange }: ApplicationsFiltersProps
         </div>
       </div>
 
-      {/* Вкладки фильтров */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="space-y-1">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-                  activeTab === tab.id
-                    ? 'bg-[#0051BA] text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                <span className="truncate text-left flex-1">{tab.label}</span>
-              </button>
-            );
-          })}
+      {/* FR-04.3 — вкладки фильтрации */}
+      <div className="p-3 border-b border-gray-200">
+        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-2 px-1">
+          Тип заявителя
+        </p>
+        <div className="space-y-0.5">
+          {CATEGORY_TABS.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setCategory(id)}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                category === id
+                  ? 'bg-[#0051BA] text-white'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              <Icon className="w-4 h-4 flex-shrink-0" />
+              <span className="truncate text-left flex-1">{label}</span>
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Фильтры для "Мои очередь" */}
-      {activeTab === 'my-queue' && (
-        <div className="p-4 space-y-6">
-          {/* Статус */}
-          <div>
-            <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-              Статус
-            </h3>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={statusFilters.new}
-                  onChange={(e) =>
-                    setStatusFilters({ ...statusFilters, new: e.target.checked })
-                  }
-                  className="w-4 h-4 text-[#0051BA] border-gray-300 rounded focus:ring-[#0051BA]"
-                />
-                <span className="text-sm text-gray-700">Новые</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={statusFilters.inProgress}
-                  onChange={(e) =>
-                    setStatusFilters({ ...statusFilters, inProgress: e.target.checked })
-                  }
-                  className="w-4 h-4 text-[#0051BA] border-gray-300 rounded focus:ring-[#0051BA]"
-                />
-                <span className="text-sm text-gray-700">В работе</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={statusFilters.waiting}
-                  onChange={(e) =>
-                    setStatusFilters({ ...statusFilters, waiting: e.target.checked })
-                  }
-                  className="w-4 h-4 text-[#0051BA] border-gray-300 rounded focus:ring-[#0051BA]"
-                />
-                <span className="text-sm text-gray-700">Ожидание</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Срочность */}
-          <div>
-            <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-              Срочность
-            </h3>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="urgency"
-                  value="all"
-                  checked={urgencyFilter === 'all'}
-                  onChange={(e) => setUrgencyFilter(e.target.value)}
-                  className="w-4 h-4 text-[#0051BA] border-gray-300 focus:ring-[#0051BA]"
-                />
-                <span className="text-sm text-gray-700">Все</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="urgency"
-                  value="regulatory"
-                  checked={urgencyFilter === 'regulatory'}
-                  onChange={(e) => setUrgencyFilter(e.target.value)}
-                  className="w-4 h-4 text-[#0051BA] border-gray-300 focus:ring-[#0051BA]"
-                />
-                <span className="text-sm text-gray-700">Только регуляторные</span>
-              </label>
-            </div>
-          </div>
-
-          {/* SLA */}
-          <div>
-            <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-              SLA
-            </h3>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="sla"
-                  value="all"
-                  checked={slaFilter === 'all'}
-                  onChange={(e) => setSlaFilter(e.target.value)}
-                  className="w-4 h-4 text-[#0051BA] border-gray-300 focus:ring-[#0051BA]"
-                />
-                <span className="text-sm text-gray-700">Все</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="sla"
-                  value="deadline"
-                  checked={slaFilter === 'deadline'}
-                  onChange={(e) => setSlaFilter(e.target.value)}
-                  className="w-4 h-4 text-[#0051BA] border-gray-300 focus:ring-[#0051BA]"
-                />
-                <span className="text-sm text-gray-700">Близко к дедлайну (&lt;1 дня)</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="sla"
-                  value="violated"
-                  checked={slaFilter === 'violated'}
-                  onChange={(e) => setSlaFilter(e.target.value)}
-                  className="w-4 h-4 text-[#0051BA] border-gray-300 focus:ring-[#0051BA]"
-                />
-                <span className="text-sm text-gray-700">В нарушении</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Тип */}
-          <div>
-            <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-              Тип
-            </h3>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={typeFilters.written}
-                  onChange={(e) =>
-                    setTypeFilters({ ...typeFilters, written: e.target.checked })
-                  }
-                  className="w-4 h-4 text-[#0051BA] border-gray-300 rounded focus:ring-[#0051BA]"
-                />
-                <span className="text-sm text-gray-700">Письменные</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={typeFilters.verbal}
-                  onChange={(e) =>
-                    setTypeFilters({ ...typeFilters, verbal: e.target.checked })
-                  }
-                  className="w-4 h-4 text-[#0051BA] border-gray-300 rounded focus:ring-[#0051BA]"
-                />
-                <span className="text-sm text-gray-700">Устные</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={typeFilters.regulatory}
-                  onChange={(e) =>
-                    setTypeFilters({ ...typeFilters, regulatory: e.target.checked })
-                  }
-                  className="w-4 h-4 text-[#0051BA] border-gray-300 rounded focus:ring-[#0051BA]"
-                />
-                <span className="text-sm text-gray-700">От регулятора</span>
-              </label>
-            </div>
-          </div>
+      {/* SLA фильтр */}
+      <div className="p-4">
+        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-2">SLA</p>
+        <div className="space-y-2">
+          {SLA_OPTIONS.map(({ id, label }) => (
+            <label key={id} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="sla"
+                value={id}
+                checked={slaStatus === id}
+                onChange={() => setSlaStatus(id)}
+                className="w-4 h-4 text-[#0051BA] border-gray-300 focus:ring-[#0051BA]"
+              />
+              <span className="text-sm text-gray-700">{label}</span>
+            </label>
+          ))}
         </div>
-      )}
+      </div>
     </aside>
   );
 }

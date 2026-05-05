@@ -9,5 +9,8 @@ public class CorsConfig implements WebMvcConfigurer {
         r.addMapping("/api/**").allowedOrigins(allowedOrigins)
          .allowedMethods("GET","POST","PATCH","PUT","DELETE","OPTIONS")
          .allowedHeaders("*").allowCredentials(true).maxAge(3600);
+        r.addMapping("/api/v1/**").allowedOrigins(allowedOrigins)
+         .allowedMethods("GET","POST","PATCH","PUT","DELETE","OPTIONS")
+         .allowedHeaders("*").allowCredentials(true).maxAge(3600);
     }
 }

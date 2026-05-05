@@ -48,7 +48,7 @@ export default function App() {
 
   const handleTabChange = (tab: string) => {
     const workflowTabs = ['start', 'create', 'process', 'secretary', 'manager', 'audit', 'archive', 'api-docs'];
-    
+
     if (workflowTabs.includes(tab)) {
       setActiveTab(tab);
       setActiveNavTab(tab);
@@ -93,7 +93,7 @@ export default function App() {
           console.warn('[App] No audit page handler found');
         }
       }, 100);
-      
+
       return () => clearTimeout(timer);
     }
   }, [activeTab, pendingAppealId]);

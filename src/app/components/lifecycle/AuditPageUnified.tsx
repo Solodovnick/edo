@@ -6,25 +6,43 @@ import {
   ChevronDown,
   User
 } from 'lucide-react';
-import type { UnifiedAppeal } from '../../../data/unifiedAppealsData';
-import { loadAuditCabinetAppeals } from '../../../services/edoCabinetApi';
+import { getCabinetAppeals, getAppealDetail, type CabinetAppeal } from '../../../services/appealApi';
 import { AuditCardDetailed } from './AuditCardDetailed';
+import { toast } from 'sonner';
+
+const AUDIT_STATUSES = ['Аудит', 'На аудите', 'Пройден аудит'];
 
 // CABINET COMPONENT
 function AuditCabinet({
-  onOpenAppeal,
-  appeals,
+  onOpenAppeal
 }: {
-  onOpenAppeal: (appealId: string) => void;
-  appeals: UnifiedAppeal[];
+  onOpenAppeal: (appealId: string) => void
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<string>('Все');
   const [viewMode, setViewMode] = useState<'my' | 'all'>('my');
+  const [allAppeals, setAllAppeals] = useState<CabinetAppeal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  const filteredAppeals = appeals.filter((appeal) => {
+  const loadAppeals = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getCabinetAppeals(AUDIT_STATUSES);
+      setAllAppeals(data);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Не удалось загрузить обращения');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadAppeals(); }, [loadAppeals]);
+
+  const filteredAppeals = allAppeals.filter(appeal => {
     // View mode filter
     let viewModeMatch = true;
     if (viewMode === 'my') {
@@ -52,11 +70,11 @@ function AuditCabinet({
     return viewModeMatch && statusMatch && searchMatch;
   });
 
-  const myAppealsCount = appeals.filter((a) => a.isMine === true).length;
-  const allAppealsCount = appeals.length;
-  const pendingCount = appeals.filter((a) => a.auditStatus === 'pending').length;
-  const approvedCount = appeals.filter((a) => a.auditStatus === 'approved').length;
-  const rejectedCount = appeals.filter((a) => a.auditStatus === 'rejected').length;
+  const myAppealsCount = allAppeals.filter(a => a.isMine === true).length;
+  const allAppealsCount = allAppeals.length; // Все обращения (и мои, и не мои)
+  const pendingCount = allAppeals.filter(a => a.auditStatus === 'pending').length;
+  const approvedCount = allAppeals.filter(a => a.auditStatus === 'approved').length;
+  const rejectedCount = allAppeals.filter(a => a.auditStatus === 'rejected').length;
 
   // Handle sorting
   const handleSort = (column: string) => {
@@ -93,6 +111,18 @@ function AuditCabinet({
     if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
     return 0;
   });
+
+  if (loading) return (
+    <div style={{ background: '#D1C4E9', minHeight: '100vh' }} className="flex items-center justify-center">
+      <p className="text-purple-800 text-sm">Загрузка обращений…</p>
+    </div>
+  );
+  if (error) return (
+    <div style={{ background: '#D1C4E9', minHeight: '100vh' }} className="flex flex-col items-center justify-center gap-3">
+      <p className="text-red-700 text-sm">{error}</p>
+      <button onClick={loadAppeals} className="px-4 py-2 bg-purple-700 text-white rounded-lg text-sm hover:bg-purple-800">Повторить</button>
+    </div>
+  );
 
   return (
     <div style={{ background: '#D1C4E9', minHeight: '100vh', paddingBottom: '3rem' }}>
@@ -331,52 +361,45 @@ function AuditCabinet({
 // MAIN AUDIT PAGE COMPONENT
 export function AuditPage() {
   const [view, setView] = useState<'cabinet' | 'card'>('cabinet');
-  const [selectedAppealId, setSelectedAppealId] = useState<string | null>(null);
-  const [allAppeals, setAllAppeals] = useState<UnifiedAppeal[]>([]);
+  const [selectedAppeal, setSelectedAppeal] = useState<CabinetAppeal | null>(null);
+  const [cardLoading, setCardLoading] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      const merged = await loadAuditCabinetAppeals();
-      if (!cancelled) setAllAppeals(merged);
-    };
-    void load();
-    const interval = window.setInterval(() => void load(), 15_000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(interval);
-    };
-  }, []);
-
-  const handleOpenAppeal = useCallback((appealId: string) => {
-    console.log('[AuditPage] handleOpenAppeal called with:', appealId);
-    setSelectedAppealId(appealId);
-    setView('card');
+  const handleOpenAppeal = useCallback(async (appealId: string) => {
+    setCardLoading(true);
+    try {
+      const detail = await getAppealDetail(appealId);
+      setSelectedAppeal(detail);
+      setView('card');
+    } catch {
+      toast.error('Не удалось загрузить карточку обращения');
+    } finally {
+      setCardLoading(false);
+    }
   }, []);
 
   const handleBack = () => {
     setView('cabinet');
-    setSelectedAppealId(null);
+    setSelectedAppeal(null);
   };
-
-  const selectedAppeal = allAppeals.find(a => a.id === selectedAppealId);
 
   // Expose handleOpenAppeal globally for notifications
   useEffect(() => {
-    (window as any).__auditPageOpenAppeal = handleOpenAppeal;
-    console.log('[AuditPage] Registered global appeal handler');
-    return () => {
-      delete (window as any).__auditPageOpenAppeal;
-      console.log('[AuditPage] Unregistered global appeal handler');
-    };
+    (window as any).__auditPageOpenAppeal = (id: string) => { void handleOpenAppeal(id); };
+    return () => { delete (window as any).__auditPageOpenAppeal; };
   }, [handleOpenAppeal]);
+
+  if (cardLoading) return (
+    <div className="flex flex-1 items-center justify-center text-sm text-gray-500">
+      Загрузка карточки…
+    </div>
+  );
 
   return (
     <>
       {view === 'card' && selectedAppeal ? (
         <AuditCardDetailed onBack={handleBack} appealData={selectedAppeal} />
       ) : (
-        <AuditCabinet onOpenAppeal={handleOpenAppeal} appeals={allAppeals} />
+        <AuditCabinet onOpenAppeal={handleOpenAppeal} />
       )}
     </>
   );

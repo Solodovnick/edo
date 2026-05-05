@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Download,
   Search,
@@ -9,92 +9,55 @@ import {
   ArrowUpDown,
   User
 } from 'lucide-react';
-import type { UnifiedAppeal } from '../../../data/unifiedAppealsData';
-import { appealStorage } from '../../../services/appealStorage';
+import { getCabinetAppeals, getAppealDetail, type CabinetAppeal } from '../../../services/appealApi';
 import { ManagerCardDetailed } from './ManagerCardDetailed';
-import { loadManagerCabinetAppeals } from '../../../services/edoCabinetApi';
 import { toast, Toaster } from 'sonner';
 import { NotificationBell } from '../notifications/NotificationBell';
 
 export function ManagerCabinetPage() {
-  const [allAppeals, setAllAppeals] = useState<UnifiedAppeal[]>([]);
+  const [allAppeals, setAllAppeals] = useState<CabinetAppeal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedAppeal, setSelectedAppeal] = useState<any>(null);
+  const [selectedAppeal, setSelectedAppeal] = useState<CabinetAppeal | null>(null);
+  const [cardLoading, setCardLoading] = useState(false);
   const [view, setView] = useState<'cabinet' | 'card'>('cabinet');
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadAppeals = async () => {
-      try {
-        const merged = await loadManagerCabinetAppeals();
-        if (!cancelled) setAllAppeals(merged);
-      } catch {
-        toast.error('Ошибка доступа к базе данных', {
-          description: 'Обращения недоступны для просмотра. Попробуйте обновить страницу.',
-        });
-      }
-    };
-
-    void loadAppeals();
-    const interval = window.setInterval(() => void loadAppeals(), 15_000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(interval);
-    };
+  const loadAppeals = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getCabinetAppeals(); // все статусы
+      setAllAppeals(data);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Не удалось загрузить обращения');
+      toast.error('Ошибка загрузки обращений');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  // Handle opening appeal card with logging
-  const handleOpenAppeal = (appeal: any) => {
+  useEffect(() => { loadAppeals(); }, [loadAppeals]);
+
+  const handleOpenAppeal = useCallback(async (appeal: CabinetAppeal) => {
+    setCardLoading(true);
     try {
-      // Log view event
-      const viewEvent = {
-        userId: 'manager_001',
-        userName: 'Руководитель Петров А.И.',
-        timestamp: new Date().toLocaleString('ru-RU'),
-        action: 'просмотр' as const
-      };
-
-      // Add view to history
-      const updatedAppeal = {
-        ...appeal,
-        viewHistory: [...(appeal.viewHistory || []), viewEvent]
-      };
-
-      // Update in storage if it's a saved appeal
-      const savedAppeals = appealStorage.getAllAppeals();
-      const existingIndex = savedAppeals.findIndex(a => a.id === appeal.id);
-      if (existingIndex !== -1) {
-        savedAppeals[existingIndex] = updatedAppeal;
-        localStorage.setItem('appeals', JSON.stringify(savedAppeals));
-      }
-
-      setSelectedAppeal(updatedAppeal);
+      const detail = await getAppealDetail(appeal.id);
+      setSelectedAppeal(detail);
       setView('card');
-
-      toast.success(`Обращение №${appeal.id} открыто`, {
-        description: `Просмотр зафиксирован в ${viewEvent.timestamp}`,
-      });
-    } catch (error) {
-      toast.error('Ошибка доступа к базе данных', {
-        description: 'Обращение недоступно к просмотру',
-      });
+    } catch {
+      toast.error('Не удалось загрузить карточку обращения');
+    } finally {
+      setCardLoading(false);
     }
-  };
+  }, []);
 
   const handleBack = () => {
     setView('cabinet');
     setSelectedAppeal(null);
-    void loadManagerCabinetAppeals()
-      .then(setAllAppeals)
-      .catch(() => {
-        toast.error('Ошибка доступа к базе данных', {
-          description: 'Обращения недоступны для просмотра. Попробуйте обновить страницу.',
-        });
-      });
   };
 
   // Handle sorting
@@ -106,11 +69,6 @@ export function ManagerCabinetPage() {
       setSortDirection('asc');
     }
   };
-
-  // If card view is active, show the detailed card
-  if (view === 'card' && selectedAppeal) {
-    return <ManagerCardDetailed onBack={handleBack} appealData={selectedAppeal} />;
-  }
 
   // Filter appeals
   const filteredAppeals = allAppeals.filter(appeal =>
@@ -155,6 +113,24 @@ export function ManagerCabinetPage() {
     if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
     return 0;
   });
+
+  if (cardLoading) return (
+    <div className="flex flex-1 items-center justify-center text-sm text-gray-500">Загрузка карточки…</div>
+  );
+  if (view === 'card' && selectedAppeal) {
+    return <ManagerCardDetailed onBack={handleBack} appealData={selectedAppeal} />;
+  }
+  if (loading) return (
+    <div style={{ background: '#D1C4E9', minHeight: '100vh' }} className="flex items-center justify-center">
+      <p className="text-purple-800 text-sm">Загрузка обращений…</p>
+    </div>
+  );
+  if (error) return (
+    <div style={{ background: '#D1C4E9', minHeight: '100vh' }} className="flex flex-col items-center justify-center gap-3">
+      <p className="text-red-700 text-sm">{error}</p>
+      <button onClick={loadAppeals} className="px-4 py-2 bg-purple-700 text-white rounded-lg text-sm">Повторить</button>
+    </div>
+  );
 
   return (
     <div style={{ background: '#D1C4E9', minHeight: '100vh', paddingBottom: '3rem' }}>

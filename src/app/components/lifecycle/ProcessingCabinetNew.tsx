@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Search,
   User,
@@ -8,36 +8,47 @@ import {
   ArrowUp,
   ArrowDown
 } from 'lucide-react';
-import type { UnifiedAppeal } from '../../../data/unifiedAppealsData';
-import { toast } from 'sonner';
+import { getCabinetAppeals, type CabinetAppeal } from '../../../services/appealApi';
 import { NotificationBell } from '../notifications/NotificationBell';
 
-// Допустимые статусы для кабинета ответственного
+// Статусы кабинета ответственного (бэкенд-имена)
 const ALLOWED_STATUSES = [
-  'В работе',                        // Зарегистрированные обращения
-  'На ответственном, не взято',      // Не взятые в работу
-  'На ответственном, взято',         // Взятые в работу
-  'На БП',                           // Бизнес-подразделение
-  'На ПК',                           // Претензионная комиссия
-  'На HD'                            // Helpdesk
+  'Назначено',
+  'На ответственном, взято',
+  'Запрос в БП',
+  'Готово к подписи',
 ];
 
 interface ProcessingCabinetProps {
   onOpenAppeal: (appealId: string) => void;
-  appeals: UnifiedAppeal[];
 }
 
-export function ProcessingCabinetNew({ onOpenAppeal, appeals }: ProcessingCabinetProps) {
+export function ProcessingCabinetNew({ onOpenAppeal }: ProcessingCabinetProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<string>('Мои обращения');
   const [typeFilter, setTypeFilter] = useState<string>('Все обращения');
-  const [allAppeals, setAllAppeals] = useState(appeals);
+  const [allAppeals, setAllAppeals] = useState<CabinetAppeal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [sortColumn, setSortColumn] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
+  const loadAppeals = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getCabinetAppeals(ALLOWED_STATUSES);
+      setAllAppeals(data);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Не удалось загрузить обращения');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    setAllAppeals(appeals);
-  }, [appeals]);
+    loadAppeals();
+  }, [loadAppeals]);
 
   // Filter appeals based on active filter and search
   const filteredAppeals = allAppeals.filter(appeal => {
@@ -104,6 +115,18 @@ export function ProcessingCabinetNew({ onOpenAppeal, appeals }: ProcessingCabine
       <ArrowDown className="w-4 h-4 text-purple-600" />
     );
   };
+
+  if (loading) return (
+    <div style={{ background: '#D1C4E9', minHeight: '100vh' }} className="flex items-center justify-center">
+      <p className="text-purple-800 text-sm">Загрузка обращений…</p>
+    </div>
+  );
+  if (error) return (
+    <div style={{ background: '#D1C4E9', minHeight: '100vh' }} className="flex flex-col items-center justify-center gap-3">
+      <p className="text-red-700 text-sm">{error}</p>
+      <button onClick={loadAppeals} className="px-4 py-2 bg-purple-700 text-white rounded-lg text-sm hover:bg-purple-800">Повторить</button>
+    </div>
+  );
 
   return (
     <div style={{ background: '#D1C4E9', minHeight: '100vh', paddingBottom: '3rem' }}>
@@ -300,9 +323,7 @@ export function ProcessingCabinetNew({ onOpenAppeal, appeals }: ProcessingCabine
                       >
                         <td className="px-4 py-3 whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <span className="text-purple-700 font-semibold">
-                              №{appeal.publicNumber ?? appeal.id}
-                            </span>
+                            <span className="text-purple-700 font-semibold">№{appeal.id}</span>
                             {isMyAppeal && (
                               <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full font-medium">
                                 МОЁ

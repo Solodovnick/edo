@@ -23,10 +23,10 @@ export interface AppealListItem {
 }
 
 interface AppealsPage {
-  content: AppealListItem[];
+  items: AppealListItem[];
   totalElements: number;
   totalPages: number;
-  number: number;
+  page: number;
   size: number;
 }
 
@@ -76,14 +76,29 @@ function mapIcon(appealType: string): Application['icon'] {
 }
 
 function calcSla(deadline: string): { sla: string; slaStatus: Application['slaStatus'] } {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const now = new Date();
   const dl = new Date(deadline);
-  const days = Math.ceil((dl.getTime() - today.getTime()) / 86_400_000);
-  if (days < 0) return { sla: `Нарушено ${Math.abs(days)} дн.`, slaStatus: 'violated' };
-  if (days === 0) return { sla: 'Срок сегодня', slaStatus: 'warning' };
-  if (days <= 2) return { sla: `Осталось ${days} дн.`, slaStatus: 'warning' };
-  return { sla: `Осталось ${days} дн.`, slaStatus: 'ok' };
+  // При нарушении считаем целые сутки
+  const totalMs = dl.getTime() - now.getTime();
+  const totalMin = Math.floor(totalMs / 60_000);
+  const absDays = Math.abs(Math.floor(totalMin / (60 * 24)));
+  const absHours = Math.abs(Math.floor((totalMin % (60 * 24)) / 60));
+  const absMins = Math.abs(totalMin % 60);
+
+  if (totalMin < 0) {
+    const label = absDays > 0
+      ? `Нарушено ${absDays}дн ${absHours}ч`
+      : `Нарушено ${absHours}ч ${absMins}м`;
+    return { sla: label, slaStatus: 'violated' };
+  }
+  if (totalMin < 60) return { sla: `Осталось ${absMins}м`, slaStatus: 'warning' };
+  if (totalMin < 60 * 24 * 2) {
+    const label = absDays > 0
+      ? `Осталось ${absDays}дн ${absHours}ч`
+      : `Осталось ${absHours}ч ${absMins}м`;
+    return { sla: label, slaStatus: 'warning' };
+  }
+  return { sla: `Осталось ${absDays}дн ${absHours}ч`, slaStatus: 'ok' };
 }
 
 function toApplication(a: AppealListItem): Application {
@@ -149,21 +164,170 @@ export interface CreateComplaintData {
   slaDeadline: string;
 }
 
+// ── Тип для кабинетов (замена UnifiedAppeal/auditAppealsData) ────────────────
+export interface CabinetAppeal {
+  id: string;
+  number: string;
+  regDate: string;
+  deadline: string;
+  /** appealType из API: Устное | Письменное | Регулятор */
+  category: 'Письменное' | 'Устное' | 'Регулятор';
+  status: string;
+  /** applicantCategory: Физ лицо | Юр лицо | Регулятор */
+  applicantCategory: string;
+  type: 'Физ лицо' | 'Юр лицо';
+  applicantName: string;
+  organizationName: string;
+  content: string;
+  solution: string;
+  response: string;
+  responsible: string;
+  registrar: string;
+  appealCategory: string;
+  appealSubcategory: string;
+  cbs: string;
+  phone: string;
+  email: string;
+  address: string;
+  auditStatus: 'pending' | 'approved' | 'rejected';
+  priority: 'Высокий' | 'Средний' | 'Низкий';
+  requiresAttention: boolean;
+  requiresSignature: boolean;
+  isMine: boolean;
+  deadlineCountdown: { days: number; hours: number; minutes: number };
+  attachments: Array<{ id: number; name: string; date: string }>;
+  crmComments: Array<{ id: number; author: string; commentDate: string; text: string }>;
+  history: Array<{ number: string; date: string; status: string }>;
+  viewHistory: Array<{ userId: string; userName: string; timestamp: string; action: string }>;
+}
+
+const APPEAL_TYPE_TO_CATEGORY: Record<string, CabinetAppeal['category']> = {
+  'Устное': 'Устное',
+  'Письменное': 'Письменное',
+  'Регулятор': 'Регулятор',
+  'Регуляторное': 'Регулятор',
+};
+
+const AUDIT_STATUS_MAP: Record<string, CabinetAppeal['auditStatus']> = {
+  'На аудите': 'pending',
+  'Аудит': 'pending',
+  'Пройден аудит': 'approved',
+};
+
+function calcDeadlineCountdown(deadline: string): { days: number; hours: number; minutes: number } {
+  const diffMs = new Date(deadline).getTime() - Date.now();
+  if (diffMs <= 0) return { days: 0, hours: 0, minutes: 0 };
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+  return { days, hours, minutes };
+}
+
+function listItemToCabinet(a: AppealListItem): CabinetAppeal {
+  return {
+    id: a.id,
+    number: a.number ?? '',
+    regDate: a.regDate ?? '',
+    deadline: a.deadline ?? '',
+    category: APPEAL_TYPE_TO_CATEGORY[a.appealType] ?? 'Письменное',
+    status: a.status ?? '',
+    applicantCategory: a.applicantCategory ?? '',
+    type: a.applicantCategory === 'Физ лицо' ? 'Физ лицо' : 'Юр лицо',
+    applicantName: a.applicantName ?? '',
+    organizationName: a.organizationName ?? '',
+    content: '',
+    solution: '',
+    response: '',
+    responsible: a.responsible ?? '',
+    registrar: '',
+    appealCategory: a.appealCategory ?? '',
+    appealSubcategory: '',
+    cbs: '',
+    phone: '',
+    email: '',
+    address: '',
+    auditStatus: AUDIT_STATUS_MAP[a.status] ?? (a.auditStatus as CabinetAppeal['auditStatus']) ?? 'pending',
+    priority: (a.priority as CabinetAppeal['priority']) ?? 'Средний',
+    requiresAttention: a.requiresAttention ?? false,
+    requiresSignature: a.requiresSignature ?? false,
+    isMine: false,
+    deadlineCountdown: calcDeadlineCountdown(a.deadline ?? ''),
+    attachments: [],
+    crmComments: [],
+    history: [],
+    viewHistory: [],
+  };
+}
+
+function fullDtoToCabinet(dto: any): CabinetAppeal {
+  return {
+    id: dto.id,
+    number: dto.number ?? '',
+    regDate: dto.regDate ?? '',
+    deadline: dto.deadline ?? '',
+    category: APPEAL_TYPE_TO_CATEGORY[dto.appealType] ?? 'Письменное',
+    status: dto.status ?? '',
+    applicantCategory: dto.applicantCategory ?? '',
+    type: dto.applicantCategory === 'Физ лицо' ? 'Физ лицо' : 'Юр лицо',
+    applicantName: dto.applicantName ?? '',
+    organizationName: dto.organizationName ?? '',
+    content: dto.content ?? '',
+    solution: dto.solution ?? '',
+    response: dto.response ?? '',
+    responsible: dto.responsible ?? '',
+    registrar: dto.registrar ?? '',
+    appealCategory: dto.appealCategory ?? '',
+    appealSubcategory: dto.appealSubcategory ?? '',
+    cbs: dto.cbs ?? '',
+    phone: dto.phone ?? '',
+    email: dto.email ?? '',
+    address: dto.address ?? '',
+    auditStatus: AUDIT_STATUS_MAP[dto.status] ?? (dto.auditStatus as CabinetAppeal['auditStatus']) ?? 'pending',
+    priority: (dto.priority as CabinetAppeal['priority']) ?? 'Средний',
+    requiresAttention: dto.requiresAttention ?? false,
+    requiresSignature: dto.requiresSignature ?? false,
+    isMine: false,
+    deadlineCountdown: calcDeadlineCountdown(dto.deadline ?? ''),
+    attachments: (dto.attachments ?? []).map((x: any) => ({ id: x.id, name: x.name, date: x.attachDate ?? '' })),
+    crmComments: (dto.crmComments ?? []).map((x: any) => ({ id: x.id, author: x.author, commentDate: x.commentDate, text: x.text })),
+    history: (dto.history ?? []).map((x: any) => ({ number: x.relatedNumber ?? '', date: x.relatedDate ?? '', status: x.relatedStatus ?? '' })),
+    viewHistory: [],
+  };
+}
+
 // ── API-вызовы ───────────────────────────────────────────────────────────────
+export async function getCabinetAppeals(statuses?: string[]): Promise<CabinetAppeal[]> {
+  const res = await fetch(`${API_BASE}/api/v1/appeals?size=200&page=0`);
+  if (!res.ok) throw new Error(`Ошибка API: ${res.status}`);
+  const data: AppealsPage = await res.json();
+  const all = data.items.map(listItemToCabinet);
+  if (!statuses || statuses.length === 0) return all;
+  return all.filter(a => statuses.includes(a.status));
+}
+
+export async function getAppealDetail(id: string): Promise<CabinetAppeal> {
+  const res = await fetch(`${API_BASE}/api/v1/appeals/${id}`);
+  if (!res.ok) throw new Error(`Ошибка API: ${res.status}`);
+  const dto = await res.json();
+  return fullDtoToCabinet(dto);
+}
+
 export async function getAppeals(
   page = 0,
   size = 50,
   search?: string,
   status?: string,
+  category?: string,
 ): Promise<{ applications: Application[]; total: number }> {
   const params = new URLSearchParams({ page: String(page), size: String(size) });
-  if (search) params.set('search', search);
+  if (search) params.set('q', search);
   if (status) params.set('status', status);
-  const res = await fetch(`${API_BASE}/api/appeals?${params}`);
+  if (category) params.set('category', category);
+  const res = await fetch(`${API_BASE}/api/v1/appeals?${params}`);
   if (!res.ok) throw new Error(`Ошибка API: ${res.status}`);
   const data: AppealsPage = await res.json();
   return {
-    applications: data.content.map(toApplication),
+    applications: data.items.map(toApplication),
     total: data.totalElements,
   };
 }
@@ -186,7 +350,7 @@ export async function createAppeal(data: CreateComplaintData): Promise<{ id: str
   if (data.category) body.appealCategory = data.category;
   if (data.assignedTo) body.responsible = data.assignedTo;
 
-  const res = await fetch(`${API_BASE}/api/appeals`, {
+  const res = await fetch(`${API_BASE}/api/v1/appeals`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
