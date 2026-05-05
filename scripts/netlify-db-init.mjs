@@ -40,6 +40,7 @@ const FILES_MINIMAL = [
   "03-app-event-log.sql",
   "04-app-notifications-crm-attachments.sql",
   "05-dict-cabinet-statuses.sql",
+  "06-app-users-and-roles.sql",
 ]
 
 const FILES_WITH_ERD = ["01-schema.sql", "01-edo-schema.sql", ...FILES_MINIMAL.slice(1)]
