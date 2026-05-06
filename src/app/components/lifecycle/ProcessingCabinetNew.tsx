@@ -79,12 +79,15 @@ export function ProcessingCabinetNew({ onOpenAppeal }: ProcessingCabinetProps) {
     }
 
     const searchLower = searchQuery.toLowerCase();
+    const contentLower = String(appeal.content ?? '').toLowerCase();
     const searchMatch =
       appeal.id.toLowerCase().includes(searchLower) ||
+      appeal.number.toLowerCase().includes(searchLower) ||
       appeal.applicantName.toLowerCase().includes(searchLower) ||
       appeal.organizationName.toLowerCase().includes(searchLower) ||
       appeal.category.toLowerCase().includes(searchLower) ||
-      appeal.status.toLowerCase().includes(searchLower);
+      appeal.status.toLowerCase().includes(searchLower) ||
+      contentLower.includes(searchLower);
 
     return ownershipMatch && typeMatch && searchMatch;
   });

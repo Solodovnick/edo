@@ -231,10 +231,22 @@ export function edoApiMockMiddleware(): Connect.NextHandleFunction {
 
       // --- Responsible ---
       if (method === 'GET' && pathname === '/api/v1/responsible/appeals') {
-        const fromPosted = mockAppealsPosted
-          .filter((a) => MOCK_RESPONSIBLE_STATUSES.has(String(a.status ?? '')))
-          .map((a) => appealDtoToResponsibleRow(a))
-        const staticItems = [
+        const qs = raw.includes('?') ? raw.slice(raw.indexOf('?') + 1) : ''
+        const qParam = new URLSearchParams(qs).get('q')?.trim().toLowerCase() ?? ''
+        let postedForResponsible = mockAppealsPosted.filter((a) =>
+          MOCK_RESPONSIBLE_STATUSES.has(String(a.status ?? '')),
+        )
+        if (qParam) {
+          postedForResponsible = postedForResponsible.filter(
+            (a) =>
+              String(a.id ?? '').toLowerCase().includes(qParam) ||
+              String(a.applicantName ?? '').toLowerCase().includes(qParam) ||
+              String(a.organizationName ?? '').toLowerCase().includes(qParam) ||
+              String(a.content ?? '').toLowerCase().includes(qParam),
+          )
+        }
+        const fromPosted = postedForResponsible.map((a) => appealDtoToResponsibleRow(a))
+        const staticItemsAll = [
           {
             id: 'r-1',
             publicNumber: '347823',
@@ -253,6 +265,16 @@ export function edoApiMockMiddleware(): Connect.NextHandleFunction {
             regDate: '02/05/26',
           },
         ]
+        const staticItems = qParam
+          ? staticItemsAll.filter(
+              (row) =>
+                String(row.id ?? '').toLowerCase().includes(qParam) ||
+                String(row.publicNumber ?? '').toLowerCase().includes(qParam) ||
+                String(row.title ?? '').toLowerCase().includes(qParam) ||
+                String(row.applicantName ?? '').toLowerCase().includes(qParam) ||
+                String(row.organizationName ?? '').toLowerCase().includes(qParam),
+            )
+          : staticItemsAll
         writeJson(resHttp, 200, {
           items: [...fromPosted, ...staticItems],
           nextCursor: null,

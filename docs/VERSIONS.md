@@ -1,6 +1,6 @@
 # Реестр версий документации — EDO Bank
 
-**Version:** 1.4.1 | **Date:** 2026-05-04
+**Version:** 1.4.2 | **Date:** 2026-05-06
 
 Правила версионирования:
 - **MAJOR** — структурные изменения документа (переработка разделов)
@@ -10,6 +10,8 @@
 При выпуске новой версии старая копия переносится в `docs/archive/` с суффиксом версии.
 
 Пример: `docs/archive/functional-requirements-v1.0.0.md`
+
+**1.4.2:** Зависимости Supabase для Netlify: `@supabase/supabase-js`, `@supabase/ssr`; [ADR-005](adr/ADR-005-supabase-netlify.md) (**S-025**); каталог артефактов **1.0.26**.
 
 **1.4.1:** Слияние с GitHub `main`: сохранены локальные вкладки «Архив», «Swagger», опрос `/api/health` в шапке. Документация и UI кабинетов: `docs/api-cabinets.md`, `edoCabinetApi`, расширены роль аналитика и навык `edo-ui-analyst`.
 

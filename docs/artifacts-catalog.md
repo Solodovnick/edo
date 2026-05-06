@@ -1,6 +1,6 @@
 # Реестр артефактов — EDO Bank
 
-**Version:** 1.0.25 | **Date:** 2026-05-04 | **Status:** Active
+**Version:** 1.0.26 | **Date:** 2026-05-06 | **Status:** Active
 
 Единый реестр всех проектных артефактов с номерами, статусами и ссылками.
 
@@ -50,6 +50,7 @@
 | **S-022** | Канвас-сводка сессии (context-summary) | [docs/canvas/context-summary.md](canvas/context-summary.md) | 1.0.2 | Active |
 | **S-023** | Канвас-схема проекта (drawio) | [docs/canvas/edo-canvas.drawio](canvas/edo-canvas.drawio) | 1.0.0 | Active |
 | **S-024** | Канвас-отчёт (HTML-viewer) | [docs/canvas/index.html](canvas/index.html) | 1.0.0 | Active |
+| **S-025** | ADR-005: Supabase + Netlify (клиентские пакеты) | [docs/adr/ADR-005-supabase-netlify.md](adr/ADR-005-supabase-netlify.md) | 1.0.0 | Accepted |
 | **S-011** | Внешние реестры (описание) | [docs/external-registry/README.md](external-registry/README.md) | 1.0.3 | Active |
 | **S-012** | Excel → Markdown (процесс) | [docs/external-registry/excel-to-markdown.md](external-registry/excel-to-markdown.md) | 1.0.0 | Active |
 | **S-013** | Скрипты репозитория | [scripts/README.md](../scripts/README.md) | 1.0.0 | Active |
