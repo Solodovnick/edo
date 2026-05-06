@@ -1,4 +1,5 @@
 import { edoApiV1BaseUrl } from './edoApiBase';
+import { mapStatusCodeToRu } from './edoCabinetApi';
 
 // ── Backend DTO (AppealListItemDto) ──────────────────────────────────────────
 export interface AppealListItem {
@@ -220,6 +221,78 @@ function calcDeadlineCountdown(deadline: string): { days: number; hours: number;
   return { days, hours, minutes };
 }
 
+function formatRuShortFromIso(iso?: string): string {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' });
+}
+
+/** Элемент GET /responsible/appeals (расширенный ответ сервера + мок). */
+type ResponsibleListRow = {
+  id: string;
+  publicNumber?: string;
+  title?: string;
+  categoryCode?: string;
+  statusCode?: string;
+  priorityCode?: string;
+  updatedAt?: string;
+  slaDueAt?: string;
+  flags?: Record<string, unknown>;
+  applicantName?: string | null;
+  organizationName?: string | null;
+  responsible?: string | null;
+  deadline?: string | null;
+  appealType?: string | null;
+  regDate?: string | null;
+};
+
+function responsibleRowToCabinet(row: ResponsibleListRow): CabinetAppeal {
+  const orgRaw = row.organizationName != null ? String(row.organizationName).trim() : '';
+  const hasOrg = orgRaw !== '' && orgRaw !== 'N/A';
+  const applicantCategory = hasOrg ? 'Юр лицо' : 'Физ лицо';
+  const appealTypeStr = String(row.appealType ?? 'Письменное');
+  const category = APPEAL_TYPE_TO_CATEGORY[appealTypeStr] ?? 'Письменное';
+  const statusRu = mapStatusCodeToRu(row.statusCode);
+  const applicantName = row.applicantName != null ? String(row.applicantName) : '';
+  const organizationName = row.organizationName != null ? String(row.organizationName) : '';
+  const deadline = row.deadline ? String(row.deadline) : formatRuShortFromIso(row.slaDueAt);
+  const regDate = row.regDate ? String(row.regDate) : formatRuShortFromIso(row.updatedAt);
+  return {
+    id: String(row.id ?? ''),
+    number: String(row.publicNumber ?? row.id ?? ''),
+    regDate,
+    deadline,
+    category,
+    status: statusRu,
+    applicantCategory,
+    type: applicantCategory === 'Юр лицо' ? 'Юр лицо' : 'Физ лицо',
+    applicantName: applicantName === 'N/A' ? '' : applicantName,
+    organizationName: organizationName === 'N/A' ? '' : organizationName,
+    content: row.title != null ? String(row.title) : '',
+    solution: '',
+    response: '',
+    responsible: row.responsible != null ? String(row.responsible) : 'Не назначено',
+    registrar: '',
+    appealCategory: row.categoryCode != null ? String(row.categoryCode) : '',
+    appealSubcategory: '',
+    cbs: '',
+    phone: '',
+    email: '',
+    address: '',
+    auditStatus: AUDIT_STATUS_MAP[statusRu] ?? 'pending',
+    priority: 'Средний',
+    requiresAttention: false,
+    requiresSignature: false,
+    isMine: false,
+    deadlineCountdown: calcDeadlineCountdown(deadline),
+    attachments: [],
+    crmComments: [],
+    history: [],
+    viewHistory: [],
+  };
+}
+
 function listItemToCabinet(raw: Record<string, unknown>): CabinetAppeal {
   const a = raw
   const appealTypeStr = String(a.appealType ?? a.category ?? 'Письменное')
@@ -310,6 +383,14 @@ export async function getCabinetAppeals(statuses?: string[]): Promise<CabinetApp
   const all = data.items.map((row) => listItemToCabinet(row as unknown as Record<string, unknown>));
   if (!statuses || statuses.length === 0) return all;
   return all.filter(a => statuses.includes(a.status));
+}
+
+/** Реестр кабинета ответственного: GET `/responsible/appeals` (данные из БД при активном Postgres). */
+export async function fetchResponsibleCabinetAppeals(): Promise<CabinetAppeal[]> {
+  const res = await fetch(`${edoApiV1BaseUrl()}/responsible/appeals?page=0&size=200`);
+  if (!res.ok) throw new Error(`Ошибка API: ${res.status}`);
+  const data = (await res.json()) as { items?: ResponsibleListRow[] };
+  return (data.items ?? []).map(responsibleRowToCabinet);
 }
 
 export async function getAppealDetail(id: string): Promise<CabinetAppeal> {

@@ -296,16 +296,17 @@ export function AppealRegistrationCard({ onBack, onSave }: AppealRegistrationCar
       updatedAt: new Date().toISOString(),
     };
 
-    const { ok, appeal: stored } = await persistRegisteredAppeal(appeal, (a) =>
-      appealStorage.saveAppeal(a)
-    );
+    const result = await persistRegisteredAppeal(appeal, (a) => appealStorage.saveAppeal(a));
 
-    if (ok) {
-      toast.success(`Обращение №${stored.id} успешно зарегистрировано!`);
-      onSave(stored);
+    if (result.apiSynced && result.ok) {
+      toast.success(`Обращение №${result.appeal.id} успешно зарегистрировано!`);
+      window.dispatchEvent(new CustomEvent('edo-appeals-changed'));
+      onSave(result.appeal);
       onBack();
     } else {
-      toast.error('Ошибка при сохранении обращения');
+      toast.error('Не удалось сохранить обращение на сервере', {
+        description: result.error ?? 'Проверьте API и подключение БД.',
+      });
     }
   };
 

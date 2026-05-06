@@ -326,16 +326,30 @@ export async function pgResponsibleList(pool, query = {}) {
     const updatedAt =
       a.updatedAt ??
       (r.updated_at instanceof Date ? r.updated_at.toISOString() : r.updated_at != null ? String(r.updated_at) : nowIso())
+    const deadlineStr = typeof a.deadline === "string" && a.deadline.trim() ? a.deadline.trim() : ruShort(updatedAt)
+    let slaIso = updatedAt
+    try {
+      const d = new Date(String(a.deadline))
+      if (!Number.isNaN(d.getTime())) slaIso = d.toISOString()
+    } catch {
+      /* оставляем updatedAt */
+    }
     return {
       id: a.id,
-      publicNumber: a.id,
+      publicNumber: a.number ?? a.id,
       title: (a.content && String(a.content).slice(0, 120)) || a.applicantName || "—",
-      categoryCode: "GENERAL",
+      categoryCode: typeof a.subcategory === "string" ? a.subcategory : "GENERAL",
       statusCode: statusToResponsibleCode(a.status),
       priorityCode: "NORMAL",
       updatedAt,
-      slaDueAt: new Date(Date.now() + 864e5 * 5).toISOString(),
+      slaDueAt: slaIso,
       flags: { overdue: false },
+      applicantName: a.applicantName ?? null,
+      organizationName: a.organizationName ?? null,
+      responsible: a.responsible ?? null,
+      deadline: deadlineStr,
+      appealType: a.appealType ?? a.category ?? "Письменное",
+      regDate: a.regDate ?? ruShort(updatedAt),
     }
   })
 

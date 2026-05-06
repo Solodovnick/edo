@@ -1097,10 +1097,13 @@ function RegistrationCard({ onBack, onRegisterSuccess }: { onBack: () => void, o
     const hasAssignee = Boolean(respTrim) && respTrim !== 'Не назначено'
     const cabinetStatus = hasAssignee ? 'На ответственном, взято' : 'Назначено'
 
+    const channelLabel =
+      appealType === 'oral' ? 'Устное' : appealType === 'written' ? 'Письменное' : 'Регулятор'
+
     const newAppeal: Appeal = {
       id: newAppealId,
       regDate: registrationDate,
-      category: appealType === 'oral' ? 'Устное' : 'Письменное',
+      category: channelLabel,
       subcategory,
       status: cabinetStatus,
       deadline: deadline.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }),
@@ -1116,21 +1119,23 @@ function RegistrationCard({ onBack, onRegisterSuccess }: { onBack: () => void, o
       response: responseForm || '',
       phone: phone || '',
       email: email || '',
-      appealType: appealType === 'oral' ? 'Устное' : 'Письменное',
+      appealType: channelLabel as Appeal['appealType'],
+      inn: applicantType === 'company' ? inn : undefined,
       createdBy: registratorName || 'Регистратор',
       updatedAt: new Date().toISOString(),
     };
 
-    const { ok, appeal } = await persistRegisteredAppeal(newAppeal, (a) => appealStorage.saveAppeal(a));
+    const result = await persistRegisteredAppeal(newAppeal, (a) => appealStorage.saveAppeal(a));
 
-    if (ok) {
-      toast.success(`Обращение №${appeal.id} зарегистрировано!`, {
-        description: `Статус: «${appeal.status}», срок исполнения: ${appeal.deadline}`,
+    if (result.apiSynced && result.ok) {
+      toast.success(`Обращение №${result.appeal.id} зарегистрировано!`, {
+        description: `Статус: «${result.appeal.status}», срок исполнения: ${result.appeal.deadline}`,
       });
+      window.dispatchEvent(new CustomEvent('edo-appeals-changed'));
       onRegisterSuccess();
     } else {
-      toast.error('Ошибка сохранения обращения', {
-        description: 'Попробуйте снова',
+      toast.error('Не удалось сохранить обращение на сервере', {
+        description: result.error ?? 'Проверьте API и подключение БД (DATABASE_URL).',
       });
     }
   };

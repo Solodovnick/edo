@@ -194,17 +194,34 @@ export function listResponsibleAppeals(query = {}) {
     )
   }
   const slice = rows.slice(page * size, page * size + size)
-  const items = slice.map((a) => ({
-    id: a.id,
-    publicNumber: a.id,
-    title: (a.content && String(a.content).slice(0, 120)) || a.applicantName || "—",
-    categoryCode: "GENERAL",
-    statusCode: statusToResponsibleCode(a.status),
-    priorityCode: "NORMAL",
-    updatedAt: a.updatedAt ?? nowIso(),
-    slaDueAt: new Date(Date.now() + 864e5 * 5).toISOString(),
-    flags: { overdue: false },
-  }))
+  const items = slice.map((a) => {
+    const updatedAt = a.updatedAt ?? nowIso()
+    const deadlineStr = typeof a.deadline === "string" && a.deadline.trim() ? a.deadline.trim() : updatedAt
+    let slaIso = updatedAt
+    try {
+      const d = new Date(String(a.deadline))
+      if (!Number.isNaN(d.getTime())) slaIso = d.toISOString()
+    } catch {
+      slaIso = new Date(Date.now() + 864e5 * 5).toISOString()
+    }
+    return {
+      id: a.id,
+      publicNumber: a.id,
+      title: (a.content && String(a.content).slice(0, 120)) || a.applicantName || "—",
+      categoryCode: typeof a.subcategory === "string" ? a.subcategory : "GENERAL",
+      statusCode: statusToResponsibleCode(a.status),
+      priorityCode: "NORMAL",
+      updatedAt,
+      slaDueAt: slaIso,
+      flags: { overdue: false },
+      applicantName: a.applicantName ?? null,
+      organizationName: a.organizationName ?? null,
+      responsible: a.responsible ?? null,
+      deadline: deadlineStr,
+      appealType: a.appealType ?? a.category ?? "Письменное",
+      regDate: a.regDate ?? updatedAt.split("T")[0],
+    }
+  })
   return {
     items,
     nextCursor: slice.length === size ? String(page + 1) : null,

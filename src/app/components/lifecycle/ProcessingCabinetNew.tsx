@@ -8,15 +8,17 @@ import {
   ArrowUp,
   ArrowDown
 } from 'lucide-react';
-import { getCabinetAppeals, type CabinetAppeal } from '../../../services/appealApi';
+import { fetchResponsibleCabinetAppeals, type CabinetAppeal } from '../../../services/appealApi';
 import { NotificationBell } from '../notifications/NotificationBell';
 
 // Статусы кабинета ответственного (бэкенд-имена)
 const ALLOWED_STATUSES = [
   'Назначено',
+  'На ответственном, не взято',
   'На ответственном, взято',
   'Запрос в БП',
   'Готово к подписи',
+  'В работе',
 ];
 
 interface ProcessingCabinetProps {
@@ -37,8 +39,8 @@ export function ProcessingCabinetNew({ onOpenAppeal }: ProcessingCabinetProps) {
     setLoading(true);
     setError(null);
     try {
-      // Полный список с API; фильтр по статусам кабинета — на клиенте (иначе сиды «В работе» и новые записи расходятся).
-      const data = await getCabinetAppeals();
+      // GET /responsible/appeals (БД при Postgres); доп. фильтр по статусам кабинета на клиенте.
+      const data = await fetchResponsibleCabinetAppeals();
       setAllAppeals(data);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Не удалось загрузить обращения');
@@ -49,6 +51,14 @@ export function ProcessingCabinetNew({ onOpenAppeal }: ProcessingCabinetProps) {
 
   useEffect(() => {
     loadAppeals();
+  }, [loadAppeals]);
+
+  useEffect(() => {
+    const onAppealsChanged = () => {
+      void loadAppeals();
+    };
+    window.addEventListener('edo-appeals-changed', onAppealsChanged);
+    return () => window.removeEventListener('edo-appeals-changed', onAppealsChanged);
   }, [loadAppeals]);
 
   const allowedAppeals = allAppeals.filter((a) => ALLOWED_STATUSES.includes(a.status));

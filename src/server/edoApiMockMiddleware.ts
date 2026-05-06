@@ -41,6 +41,58 @@ const sampleAppeal = (id: string) => ({
   updatedAt: new Date().toISOString(),
 })
 
+/** Обращения, созданные через POST /appeals в текущем процессе dev (без Postgres). */
+const mockAppealsPosted: Record<string, unknown>[] = []
+
+const MOCK_RESPONSIBLE_STATUSES = new Set([
+  'Назначено',
+  'На ответственном, не взято',
+  'На ответственном, взято',
+  'Запрос в БП',
+  'Готово к подписи',
+  'В работе',
+])
+
+function uiStatusToResponsibleCode(status: unknown): string {
+  const s = typeof status === 'string' ? status : ''
+  const m: Record<string, string> = {
+    'В работе': 'IN_PROGRESS',
+    'Назначено': 'NOT_ASSIGNED',
+    'На ответственном, не взято': 'NOT_ASSIGNED',
+    'На ответственном, взято': 'ASSIGNED',
+    'Запрос в БП': 'ON_BP',
+    'Готово к подписи': 'IN_PROGRESS',
+  }
+  return m[s] ?? 'IN_PROGRESS'
+}
+
+function appealDtoToResponsibleRow(a: Record<string, unknown>) {
+  const id = String(a.id ?? '')
+  const content = String(a.content ?? '')
+  const updatedAt = typeof a.updatedAt === 'string' ? a.updatedAt : new Date().toISOString()
+  return {
+    id,
+    publicNumber: id,
+    title: content.slice(0, 120) || String(a.applicantName ?? '—'),
+    categoryCode: typeof a.subcategory === 'string' ? a.subcategory : 'GENERAL',
+    statusCode: uiStatusToResponsibleCode(a.status),
+    priorityCode: 'NORMAL',
+    updatedAt,
+    slaDueAt: updatedAt,
+    flags: { overdue: false },
+    applicantName: a.applicantName ?? null,
+    organizationName: a.organizationName ?? null,
+    responsible: a.responsible ?? null,
+    deadline: a.deadline ?? null,
+    appealType: a.appealType ?? a.category ?? 'Письменное',
+    regDate: a.regDate ?? null,
+  }
+}
+
+function findMockAppeal(id: string): Record<string, unknown> | undefined {
+  return mockAppealsPosted.find((x) => String(x.id) === id)
+}
+
 const err = (status: number, code: string, message: string, detail?: string) => ({
   type: `https://edo-bank.example/problems/${code}`,
   title: message,
@@ -79,11 +131,13 @@ export function edoApiMockMiddleware(): Connect.NextHandleFunction {
 
       // --- Registrar: appeals CRUD ---
       if (method === 'GET' && pathname === '/api/v1/appeals') {
+        const seeded = [sampleAppeal('100001'), sampleAppeal('100002')]
+        const items = [...mockAppealsPosted, ...seeded] as Record<string, unknown>[]
         writeJson(resHttp, 200, {
-          items: [sampleAppeal('100001'), sampleAppeal('100002')],
+          items,
           page: 0,
           size: 20,
-          totalElements: 2,
+          totalElements: items.length,
           totalPages: 1,
         })
         return
@@ -112,7 +166,9 @@ export function edoApiMockMiddleware(): Connect.NextHandleFunction {
           return
         }
         const id = String(Date.now()).slice(-8)
-        writeJson(resHttp, 201, { ...sampleAppeal(id), ...merged, id })
+        const created = { ...sampleAppeal(id), ...merged, id }
+        mockAppealsPosted.unshift(created)
+        writeJson(resHttp, 201, created)
         return
       }
 
@@ -138,7 +194,8 @@ export function edoApiMockMiddleware(): Connect.NextHandleFunction {
           return
         }
         if (method === 'GET') {
-          writeJson(resHttp, 200, sampleAppeal(id))
+          const found = findMockAppeal(id)
+          writeJson(resHttp, 200, found ?? sampleAppeal(id))
           return
         }
         if (method === 'PATCH') {
@@ -152,6 +209,12 @@ export function edoApiMockMiddleware(): Connect.NextHandleFunction {
           }
           if (id === '409') {
             writeJson(resHttp, 409, err(409, 'CONFLICT', 'Недопустимый переход статуса'))
+            return
+          }
+          const idx = mockAppealsPosted.findIndex((x) => String(x.id) === id)
+          if (idx >= 0) {
+            mockAppealsPosted[idx] = { ...mockAppealsPosted[idx], ...patch, updatedAt: new Date().toISOString() }
+            writeJson(resHttp, 200, mockAppealsPosted[idx])
             return
           }
           writeJson(resHttp, 200, { ...sampleAppeal(id), ...patch })
@@ -168,20 +231,30 @@ export function edoApiMockMiddleware(): Connect.NextHandleFunction {
 
       // --- Responsible ---
       if (method === 'GET' && pathname === '/api/v1/responsible/appeals') {
+        const fromPosted = mockAppealsPosted
+          .filter((a) => MOCK_RESPONSIBLE_STATUSES.has(String(a.status ?? '')))
+          .map((a) => appealDtoToResponsibleRow(a))
+        const staticItems = [
+          {
+            id: 'r-1',
+            publicNumber: '347823',
+            title: 'Навязывание услуги',
+            categoryCode: 'CARDS',
+            statusCode: 'IN_PROGRESS',
+            priorityCode: 'NORMAL',
+            updatedAt: new Date().toISOString(),
+            slaDueAt: new Date(Date.now() + 864e5 * 5).toISOString(),
+            flags: { overdue: false },
+            applicantName: 'Петров П.П.',
+            organizationName: null,
+            responsible: 'Не назначено',
+            deadline: '17/05/26',
+            appealType: 'Письменное',
+            regDate: '02/05/26',
+          },
+        ]
         writeJson(resHttp, 200, {
-          items: [
-            {
-              id: 'r-1',
-              publicNumber: '347823',
-              title: 'Навязывание услуги',
-              categoryCode: 'CARDS',
-              statusCode: 'IN_PROGRESS',
-              priorityCode: 'NORMAL',
-              updatedAt: new Date().toISOString(),
-              slaDueAt: new Date(Date.now() + 864e5 * 5).toISOString(),
-              flags: { overdue: false },
-            },
-          ],
+          items: [...fromPosted, ...staticItems],
           nextCursor: null,
         })
         return
@@ -190,8 +263,9 @@ export function edoApiMockMiddleware(): Connect.NextHandleFunction {
       const respAppeal = pathname.match(/^\/api\/v1\/responsible\/appeals\/([^/]+)$/)
       if (respAppeal && method === 'GET') {
         const id = respAppeal[1]
+        const found = findMockAppeal(id)
         writeJson(resHttp, 200, {
-          header: sampleAppeal(id),
+          header: found ?? sampleAppeal(id),
           actionsPreview: [],
           attachments: [],
         })

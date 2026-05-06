@@ -20,7 +20,16 @@ async function apiPost<T>(path: string, body: unknown): Promise<T> {
     headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
-  if (!res.ok) throw new Error(`POST ${url} → ${res.status}`)
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({} as Record<string, unknown>))
+    const detail =
+      typeof errBody.detail === 'string'
+        ? errBody.detail
+        : typeof errBody.message === 'string'
+          ? errBody.message
+          : ''
+    throw new Error(detail || `POST ${url} → ${res.status}`)
+  }
   return res.json() as Promise<T>
 }
 
@@ -60,6 +69,12 @@ type ResponsibleListItem = {
   updatedAt?: string
   slaDueAt?: string
   flags?: Record<string, unknown>
+  applicantName?: string | null
+  organizationName?: string | null
+  responsible?: string | null
+  deadline?: string | null
+  appealType?: string | null
+  regDate?: string | null
 }
 
 type ResponsibleListResponse = { items: ResponsibleListItem[]; nextCursor?: string | null }
@@ -338,7 +353,7 @@ export async function fetchManagerDashboardSummary(): Promise<ManagerDashboardSu
 }
 
 function appealToRegistrarCreateBody(a: Appeal): Record<string, unknown> {
-  return {
+  const body: Record<string, unknown> = {
     content: a.content,
     category: a.subcategory ?? a.category,
     applicantName: a.applicantName,
@@ -352,15 +367,26 @@ function appealToRegistrarCreateBody(a: Appeal): Record<string, unknown> {
     status: a.status,
     createdBy: a.createdBy,
   }
+  if (typeof a.inn === 'string' && a.inn.trim()) body.inn = a.inn.trim()
+  return body
+}
+
+export type PersistRegisteredAppealResult = {
+  ok: boolean
+  appeal: Appeal
+  /** true — ответ 201 от POST /appeals, запись на сервере/в БД */
+  apiSynced: boolean
+  error?: string
 }
 
 /**
- * Сохраняет обращение в localStorage; при доступности POST /appeals подставляет id с сервера.
+ * POST /appeals (сервер/БД при DATABASE_URL); при успехе — merge с ответом и сохранение в localStorage.
+ * При ошибке API localStorage не обновляется (нет «ложного» успеха БД).
  */
 export async function persistRegisteredAppeal(
   appeal: Appeal,
   save: (a: Appeal) => boolean
-): Promise<{ ok: boolean; appeal: Appeal }> {
+): Promise<PersistRegisteredAppealResult> {
   let merged: Appeal = { ...appeal }
   try {
     const created = await apiPost<AppealDto>('/appeals', appealToRegistrarCreateBody(appeal))
@@ -381,11 +407,12 @@ export async function persistRegisteredAppeal(
             ? 'Физ лицо'
             : merged.type,
     }
-  } catch {
-    /* остаётся локальный id */
+    const ok = save(merged)
+    return { ok, appeal: merged, apiSynced: true }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Ошибка сети или сервера'
+    return { ok: false, appeal: merged, apiSynced: false, error: msg }
   }
-  const ok = save(merged)
-  return { ok, appeal: merged }
 }
 
 /** Сначала реестр API, затем наложение локальных (localStorage) по id. */

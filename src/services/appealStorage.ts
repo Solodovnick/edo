@@ -19,7 +19,9 @@ export interface Appeal {
   response: string;
   phone?: string;
   email?: string;
-  appealType?: 'Устное' | 'Письменное';
+  /** ИНН юрлица — уходит в POST /appeals при наличии */
+  inn?: string;
+  appealType?: 'Устное' | 'Письменное' | 'Регулятор';
   createdBy?: string;
   updatedAt?: string;
 }
