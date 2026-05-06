@@ -1,0 +1,16 @@
+{
+  "content": "Прошу разобраться в ситуации с задержкой ответа по обращению от 01.05.2026. Требуется письменный ответ в установленный срок.",
+  "appealType": "Письменное",
+  "type": "Физ лицо",
+  "applicantName": "Петрова Мария Сергеевна",
+  "phone": "+79991234567",
+  "email": "petrova@example.com",
+  "category": "Досрочное расторжение договора",
+  "responsible": "Сидоров А.В.",
+  "deadline": "21/05/26",
+  "createdBy": "Регистратор",
+  "metadata": {
+    "sourceSystem": "edo-web",
+    "correlationId": "demo-appeal-001"
+  }
+}

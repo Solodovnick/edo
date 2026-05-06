@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://edo-bank.example/schemas/appeal-create-request.json",
+  "title": "Создание обращения (тело POST /api/v1/appeals)",
+  "description": "Текст обращения задаётся полем `content` (OpenAPI) или одним из синонимов — сервер и мок нормализуют в `content` (`server/resolveAppealCreateBody.mjs`). Остальное см. прежнее описание схемы (OpenAPI, DaData-адрес, metadata).",
+  "type": "object",
+  "additionalProperties": false,
+  "anyOf": [
+    {
+      "required": ["content"],
+      "properties": {
+        "content": { "type": "string", "minLength": 1, "maxLength": 65536 }
+      }
+    },
+    {
+      "required": ["text"],
+      "properties": {
+        "text": { "type": "string", "minLength": 1, "maxLength": 65536 }
+      }
+    },
+    {
+      "required": ["message"],
+      "properties": {
+        "message": { "type": "string", "minLength": 1, "maxLength": 65536 }
+      }
+    },
+    {
+      "required": ["complaintText"],
+      "properties": {
+        "complaintText": { "type": "string", "minLength": 1, "maxLength": 65536 }
+      }
+    },
+    {
+      "required": ["appealText"],
+      "properties": {
+        "appealText": { "type": "string", "minLength": 1, "maxLength": 65536 }
+      }
+    }
+  ],
+  "properties": {
+    "content": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 65536,
+      "description": "Основной текст обращения (рекомендуемое имя в OpenAPI)."
+    },
+    "text": {
+      "type": "string",
+      "maxLength": 65536,
+      "description": "Синоним текста обращения (интеграции)."
+    },
+    "message": {
+      "type": "string",
+      "maxLength": 65536,
+      "description": "Синоним текста обращения."
+    },
+    "complaintText": {
+      "type": "string",
+      "maxLength": 65536,
+      "description": "Синоним текста обращения."
+    },
+    "appealText": {
+      "type": "string",
+      "maxLength": 65536,
+      "description": "Синоним текста обращения."
+    },
+    "category": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "В API маппится в `subcategory` карточки; также участвует в эвристике типа канала (устное/регулятор/письменное)."
+    },
+    "applicantName": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "ФИО заявителя (физлицо) или контактное лицо."
+    },
+    "organizationName": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Наименование организации (для юрлица)."
+    },
+    "inn": {
+      "type": "string",
+      "pattern": "^([0-9]{10}|[0-9]{12})$",
+      "description": "ИНН юрлица (не в минимальном OpenAPI; удобно для связки с CRM / DaData party)."
+    },
+    "type": {
+      "type": "string",
+      "description": "Категория заявителя; сервер также читает `applicantCategory`.",
+      "enum": ["Физ лицо", "Юр лицо", "Физлицо", "Юрлицо"]
+    },
+    "applicantCategory": {
+      "type": "string",
+      "description": "Синоним `type` для Spring-совместимых клиентов.",
+      "enum": ["Физ лицо", "Юр лицо", "Физлицо", "Юрлицо"]
+    },
+    "appealType": {
+      "type": "string",
+      "description": "Канал/тип обращения для UI (`Устное` | `Письменное` | `Регулятор` и варианты с regex на `category`).",
+      "enum": ["Устное", "Письменное", "Регулятор"]
+    },
+    "phone": {
+      "type": "string",
+      "maxLength": 40,
+      "description": "Контактный телефон."
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "maxLength": 320,
+      "description": "Контактный e-mail."
+    },
+    "responsible": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "ФИО ответственного; пусто или «Не назначено» — пул назначения."
+    },
+    "status": {
+      "type": "string",
+      "maxLength": 120,
+      "description": "Стартовый статус, если разрешён сценарием (сервер: подмножество кабинета ответственного или иначе выводится из `responsible`)."
+    },
+    "deadline": {
+      "type": "string",
+      "maxLength": 32,
+      "description": "Срок в формате UI (часто DD/MM/YY); иначе сервер подставляет дефолт."
+    },
+    "createdBy": {
+      "type": "string",
+      "maxLength": 120,
+      "description": "Инициатор записи (логин/роль); по умолчанию `api`."
+    },
+    "addressNormalized": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Структурированный адрес после выбора подсказки (см. маппинг ответа в `docs/input/dadata.md`, таблица «Ответ»). Все поля опциональны.",
+      "properties": {
+        "fullAddress": { "type": "string", "maxLength": 1000 },
+        "postalCode": { "type": ["string", "null"], "maxLength": 20 },
+        "country": { "type": "string", "maxLength": 120 },
+        "countryIsoCode": { "type": "string", "maxLength": 8 },
+        "region": { "type": "string", "maxLength": 120 },
+        "regionType": { "type": "string", "maxLength": 64 },
+        "regionIsoCode": { "type": "string", "maxLength": 16 },
+        "city": { "type": "string", "maxLength": 120 },
+        "cityType": { "type": "string", "maxLength": 64 },
+        "street": { "type": "string", "maxLength": 240 },
+        "streetType": { "type": "string", "maxLength": 64 },
+        "house": { "type": "string", "maxLength": 32 },
+        "houseType": { "type": "string", "maxLength": 64 },
+        "block": { "type": "string", "maxLength": 32 },
+        "blockType": { "type": "string", "maxLength": 64 },
+        "apartment": { "type": ["string", "null"], "maxLength": 32 },
+        "apartmentType": { "type": ["string", "null"], "maxLength": 64 },
+        "latitude": { "type": "string", "maxLength": 32 },
+        "longitude": { "type": "string", "maxLength": 32 },
+        "dadataQuery": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Исходная строка запроса к DaData (ограничение длины по их API, см. dadata.md)."
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Произвольные нефункциональные поля: idempotency, внешний correlation_id, канал (по образцу вложенного `metadata` в примере ЮKassa). Демо-API может игнорировать неизвестные ключи.",
+      "additionalProperties": true,
+      "properties": {
+        "externalId": { "type": "string", "maxLength": 128 },
+        "sourceSystem": { "type": "string", "maxLength": 64 },
+        "correlationId": { "type": "string", "maxLength": 64 }
+      }
+    }
+  },
+  "examples": [
+    { "content": "Текст обращения", "applicantName": "Иванов И.И.", "type": "Физ лицо" },
+    { "text": "То же через синоним", "phone": "+79001234567" }
+  ]
+}

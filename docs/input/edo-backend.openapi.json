@@ -1,0 +1,1096 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "ЭДО Банк — REST API (контракт + мок)",
+    "version": "1.0.0",
+    "description": "Спецификация бэкенд-ручек жизненного цикла обращений: регистратор, ответственный, секретарь, руководитель, аудит, уведомления, CRM.\n\n**Мок:** в `npm run dev` и `npm run preview` запросы обрабатывает Vite middleware (`src/server/edoApiMockMiddleware.ts`).\n\n**Ошибки:** передайте заголовок `X-Debug-Status` со значением `400`, `401`, `403`, `404`, `409`, `422`, `429` или `500` — вернётся соответствующий ответ с телом `application/problem+json`.\n\n**Идемпотентность:** для `POST .../actions` поддерживается заголовок `Idempotency-Key` (в моке не дедуплицируется, только документируется)."
+  },
+  "servers": [{ "url": "/api/v1", "description": "Текущий хост (мок Vite)" }],
+  "tags": [
+    { "name": "System", "description": "Служебные методы" },
+    { "name": "Registrar", "description": "Регистрация и учёт обращений" },
+    { "name": "Responsible", "description": "Кабинет ответственного" },
+    {
+      "name": "Secretary",
+      "description": "Кабинет секретаря ПК. UC: сценарии Претензионной комиссии (см. `docs/state-diagram.md`, статус «На ПК»). FR: FR-02.1 (жизненный цикл), FR-02.2."
+    },
+    {
+      "name": "Manager",
+      "description": "Кабинет руководителя. UC: UC-RU-03 назначение, UC-RU-04 списки, UC-RU-02/05 шаблоны (часть — вне этих ручек), UC-AR-01 архив, UC-ADM.01 история. FR: FR-14.1–FR-14.4."
+    },
+    {
+      "name": "Audit",
+      "description": "Аудитор. UC: UC-AU.01 уведомления/взятие в работу, UC-AU.02 отказ, UC-AU.03 проведение аудита. FR: FR-05.x, FR-13.1–FR-13.3."
+    },
+    { "name": "Notifications", "description": "Уведомления" },
+    { "name": "CRM", "description": "Поиск клиента" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT: `sub` — сотрудник, claim `roles` — роли (REGISTRAR, RESPONSIBLE, …)"
+      }
+    },
+    "parameters": {
+      "AppealId": {
+        "name": "appealId",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "description": "Идентификатор обращения. Для мока `404` на GET `/appeals/{id}` вернёт 404; `409` на PATCH — конфликт."
+      },
+      "IdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": false,
+        "schema": { "type": "string", "format": "uuid" },
+        "description": "Ключ идемпотентности для повторных POST"
+      }
+    },
+    "schemas": {
+      "Problem": {
+        "type": "object",
+        "required": ["title", "status"],
+        "properties": {
+          "type": { "type": "string", "example": "https://edo-bank.example/problems/VALIDATION" },
+          "title": { "type": "string" },
+          "status": { "type": "integer" },
+          "detail": { "type": "string" },
+          "instance": { "type": "string" }
+        }
+      },
+      "AppealDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "regDate": { "type": "string" },
+          "category": { "type": "string" },
+          "subcategory": { "type": "string" },
+          "status": { "type": "string" },
+          "deadline": { "type": "string" },
+          "responsible": { "type": "string" },
+          "applicantName": { "type": "string" },
+          "organizationName": { "type": "string" },
+          "address": { "type": "string" },
+          "cbs": { "type": "string" },
+          "type": { "type": "string", "enum": ["Физ лицо", "Юр лицо", "Физлицо", "Юрлицо"] },
+          "isMine": { "type": "boolean" },
+          "content": { "type": "string" },
+          "solution": { "type": "string" },
+          "response": { "type": "string" },
+          "phone": { "type": "string" },
+          "email": { "type": "string" },
+          "appealType": { "type": "string", "enum": ["Устное", "Письменное"] },
+          "createdBy": { "type": "string" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AppealCreate": {
+        "type": "object",
+        "required": ["content"],
+        "properties": {
+          "content": { "type": "string", "description": "Текст обращения" },
+          "category": { "type": "string" },
+          "applicantName": { "type": "string" },
+          "organizationName": { "type": "string" },
+          "type": { "type": "string" },
+          "phone": { "type": "string" },
+          "email": { "type": "string" }
+        }
+      },
+      "AppealPage": {
+        "type": "object",
+        "properties": {
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/AppealDto" } },
+          "page": { "type": "integer" },
+          "size": { "type": "integer" },
+          "totalElements": { "type": "integer" },
+          "totalPages": { "type": "integer" }
+        }
+      },
+      "ResponsibleListResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "publicNumber": { "type": "string" },
+                "title": { "type": "string" },
+                "categoryCode": { "type": "string" },
+                "statusCode": { "type": "string" },
+                "priorityCode": { "type": "string" },
+                "updatedAt": { "type": "string", "format": "date-time" },
+                "slaDueAt": { "type": "string", "format": "date-time" },
+                "flags": { "type": "object" }
+              }
+            }
+          },
+          "nextCursor": { "type": "string", "nullable": true }
+        }
+      },
+      "ActionRequest": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["ACCEPT", "REQUEST_INFO", "ESCALATE", "RESOLVE", "RETURN_TO_POOL"],
+            "description": "Тип действия ответственного"
+          },
+          "payload": { "type": "object", "additionalProperties": true }
+        }
+      },
+      "PresignedUploadResponse": {
+        "type": "object",
+        "properties": {
+          "uploadUrl": { "type": "string", "format": "uri" },
+          "expiresAt": { "type": "string", "format": "date-time" },
+          "attachmentId": { "type": "string" }
+        }
+      },
+      "NotificationDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string" },
+          "title": { "type": "string" },
+          "read": { "type": "boolean" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AssignResponsibleRequest": {
+        "type": "object",
+        "description": "Тело для UC-RU-03 / FR-14.1",
+        "properties": {
+          "userName": { "type": "string", "description": "Отображаемое имя ответственного" },
+          "responsibleName": { "type": "string" }
+        }
+      },
+      "SecretaryPkDecisionRequest": {
+        "type": "object",
+        "required": ["decision"],
+        "description": "Решение секретаря ПК по обращению на стадии «На ПК» (FR-02, state-diagram)",
+        "properties": {
+          "decision": { "type": "string", "enum": ["APPROVE", "REJECT"], "description": "APPROVE — вернуть в работу (В работе), REJECT — в пул (На ответственном, не взято)" },
+          "comment": { "type": "string" }
+        }
+      },
+      "AuditDeclineRequest": {
+        "type": "object",
+        "description": "UC-AU.02 / FR-13.2",
+        "properties": {
+          "reason": { "type": "string" },
+          "comment": { "type": "string" }
+        }
+      },
+      "AuditPublishRequest": {
+        "type": "object",
+        "description": "UC-AU.03 / FR-13.3 — публикация результатов аудита",
+        "properties": {
+          "templateId": { "type": "string" },
+          "comment": { "type": "string" }
+        }
+      },
+      "ManagerAppealsPage": {
+        "type": "object",
+        "description": "Список для UC-RU-04 / FR-14.2",
+        "properties": {
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/AppealDto" } },
+          "page": { "type": "integer" },
+          "size": { "type": "integer" },
+          "totalElements": { "type": "integer" },
+          "totalPages": { "type": "integer" }
+        }
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "Нет или невалидный Bearer",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Problem" } } }
+      },
+      "Forbidden": {
+        "description": "Нет прав на ресурс",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Problem" } } }
+      },
+      "NotFound": {
+        "description": "Сущность не найдена",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Problem" } } }
+      },
+      "Conflict": {
+        "description": "Конфликт состояния (например недопустимый переход)",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Problem" } } }
+      },
+      "Validation": {
+        "description": "Ошибка валидации тела или параметров",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Problem" } } }
+      },
+      "TooManyRequests": {
+        "description": "Превышен лимит запросов",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Problem" } } }
+      },
+      "InternalError": {
+        "description": "Внутренняя ошибка",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Problem" } } }
+      }
+    }
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Проверка доступности API",
+        "operationId": "healthCheck",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "UP" },
+                    "version": { "type": "string" },
+                    "time": { "type": "string", "format": "date-time" }
+                  }
+                }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Профиль по токену",
+        "operationId": "getMe",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Текущий пользователь",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sub": { "type": "string" },
+                    "roles": { "type": "array", "items": { "type": "string" } }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/appeals": {
+      "get": {
+        "tags": ["Registrar"],
+        "summary": "Список обращений (регистратор / единый реестр)",
+        "operationId": "listAppeals",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 0 } },
+          { "name": "size", "in": "query", "schema": { "type": "integer", "default": 20 } },
+          { "name": "status", "in": "query", "schema": { "type": "string" } },
+          { "name": "q", "in": "query", "schema": { "type": "string" }, "description": "Поиск по номеру/ФИО" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Страница обращений",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealPage" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      },
+      "post": {
+        "tags": ["Registrar"],
+        "summary": "Создать и зарегистрировать обращение",
+        "operationId": "createAppeal",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealCreate" } } }
+        },
+        "responses": {
+          "201": {
+            "description": "Создано",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealDto" } } }
+          },
+          "400": {
+            "description": "Некорректный JSON",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Problem" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "422": { "$ref": "#/components/responses/Validation" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/appeals/{appealId}": {
+      "get": {
+        "tags": ["Registrar"],
+        "summary": "Получить обращение по id",
+        "operationId": "getAppeal",
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "responses": {
+          "200": {
+            "description": "Найдено",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealDto" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      },
+      "patch": {
+        "tags": ["Registrar"],
+        "summary": "Частичное обновление обращения",
+        "operationId": "patchAppeal",
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "type": "object", "additionalProperties": true } } }
+        },
+        "responses": {
+          "200": {
+            "description": "Обновлено",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealDto" } } }
+          },
+          "400": {
+            "description": "Некорректный JSON",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Problem" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      },
+      "delete": {
+        "tags": ["Registrar"],
+        "summary": "Удалить обращение (админ/тест)",
+        "operationId": "deleteAppeal",
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "responses": {
+          "204": { "description": "Удалено" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/complaints/create": {
+      "post": {
+        "tags": ["Registrar"],
+        "summary": "Внешнее создание обращения (канал API)",
+        "description": "Альтернативный вход для интеграций (как в справке FAQ).",
+        "operationId": "createComplaintExternal",
+        "requestBody": {
+          "required": false,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealCreate" } } }
+        },
+        "responses": {
+          "201": {
+            "description": "Принято",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealDto" } } }
+          },
+          "400": {
+            "description": "Некорректный JSON",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Problem" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "422": { "$ref": "#/components/responses/Validation" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/stats/registrar/month": {
+      "get": {
+        "tags": ["Registrar"],
+        "summary": "Статистика регистратора за месяц",
+        "operationId": "getRegistrarMonthStats",
+        "responses": {
+          "200": {
+            "description": "Агрегаты",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "withoutErrors": { "type": "integer" },
+                    "withErrors": { "type": "integer" },
+                    "total": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/responsible/appeals": {
+      "get": {
+        "tags": ["Responsible"],
+        "summary": "Реестр обращений ответственного",
+        "operationId": "listResponsibleAppeals",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string" }, "style": "form", "explode": true },
+          { "name": "q", "in": "query", "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer" } },
+          { "name": "size", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/ResponsibleListResponse" } }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/responsible/appeals/{appealId}": {
+      "get": {
+        "tags": ["Responsible"],
+        "summary": "Карточка обращения (агрегат)",
+        "operationId": "getResponsibleAppeal",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "header": { "$ref": "#/components/schemas/AppealDto" },
+                    "actionsPreview": { "type": "array", "items": { "type": "object" } },
+                    "attachments": { "type": "array", "items": { "type": "object" } }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/responsible/appeals/{appealId}/timeline": {
+      "get": {
+        "tags": ["Responsible"],
+        "summary": "Лента действий по обращению",
+        "operationId": "getAppealTimeline",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": { "type": "array", "items": { "type": "object" } },
+                    "nextCursor": { "type": "string", "nullable": true }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/responsible/appeals/{appealId}/actions": {
+      "post": {
+        "tags": ["Responsible"],
+        "summary": "Зафиксировать действие ответственного",
+        "operationId": "postAppealAction",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/AppealId" },
+          { "$ref": "#/components/parameters/IdempotencyKey" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ActionRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "Действие принято",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accepted": { "type": "boolean" },
+                    "appealId": { "type": "string" },
+                    "type": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректный JSON",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Problem" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "422": { "$ref": "#/components/responses/Validation" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/responsible/appeals/{appealId}/attachments:prepareUpload": {
+      "post": {
+        "tags": ["Responsible"],
+        "summary": "Подготовить загрузку вложения (presigned URL)",
+        "operationId": "prepareAttachmentUpload",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fileName": { "type": "string" },
+                  "mimeType": { "type": "string" },
+                  "byteSize": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Данные для загрузки",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/PresignedUploadResponse" } }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "422": { "$ref": "#/components/responses/Validation" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/secretary/appeals": {
+      "get": {
+        "tags": ["Secretary"],
+        "summary": "Очередь секретаря ПК (фильтр по статусу)",
+        "description": "Реестр обращений на стадии ПК. **UC:** сценарии ПК в реестре UC (статус «На ПК»). **FR:** FR-02.1, FR-02.2.",
+        "operationId": "listSecretaryAppeals",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": { "type": "string", "default": "На ПК" },
+            "description": "Например «На ПК»"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": { "type": "array", "items": { "$ref": "#/components/schemas/AppealDto" } },
+                    "filter": { "type": "object" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/secretary/appeals/{appealId}": {
+      "get": {
+        "tags": ["Secretary"],
+        "summary": "Карточка обращения для секретаря",
+        "description": "**FR:** просмотр данных обращения на стадии ПК (согласовано с FR-04/FR-02 по полям карточки в UI).",
+        "operationId": "getSecretaryAppeal",
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealDto" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/secretary/appeals/{appealId}/decision": {
+      "post": {
+        "tags": ["Secretary"],
+        "summary": "Решение секретаря ПК (одобрить / отклонить)",
+        "description": "Фиксация решения по обращению «На ПК». **FR:** FR-02 (переходы жизненного цикла).",
+        "operationId": "postSecretaryPkDecision",
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/SecretaryPkDecisionRequest" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Обновлённое обращение",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealDto" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "422": { "$ref": "#/components/responses/Validation" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/manager/appeals": {
+      "get": {
+        "tags": ["Manager"],
+        "summary": "Реестр обращений для руководителя",
+        "description": "**UC:** UC-RU-04 (просмотр списком). **FR:** FR-14.2.",
+        "operationId": "listManagerAppeals",
+        "parameters": [
+          { "name": "q", "in": "query", "schema": { "type": "string" }, "description": "Поиск по номеру/ФИО/организации" },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 0 } },
+          { "name": "size", "in": "query", "schema": { "type": "integer", "default": 20 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ManagerAppealsPage" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/manager/appeals/{appealId}/assign-responsible": {
+      "post": {
+        "tags": ["Manager"],
+        "summary": "Назначить ответственного",
+        "description": "**UC:** UC-RU-03. **FR:** FR-14.1.",
+        "operationId": "postManagerAssignResponsible",
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/AssignResponsibleRequest" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Обновлённое обращение",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealDto" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/manager/appeals/{appealId}/history": {
+      "get": {
+        "tags": ["Manager"],
+        "summary": "История событий по обращению",
+        "description": "**UC:** UC-ADM.01 (история для руководителя и аудита). **FR:** FR-14.3.",
+        "operationId": "getManagerAppealHistory",
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "appealId": { "type": "string" },
+                    "entries": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "at": { "type": "string", "format": "date-time" },
+                          "actor": { "type": "string" },
+                          "action": { "type": "string" },
+                          "details": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/manager/dashboard/summary": {
+      "get": {
+        "tags": ["Manager"],
+        "summary": "Сводка для руководителя (виджеты дашборда)",
+        "description": "Агрегаты для UI дашборда. **FR:** FR-07.x (аналитика), частично пересекается с UC-RU-04 по обзору нагрузки.",
+        "operationId": "getManagerDashboardSummary",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "openAppeals": { "type": "integer" },
+                    "atRisk": { "type": "integer" },
+                    "closedThisMonth": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/audit/appeals": {
+      "get": {
+        "tags": ["Audit"],
+        "summary": "Поиск обращений для аудита",
+        "description": "**UC:** UC-AU.03 (контекст проведения аудита), UC-RU-04 (просмотр списком для ролей). **FR:** FR-05.1, FR-05.2.",
+        "operationId": "searchAuditAppeals",
+        "parameters": [
+          { "name": "q", "in": "query", "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer" } },
+          { "name": "size", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": { "type": "array", "items": { "$ref": "#/components/schemas/AppealDto" } },
+                    "page": { "type": "integer" },
+                    "size": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/audit/appeals/{appealId}": {
+      "get": {
+        "tags": ["Audit"],
+        "summary": "Карточка обращения для аудита",
+        "description": "**FR:** FR-05.2, FR-05.4 (данные для карточки аудитора).",
+        "operationId": "getAuditAppeal",
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealDto" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/audit/appeals/{appealId}/take-work": {
+      "post": {
+        "tags": ["Audit"],
+        "summary": "Взять обращение в работу (аудитор)",
+        "description": "**UC:** UC-AU.01. **FR:** FR-13.1.",
+        "operationId": "postAuditTakeWork",
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "responses": {
+          "200": {
+            "description": "Обновлённое обращение",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealDto" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/audit/appeals/{appealId}/decline": {
+      "post": {
+        "tags": ["Audit"],
+        "summary": "Отказ аудитора от обработки",
+        "description": "**UC:** UC-AU.02. **FR:** FR-13.2.",
+        "operationId": "postAuditDecline",
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/AuditDeclineRequest" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Обновлённое обращение",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealDto" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/audit/appeals/{appealId}/publish": {
+      "post": {
+        "tags": ["Audit"],
+        "summary": "Опубликовать результаты аудита",
+        "description": "**UC:** UC-AU.03. **FR:** FR-13.3, FR-05.3.",
+        "operationId": "postAuditPublish",
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/AuditPublishRequest" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Обновлённое обращение",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppealDto" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/audit/appeals/{appealId}/log": {
+      "get": {
+        "tags": ["Audit"],
+        "summary": "Журнал событий / аудита по обращению",
+        "description": "**UC:** UC-ADM.01 (отображение истории). **FR:** FR-02.3, FR-14.3.",
+        "operationId": "getAuditAppealLog",
+        "parameters": [{ "$ref": "#/components/parameters/AppealId" }],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "appealId": { "type": "string" },
+                    "entries": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "at": { "type": "string", "format": "date-time" },
+                          "actor": { "type": "string" },
+                          "action": { "type": "string" },
+                          "details": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/notifications": {
+      "get": {
+        "tags": ["Notifications"],
+        "summary": "Список уведомлений пользователя",
+        "operationId": "listNotifications",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": { "type": "array", "items": { "$ref": "#/components/schemas/NotificationDto" } }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/notifications/{notificationId}/read": {
+      "patch": {
+        "tags": ["Notifications"],
+        "summary": "Пометить уведомление прочитанным",
+        "operationId": "markNotificationRead",
+        "parameters": [
+          {
+            "name": "notificationId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "read": { "type": "boolean", "example": true }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/crm/clients/search": {
+      "get": {
+        "tags": ["CRM"],
+        "summary": "Поиск клиента по имени/ИНН",
+        "operationId": "searchCrmClients",
+        "parameters": [
+          { "name": "name", "in": "query", "schema": { "type": "string" } },
+          { "name": "inn", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hits": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "name": { "type": "string" },
+                          "inn": { "type": "string" },
+                          "phone": { "type": "string" },
+                          "type": { "type": "string" },
+                          "matchScore": { "type": "number" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "422": { "$ref": "#/components/responses/Validation" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/crm/clients": {
+      "post": {
+        "tags": ["CRM"],
+        "summary": "Создать клиента (демо)",
+        "operationId": "createCrmClient",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "inn": { "type": "string" },
+                  "phone": { "type": "string" },
+                  "type": { "type": "string", "enum": ["individual", "organization"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Создано",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "name": { "type": "string" },
+                    "inn": { "type": "string" },
+                    "phone": { "type": "string" },
+                    "type": { "type": "string" },
+                    "matchScore": { "type": "number" }
+                  }
+                }
+              }
+            }
+          },
+          "422": { "$ref": "#/components/responses/Validation" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    }
+  }
+}

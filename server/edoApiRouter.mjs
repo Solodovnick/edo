@@ -5,6 +5,7 @@
 import express from "express"
 import * as store from "./edoMemoryStore.mjs"
 import * as pgs from "./edoPgStore.mjs"
+import { resolveAppealCreateBody } from "./resolveAppealCreateBody.mjs"
 
 const err = (status, code, message, detail) => ({
   type: `https://edo-bank.example/problems/${code}`,
@@ -128,9 +129,11 @@ export function createEdoApiRouter(getPool = () => null) {
   r.post(
     "/v1/appeals",
     ah(async (req, res) => {
-      const body = req.body ?? {}
+      const body = resolveAppealCreateBody(req.body ?? {})
       if (!body.content || String(body.content).trim() === "") {
-        return res.status(422).json(err(422, "VALIDATION", "Поле content обязательно"))
+        return res
+          .status(422)
+          .json(err(422, "VALIDATION", "Нужен непустой текст: поле content или синоним text, message, complaintText, appealText"))
       }
       const p = getPool()
       const dto = p ? await pgs.pgAddAppealFromV1Create(p, body) : store.addAppealFromV1Create(body)
@@ -141,17 +144,13 @@ export function createEdoApiRouter(getPool = () => null) {
   r.post(
     "/v1/complaints/create",
     ah(async (req, res) => {
-      const body = req.body ?? {}
+      const raw = resolveAppealCreateBody(req.body ?? {})
+      const body = {
+        ...raw,
+        content: raw.content && String(raw.content).trim() !== "" ? raw.content : "(пустое тело)",
+      }
       const p = getPool()
-      const dto = p
-        ? await pgs.pgAddAppealFromV1Create(p, {
-            ...body,
-            content: body.content ?? "(пустое тело)",
-          })
-        : store.addAppealFromV1Create({
-            ...body,
-            content: body.content ?? "(пустое тело)",
-          })
+      const dto = p ? await pgs.pgAddAppealFromV1Create(p, body) : store.addAppealFromV1Create(body)
       res.status(201).json({ ...dto, channel: "external_api" })
     }),
   )

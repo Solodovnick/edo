@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Connect } from 'vite'
+import { resolveAppealCreateBody } from '../../server/resolveAppealCreateBody.mjs'
 
 function writeJson(res: ServerResponse, status: number, body: unknown) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8')
@@ -97,12 +98,21 @@ export function edoApiMockMiddleware(): Connect.NextHandleFunction {
           writeJson(resHttp, 400, err(400, 'BAD_JSON', 'Некорректный JSON'))
           return
         }
-        if (!body.content || String(body.content).trim() === '') {
-          writeJson(resHttp, 422, err(422, 'VALIDATION', 'Поле content обязательно'))
+        const merged = resolveAppealCreateBody(body)
+        if (!merged.content || String(merged.content).trim() === '') {
+          writeJson(
+            resHttp,
+            422,
+            err(
+              422,
+              'VALIDATION',
+              'Нужен непустой текст: content или синоним text, message, complaintText, appealText',
+            ),
+          )
           return
         }
         const id = String(Date.now()).slice(-8)
-        writeJson(resHttp, 201, { ...sampleAppeal(id), ...body, id })
+        writeJson(resHttp, 201, { ...sampleAppeal(id), ...merged, id })
         return
       }
 
