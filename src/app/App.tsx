@@ -16,6 +16,7 @@ import {
 import { ApiDocsPage } from './components/ApiDocsPage';
 import { initializeTestNotifications } from '../utils/initializeNotifications';
 import { fetchApiHealth, type ApiDbStatus } from '../services/apiHealth';
+import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('create');
@@ -26,6 +27,24 @@ export default function App() {
   // Initialize test notifications on first load
   useEffect(() => {
     initializeTestNotifications();
+  }, []);
+
+  /** Проверка связи с Supabase (таблица `users`) — только dev, смотрите консоль (F12). */
+  useEffect(() => {
+    if (!import.meta.env.DEV || !isSupabaseConfigured()) return;
+
+    async function testDatabaseConnection() {
+      console.log('[Supabase] Подключаемся к Supabase…');
+      const { data, error } = await supabase.from('users').select('first_name, last_name, role_id');
+
+      if (error) {
+        console.error('[Supabase] Ошибка запроса:', error.message);
+      } else {
+        console.log('[Supabase] Успех. Данные из БД:', data);
+      }
+    }
+
+    void testDatabaseConnection();
   }, []);
 
   useEffect(() => {
