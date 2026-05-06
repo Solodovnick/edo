@@ -3,16 +3,19 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim() ?? ''
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() ?? ''
 
-/** Единый клиент Supabase для работы с БД (Vite: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`). */
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+let browserClient: SupabaseClient | null = null
 
 /**
- * Тот же клиент или `null`, если переменные окружения не заданы
- * (удобно, когда приложение должно работать без Supabase).
+ * Клиент Supabase создаётся только при непустых `VITE_SUPABASE_URL` и `VITE_SUPABASE_ANON_KEY`.
+ * Иначе `@supabase/supabase-js` бросает исключение на `createClient('', '')` — на Netlify без
+ * переменных на этапе сборки это давало бы белый экран.
  */
 export function getSupabaseBrowserClient(): SupabaseClient | null {
   if (!supabaseUrl || !supabaseAnonKey) return null
-  return supabase
+  if (!browserClient) {
+    browserClient = createClient(supabaseUrl, supabaseAnonKey)
+  }
+  return browserClient
 }
 
 export function isSupabaseConfigured(): boolean {

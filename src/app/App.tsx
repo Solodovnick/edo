@@ -16,7 +16,7 @@ import {
 import { ApiDocsPage } from './components/ApiDocsPage';
 import { initializeTestNotifications } from '../utils/initializeNotifications';
 import { fetchApiHealth, type ApiDbStatus } from '../services/apiHealth';
-import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
+import { getSupabaseBrowserClient, isSupabaseConfigured } from '../lib/supabaseClient';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('create');
@@ -34,6 +34,9 @@ export default function App() {
     if (!import.meta.env.DEV || !isSupabaseConfigured()) return;
 
     async function testDatabaseConnection() {
+      const supabase = getSupabaseBrowserClient();
+      if (!supabase) return;
+
       console.log('[Supabase] Подключаемся к Supabase…');
       const { data, error } = await supabase.from('users').select('first_name, last_name, role_id');
 
